@@ -88,7 +88,8 @@ class GetReadyToShareScreenTest {
             navigator = navigator,
             orchestrator = orchestrator,
             resolver = resolver,
-            dispatcher = dispatcherRule.testDispatcher
+            dispatcher = dispatcherRule.testDispatcher,
+            mainDispatcher = dispatcherRule.testDispatcher,
         )
     }
 
@@ -159,6 +160,25 @@ class GetReadyToShareScreenTest {
                 contains(
                     GetReadyToShareTestData.expectedScreenEvent,
                     GetReadyToShareTestData.expectedAllowBluetoothButtonEvent
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Finding out more sends an analytics event`() = runTest {
+        screenRule.run {
+            setContent { Render() }
+            waitUntil { analyticsLogger.size == 1 }
+
+            performFindOutMoreClick()
+            waitUntil { analyticsLogger.size == 2 }
+
+            assertThat(
+                analyticsLogger,
+                contains(
+                    GetReadyToShareTestData.expectedScreenEvent,
+                    GetReadyToShareTestData.expectedFindOutMoreButtonEvent
                 )
             )
         }

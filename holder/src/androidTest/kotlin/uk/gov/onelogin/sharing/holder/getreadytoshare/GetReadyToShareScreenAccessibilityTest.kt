@@ -13,6 +13,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.accessibility.AccessibilityHelper.performAccessibilityCheck
@@ -36,7 +38,7 @@ class GetReadyToShareScreenAccessibilityTest {
         MissingPrerequisites.Bluetooth(state = BluetoothState.PermissionNotGranted)
     )
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val orchestrator by lazy {
         FakeOrchestrator(
@@ -62,8 +64,13 @@ class GetReadyToShareScreenAccessibilityTest {
         )
     }
 
+    private val analyticsLogger by lazy {
+        FakeAnalyticsLogger()
+    }
+
     private val viewModel by lazy {
         GetReadyToShareViewModel(
+            analyticsLogger = analyticsLogger,
             navigator = navigator,
             orchestrator = orchestrator,
             resolver = resolver,

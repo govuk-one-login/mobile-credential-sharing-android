@@ -46,6 +46,7 @@ class GetReadyToShareViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val resolver: ResolvePrerequisiteAction<HolderSessionState>,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
     val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent> = navigator
@@ -82,7 +83,7 @@ class GetReadyToShareViewModel(
             ?.onComplete()
     }
 
-    fun sendScreenEvent() = viewModelScope.launch {
+    fun sendScreenEvent(): Job = viewModelScope.launch {
         Screen(
             name = "Get ready to share",
             id = "3f5c1d0b-8068-4e19-8300-37f7bb468ff5",
@@ -92,8 +93,10 @@ class GetReadyToShareViewModel(
 
     fun onAllowBluetooth(
         launcher: ActivityResultLauncher<PrerequisiteAction>
-    ) = viewModelScope.launch {
-        resolver.resolve(launcher)
+    ): Job = viewModelScope.launch {
+        withContext(mainDispatcher) {
+            resolver.resolve(launcher)
+        }
 
         Button(
             text = "Allow bluetooth",
@@ -101,11 +104,10 @@ class GetReadyToShareViewModel(
         ).let(analyticsLogger::logEventV3Dot1)
     }
 
-    /**
-     * DCMAW-23663:
-     * - Send button analytics events with [walletSharingRequiredParameters]
-     */
-    fun onFindOutMore(): Job = viewModelScope.launch(dispatcher) {
-
+    fun onFindOutMore(): Job = viewModelScope.launch {
+        Button(
+            text = "Find out how sharing works",
+            params = walletSharingRequiredParameters
+        ).let(analyticsLogger::logEventV3Dot1)
     }
 }
