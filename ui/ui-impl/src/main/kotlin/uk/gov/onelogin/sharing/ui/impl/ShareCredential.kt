@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -68,6 +69,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
 }
 
 @Composable
+@Suppress("LongMethod")
 internal fun ShareCredential(
     orchestrator: Orchestrator.Holder,
     holderSessionState: StateFlow<HolderSessionState>,
@@ -123,6 +125,8 @@ internal fun ShareCredential(
                     }
                 }
 
+                val tweenSpec = tween<IntOffset>(THREE_HUNDRED_MILLISECONDS)
+
                 NavHost(
                     navController = navController,
                     startDestination = HolderRoutes,
@@ -131,25 +135,25 @@ internal fun ShareCredential(
                     enterTransition = {
                         slideIntoContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                            animationSpec = tween(300)
+                            animationSpec = tweenSpec
                         )
                     },
                     exitTransition = {
                         slideOutOfContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                            animationSpec = tween(300)
+                            animationSpec = tweenSpec
                         )
                     },
                     popEnterTransition = {
                         slideIntoContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                            animationSpec = tween(300)
+                            animationSpec = tweenSpec
                         )
                     },
                     popExitTransition = {
                         slideOutOfContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                            animationSpec = tween(300)
+                            animationSpec = tweenSpec
                         )
                     }
                 ) {
@@ -161,3 +165,5 @@ internal fun ShareCredential(
 
     BackHandler(state.userCanCancel(), onBack = onCancel)
 }
+
+private const val THREE_HUNDRED_MILLISECONDS = 300
