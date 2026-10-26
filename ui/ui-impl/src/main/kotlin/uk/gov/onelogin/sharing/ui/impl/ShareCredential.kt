@@ -110,8 +110,6 @@ internal fun ShareCredential(
     ) {
         Surface(modifier = modifier) {
             Column(
-                // DCMAW-23663: The `safeContentPadding` function seems to cause problems with the
-                // preview.
                 modifier = Modifier
                     .fillMaxSize()
                     .safeContentPadding()
