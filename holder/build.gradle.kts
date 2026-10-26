@@ -61,6 +61,7 @@ dependencies {
 
     listOf(
         projects.sdk,
+        testFixtures(projects.screenshotTesting)
     ).forEach(::testImplementation)
 
     listOf(
