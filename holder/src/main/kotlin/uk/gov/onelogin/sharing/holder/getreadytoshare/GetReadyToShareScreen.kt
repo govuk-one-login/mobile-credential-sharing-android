@@ -24,9 +24,9 @@ import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.core.WalletSharingPreview
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
@@ -108,8 +108,8 @@ internal fun GetReadyToShareContent(
     )
 }
 
-@WalletSharingPreview
 @Composable
+@PreviewContent
 internal fun GetReadyToSharePreview() {
     GdsTheme {
         GetReadyToShareContent(
