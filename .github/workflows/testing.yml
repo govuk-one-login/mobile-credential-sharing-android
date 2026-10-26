@@ -127,15 +127,6 @@ jobs:
         run: |
           ./scripts/screenshot/verify --no-configuration-cache
 
-      - name: Upload instrumentation test coverage report
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: screenshot-test-coverage
-          path: |
-            **/build/outputs/managed_device_code_coverage/**/*.ec
-            **/build/reports/coverage/androidTest/**/*.xml  
-
   python_tests:
     name: "Python tests: mock_credential scripts"
     runs-on: ubuntu-latest
@@ -191,11 +182,6 @@ jobs:
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 #v8.0.2
         with:
           name: instrumentation-test-coverage
-
-      - name: Download screenshot test coverage
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 #v8.0.2
-        with:
-          name: screenshot-test-coverage
 
       - name: Assemble for Sonar scan
         run: |
