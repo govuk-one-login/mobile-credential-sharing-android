@@ -63,8 +63,10 @@ jobs:
           install-vale: 'false'
 
       - name: Run unit tests
+        # Roborazzi verify is disabled here. Screenshots are recorded on macos and don't match
+        # when running on Linux. These are verified by the dedicated `screenshot_tests` job.
         run: |
-          ./scripts/test/unit/debug
+          ./scripts/test/unit/debug -Proborazzi.test.verify=false
 
       - name: Upload unit test coverage report
         if: always()
@@ -75,6 +77,40 @@ jobs:
             **/build/outputs/unit_test_code_coverage/**/*.exec
             **/build/reports/coverage/test/debug/*.xml
             **/build/reports/jacoco/**/*.xml
+
+  # https://takahirom.github.io/roborazzi/github-actions.html#add-a-job-to-verify-screenshots
+  screenshot_tests:
+    name: "Screenshot tests: Debug (macOS)"
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - name: Verify screenshots
+        run: |
+          ./gradlew verifyRoborazziDebug --stacktrace
+
+      - name: Upload screenshot diff report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: screenshot-diff
+          path: |
+            **/build/outputs/roborazzi/**
+            **/build/reports/roborazzi/**
 
   instrumentation_tests:
     runs-on: ubuntu-latest
