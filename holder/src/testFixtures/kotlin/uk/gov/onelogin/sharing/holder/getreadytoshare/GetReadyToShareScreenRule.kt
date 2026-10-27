@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -22,7 +23,7 @@ import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
 
 class GetReadyToShareScreenRule(
-    composeTestRule: ComposeContentTestRule,
+    composeTestRule: ComposeContentTestRule = createComposeRule(),
     private val resources: Resources = ApplicationProvider
         .getApplicationContext<Context>().resources
 ) : ComposeContentTestRule by composeTestRule {
