@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="holder_consent_card_heading">@string/consent_card_heading</string>
-
     <string name="holder_consent_card_will_keep">@string/consent_card_will_keep</string>
     <string name="holder_consent_card_will_not_keep">@string/consent_card_will_not_keep</string>
 
