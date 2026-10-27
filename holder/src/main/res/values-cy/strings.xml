@@ -11,7 +11,14 @@
     <string name="use_qr_code_to_connect_next">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf.</string>
 
     <!-- Consent card -->
-    <string name="consent_card_heading">Byddwch yn rhannu manylion %1$d o’ch %2$s</string>
+    <plurals name="consent_card_heading">
+        <item quantity="zero">Byddwch yn rhannu %1$d manylion o’ch %2$s</item>
+        <item quantity="one">Byddwch yn rhannu %1$d manylyn o’ch %2$s</item>
+        <item quantity="two">Byddwch yn rhannu manylion %1$d o’ch %2$s</item>
+        <item quantity="few">Byddwch yn rhannu manylion %1$d o’ch %2$s</item>
+        <item quantity="many">Byddwch yn rhannu manylion %1$d o’ch %2$s</item>
+        <item quantity="other">Byddwch yn rhannu manylion %1$d o’ch %2$s</item>
+    </plurals>
     <string name="consent_card_will_keep">Bydd %1$s yn cadw’r manylion hyn fel cofnod o’r gwiriad hwn:</string>
     <string name="consent_card_will_not_keep">Ni fydd %1$s yn cadw:</string>
     <string name="consent_card_all_kept">Bydd %1$s yn cadw’r manylion hyn fel cofnod o’r gwiriad hwn.</string>

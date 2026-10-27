@@ -23,7 +23,10 @@
     <string name="use_qr_code_to_connect_next" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
 
     <!-- Consent card -->
-    <string name="consent_card_heading">You’ll share %1$d details from your %2$s</string>
+    <plurals name="consent_card_heading">
+        <item quantity="one">You’ll share %1$d detail from your %2$s</item>
+        <item quantity="other">You’ll share %1$d details from your %2$s</item>
+    </plurals>
     <string name="consent_card_will_keep">%1$s will keep these details as a record of this check:</string>
     <string name="consent_card_will_not_keep">%1$s will not keep:</string>
     <string name="consent_card_all_kept">%1$s will keep these details as a record of this check.</string>

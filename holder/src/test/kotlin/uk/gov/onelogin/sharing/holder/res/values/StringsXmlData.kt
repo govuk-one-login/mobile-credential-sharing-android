@@ -77,10 +77,6 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Turn on Bluetooth",
         resourceId = R.string.turn_on_bluetooth
     ),
-    HOLDER_CONSENT_CARD_HEADING(
-        expected = "You\u2019ll share %1\$d details from your %2\$s",
-        resourceId = R.string.holder_consent_card_heading
-    ),
     HOLDER_CONSENT_CARD_WILL_KEEP(
         expected = "%1\$s will keep these details as a record of this check:",
         resourceId = R.string.holder_consent_card_will_keep
