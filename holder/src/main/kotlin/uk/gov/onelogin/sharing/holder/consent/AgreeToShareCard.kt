@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -116,7 +117,8 @@ internal fun AgreeToShareCard(
 @Composable
 private fun CardHeading(count: Int) {
     val documentName = stringResource(R.string.holder_consent_doc_mdl)
-    val headingTemplate = stringResource(R.string.holder_consent_card_heading, count, documentName)
+    val headingTemplate =
+        pluralStringResource(R.plurals.consent_card_heading, count, count, documentName)
 
     val bold = SpanStyle(
         fontFamily = ExtraTypography.bodyLargeBold.fontFamily,
