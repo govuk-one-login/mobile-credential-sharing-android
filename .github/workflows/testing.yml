@@ -66,7 +66,7 @@ jobs:
         # Roborazzi verify is disabled here. Screenshots are recorded on macos and don't match
         # when running on Linux. These are verified by the dedicated `screenshot_tests` job.
         run: |
-          ./scripts/test/unit/debug -Proborazzi.test.verify=false
+          ./scripts/test/unit/debug -PskipScreenshotTests
 
       - name: Upload unit test coverage report
         if: always()
