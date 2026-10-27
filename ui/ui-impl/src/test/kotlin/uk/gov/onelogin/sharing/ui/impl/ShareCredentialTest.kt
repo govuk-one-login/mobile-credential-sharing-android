@@ -26,10 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
-import uk.gov.logging.api.v3dot1.model.TrackEvent
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
-import uk.gov.onelogin.sharing.analytics.WalletSharingButton
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -49,7 +46,7 @@ class ShareCredentialTest {
         createTestAppGraph(analyticsLogger = analyticsLogger)
     }
 
-    private val expectedCloseEvent = WalletSharingButton.CLOSE
+    private val expectedCloseEvent = ShareCredentialAnalytics.closeButton
         .buttonEvent
         .asLegacyEvent()
 

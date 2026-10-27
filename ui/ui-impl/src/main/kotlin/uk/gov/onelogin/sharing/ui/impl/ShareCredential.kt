@@ -31,9 +31,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
-import uk.gov.logging.api.v3dot1.model.TrackEvent
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
-import uk.gov.onelogin.sharing.analytics.WalletSharingButton
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
@@ -71,9 +68,10 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     )
 }
 
-private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) = WalletSharingButton.CLOSE
-    .buttonEvent
-    .let(analyticsLogger::logEventV3Dot1)
+private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) =
+    ShareCredentialAnalytics.closeButton
+        .buttonEvent
+        .let(analyticsLogger::logEventV3Dot1)
 
 @Composable
 internal fun ShareCredential(

@@ -13,7 +13,6 @@ object TurnOnBluetoothNavigationExt {
 
     internal fun NavGraphBuilder.configureTurnOnBluetooth() {
         composable<TurnOnBluetoothRoute> {
-            // temp: reuse existing screen
             TurnOnBluetoothScreen(modifier = Modifier.fillMaxSize())
         }
     }
