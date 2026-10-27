@@ -114,7 +114,6 @@ internal fun ShareCredential(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .safeContentPadding()
             ) {
                 if (state.userCanCancel()) {
                     IconButton(onClick = onCancel) {
