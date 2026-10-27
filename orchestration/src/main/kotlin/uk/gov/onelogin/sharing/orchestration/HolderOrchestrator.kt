@@ -441,27 +441,19 @@ class HolderOrchestrator(
             return
         }
 
-        val oldUuid = currentContext.sessionUuid
+        val oldSession = sessionFlow.value
+        val oldUuid = oldSession.sessionContext.sessionUuid
 
         peripheralBluetoothTransport.stop(
             serviceUuid = oldUuid,
             sendEndCommand = false
         )
 
-        val newSession = sessionFactory.create()
+        sessionFlow.value = sessionFactory.create()
 
-        newSession.transitionTo(HolderSessionState.ReadyToPresent)
-        sessionFlow.value = newSession
+        oldSession.transitionTo(HolderSessionState.Complete.Expired)
 
-        val newUuid = newSession.sessionContext.sessionUuid
-        peripheralBluetoothTransport.start(
-            serviceUuid = newUuid
-        )
-
-        val newQrCode = newSession.sessionContext.qrCode
-        if (newQrCode.isNotEmpty()) {
-            safeTransitionTo(HolderSessionState.PresentingEngagement(newQrCode))
-        }
+        performPreflightChecks()
     }
 
     private fun stopAdvertising(sendEndCommand: Boolean) {

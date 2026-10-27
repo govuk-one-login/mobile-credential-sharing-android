@@ -164,12 +164,12 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        HolderSessionState.Complete.Expired,
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
         HolderSessionState.SendingTermination
         -> {
-            // Do nothing with UI-less states
             {}
         }
     }

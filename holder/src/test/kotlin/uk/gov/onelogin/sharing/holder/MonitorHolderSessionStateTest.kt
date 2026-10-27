@@ -63,6 +63,32 @@ class MonitorHolderSessionStateTest {
         }
     }
 
+    @Test
+    @UiThreadTest
+    fun `Complete Expired performs no navigation`() = runTest {
+        composeTestRule.run {
+            setContent {
+                context = LocalContext.current
+                controller = TestNavHostController(context).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                    navigatorProvider.addNavigator(DialogNavigator())
+                }
+
+                Render(viewModelFactory)
+            }
+
+            val startRoute = controller.currentBackStackEntry?.destination?.route
+
+            convertSessionStateToNavigation(
+                context = context,
+                navController = controller,
+                state = HolderSessionState.Complete.Expired
+            ).invoke()
+
+            assert(controller.currentBackStackEntry?.destination?.route == startRoute)
+        }
+    }
+
     @Composable
     private fun Render(viewModelFactory: MetroViewModelFactory) {
         CompositionLocalProvider(

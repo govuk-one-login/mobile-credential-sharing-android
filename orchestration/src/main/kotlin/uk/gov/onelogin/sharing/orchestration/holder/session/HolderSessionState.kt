@@ -144,6 +144,15 @@ sealed class HolderSessionState :
          * journey.
          */
         data object Cancelled : Complete("Journey cancelled by User")
+
+        /**
+         * The engagement session reached its deadline without a Verifier connecting and was
+         * refreshed. The expired session is replaced by a new one carrying fresh keys, a new BLE
+         * UUID, and a new QR payload. This terminal state records the expiry so that every created
+         * session reaches a [Complete] state; it is not surfaced to the UI (the journey continues
+         * on the replacement session).
+         */
+        data object Expired : Complete("Engagement session expired and was refreshed")
     }
 
     companion object {

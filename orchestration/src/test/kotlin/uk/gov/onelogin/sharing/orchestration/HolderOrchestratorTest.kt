@@ -98,6 +98,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
@@ -179,11 +180,12 @@ class HolderOrchestratorTest {
         authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory =
             FakeAuthenticatedReaderRequestFactory(),
         readerAuthentication: ReaderAuthentication = fakeReaderAuthentication,
-        engagementTimer: SessionTimer = FakeSessionTimer()
+        engagementTimer: SessionTimer = FakeSessionTimer(),
+        prerequisiteGate: PrerequisiteGate = gate
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
-        prerequisiteGate = gate,
+        prerequisiteGate = prerequisiteGate,
         peripheralBluetoothTransport = peripheralBluetoothTransport,
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
@@ -2242,6 +2244,7 @@ class HolderOrchestratorTest {
                 engagementTimer.onTimeout?.invoke()
                 advanceUntilIdle()
 
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
                 assertEquals(
                     HolderSessionState.PresentingEngagement("qr_code", showQr = true),
@@ -2250,6 +2253,60 @@ class HolderOrchestratorTest {
                 assert(transport.stopCalls >= 1)
                 assertEquals(2, transport.startCalls)
                 assertEquals(3, engagementTimer.startCalls)
+            }
+        }
+
+    @Test
+    fun `refresh re-evaluates prerequisites and routes to Preflight when Bluetooth unavailable`() =
+        runTest {
+            val engagementTimer = FakeSessionTimer()
+            val transport = FakePeripheralBluetoothTransport()
+
+            // Prerequisites pass on initial start, then Bluetooth is reported unavailable when the
+            // refresh re-evaluates at the deadline.
+            val missingBluetooth = MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            val togglingGate = object : PrerequisiteGate {
+                var evaluations = 0
+                override fun evaluatePrerequisites(
+                    prerequisites: Iterable<Prerequisite>
+                ): List<MissingPrerequisite> {
+                    evaluations++
+                    return if (evaluations == 1) emptyList() else listOf(missingBluetooth)
+                }
+            }
+
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                engagementTimer = engagementTimer,
+                prerequisiteGate = togglingGate
+            )
+
+            orchestrator.holderSessionState.test {
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+                orchestrator.start()
+                assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    awaitItem()
+                )
+
+                // Grace, then refresh at the deadline: prerequisites now fail.
+                engagementTimer.onTimeout?.invoke()
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                    awaitItem()
+                )
+
+                engagementTimer.onTimeout?.invoke()
+                advanceUntilIdle()
+
+                // New session starts NotStarted, then routes to Preflight (not re-advertising).
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+                assertThat(
+                    awaitItem(),
+                    hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+                )
             }
         }
 
@@ -2305,8 +2362,10 @@ class HolderOrchestratorTest {
 
             assert(sessionFactory.getCurrentSession() === secondSession)
             assert(sessionFactory.getCurrentSession() !== firstSession)
+            // The replaced session reaches a terminal Complete.Expired state (policy: every
+            // created session completes), while the new session owns the live engagement.
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code_first", showQr = false),
+                HolderSessionState.Complete.Expired,
                 firstSession.currentState.value
             )
             assertEquals(
@@ -2314,6 +2373,7 @@ class HolderOrchestratorTest {
                 secondSession.currentState.value
             )
 
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
                 HolderSessionState.PresentingEngagement("qr_code_second", showQr = true),
