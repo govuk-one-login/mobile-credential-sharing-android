@@ -30,6 +30,7 @@ import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
@@ -101,19 +102,27 @@ internal fun TurnOnBluetoothContent(onTurnOnBluetooth: () -> Unit, modifier: Mod
 }
 
 @Composable
-internal fun TurnOnBluetoothLoadingContent(modifier: Modifier = Modifier) {
+internal fun TurnOnBluetoothLoadingContent(
+    modifier: Modifier = Modifier,
+    progress: (() -> Float)? = null
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        CircularProgressIndicator(modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG))
+        if (progress != null) {
+            CircularProgressIndicator(
+                progress = progress,
+                modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG)
+            )
+        } else {
+            CircularProgressIndicator(modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG))
+        }
     }
 }
 
-@PreviewLightDark
-@PreviewFontScale
-@PreviewScreenSizes
+@PreviewContent
 @Composable
 internal fun TurnOnBluetoothContentPreview() {
     GdsTheme {
@@ -126,13 +135,15 @@ internal fun TurnOnBluetoothContentPreview() {
     }
 }
 
-@PreviewLightDark
-@PreviewScreenSizes
+@PreviewContent
 @Composable
 internal fun TurnOnBluetoothLoadingContentPreview() {
     GdsTheme {
         Surface {
-            TurnOnBluetoothLoadingContent(modifier = Modifier.fillMaxSize())
+            TurnOnBluetoothLoadingContent(
+                modifier = Modifier.fillMaxSize(),
+                progress = { 0.7f }
+            )
         }
     }
 }
