@@ -24,11 +24,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
-import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
-import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareAnalyticsEvents.allowBluetoothButton
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareAnalyticsEvents.findOutHowSharingWorksButton
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareAnalyticsEvents.getReadyToShareScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
@@ -84,11 +83,7 @@ class GetReadyToShareViewModel(
     }
 
     fun sendScreenEvent(): Job = viewModelScope.launch {
-        Screen(
-            name = "Get ready to share",
-            id = "3f5c1d0b-8068-4e19-8300-37f7bb468ff5",
-            params = walletSharingRequiredParameters
-        ).let(analyticsLogger::logEventV3Dot1)
+        analyticsLogger.getReadyToShareScreen()
     }
 
     fun onAllowBluetooth(launcher: ActivityResultLauncher<PrerequisiteAction>): Job =
@@ -97,16 +92,10 @@ class GetReadyToShareViewModel(
                 resolver.resolve(launcher)
             }
 
-            Button(
-                text = "Allow bluetooth",
-                params = walletSharingRequiredParameters
-            ).let(analyticsLogger::logEventV3Dot1)
+            analyticsLogger.allowBluetoothButton()
         }
 
     fun onFindOutMore(): Job = viewModelScope.launch {
-        Button(
-            text = "Find out how sharing works",
-            params = walletSharingRequiredParameters
-        ).let(analyticsLogger::logEventV3Dot1)
+        analyticsLogger.findOutHowSharingWorksButton()
     }
 }
