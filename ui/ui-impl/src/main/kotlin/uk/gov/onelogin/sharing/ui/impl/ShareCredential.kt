@@ -135,5 +135,3 @@ internal fun ShareCredential(
 
     BackHandler(state.userCanCancel(), onBack = onCancel)
 }
-
-private const val THREE_HUNDRED_MILLISECONDS = 300
