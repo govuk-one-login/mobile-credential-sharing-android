@@ -2,11 +2,9 @@ package uk.gov.onelogin.sharing.ui.impl
 
 import android.R.drawable.ic_menu_close_clear_cancel
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -18,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -114,6 +111,7 @@ internal fun ShareCredential(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .systemBarsPadding()
             ) {
                 if (state.userCanCancel()) {
                     IconButton(onClick = onCancel) {
@@ -124,37 +122,10 @@ internal fun ShareCredential(
                     }
                 }
 
-                val tweenSpec = tween<IntOffset>(THREE_HUNDRED_MILLISECONDS)
-
                 NavHost(
                     navController = navController,
                     startDestination = HolderRoutes,
-                    modifier = Modifier.fillMaxSize(),
-                    // define default transitions to mirror iOS defaults.
-                    enterTransition = {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                            animationSpec = tweenSpec
-                        )
-                    },
-                    exitTransition = {
-                        slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                            animationSpec = tweenSpec
-                        )
-                    },
-                    popEnterTransition = {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                            animationSpec = tweenSpec
-                        )
-                    },
-                    popExitTransition = {
-                        slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                            animationSpec = tweenSpec
-                        )
-                    }
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     configureHolderRoutes()
                 }

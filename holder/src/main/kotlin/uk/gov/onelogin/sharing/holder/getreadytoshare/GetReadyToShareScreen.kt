@@ -4,7 +4,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -13,7 +15,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -99,11 +103,13 @@ internal fun GetReadyToShareContent(
         }.toPersistentList(),
         primaryButton = LeftAlignedScreenButton(
             text = stringResource(R.string.get_ready_to_share_allow_bluetooth),
-            onClick = onAllowBluetoothClick
+            onClick = onAllowBluetoothClick,
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(15.dp))
         ),
         secondaryButton = LeftAlignedScreenButton(
             text = stringResource(R.string.get_ready_to_share_find_out_more),
-            onClick = onFindOutMoreButtonClick
+            onClick = onFindOutMoreButtonClick,
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(15.dp))
         ),
         forceScroll = true
     )

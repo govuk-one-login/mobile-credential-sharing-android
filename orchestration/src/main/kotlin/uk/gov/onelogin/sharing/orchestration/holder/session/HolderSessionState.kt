@@ -139,7 +139,6 @@ sealed class HolderSessionState :
     companion object {
         @JvmStatic
         private val cancelConfirmationRequired = listOf(
-            Preflight::class,
             AwaitingUserConsent::class,
             AwaitingVerifierResolution::class,
             ProcessingEstablishment::class,
@@ -148,6 +147,7 @@ sealed class HolderSessionState :
 
         @JvmStatic
         private val cancellableStates = listOf(
+            Preflight::class,
             PresentingEngagement::class
         ) + cancelConfirmationRequired
     }
