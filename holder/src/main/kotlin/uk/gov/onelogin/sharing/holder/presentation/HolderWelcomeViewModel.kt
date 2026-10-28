@@ -18,8 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
-import uk.gov.logging.api.v3dot1.model.ViewEvent
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -49,11 +47,8 @@ class HolderWelcomeViewModel(
         )
 
     fun sendScreenEvent() = viewModelScope.launch(dispatcher) {
-        ViewEvent.Screen(
-            name = "HolderWelcomeScreen",
-            id = "29fd14a3-4390-4939-9d57-d9fe8cf61811",
-            params = walletSharingRequiredParameters
-        ).let(analyticsLogger::logEventV3Dot1)
+        HolderWelcomeScreenAnalytics.screen.screenViewEvent
+            .let(analyticsLogger::logEventV3Dot1)
     }
 }
 

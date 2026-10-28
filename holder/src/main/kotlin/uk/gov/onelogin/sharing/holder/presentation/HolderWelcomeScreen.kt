@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.presentation.component.LandscapeQrContent
 import uk.gov.onelogin.sharing.holder.presentation.component.PortraitQrContent
 
@@ -66,7 +67,7 @@ private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = M
 @Composable
 @PreviewLightDark
 @PreviewFontScale
-@PreviewScreenSizes
+@PreviewContent
 private fun HolderWelcomeScreenPortraitPreview() {
     GdsTheme {
         QrContent(HolderWelcomeUiState(qrData = "QR Data"))
