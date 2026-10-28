@@ -7,14 +7,21 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
 class ConsentAttributeResolverTest {
 
+    private val baseNameSpace = "org.iso.18013.5.1"
+    private val gbNameSpace = "org.iso.18013.5.1.GB"
+
+    private fun DisplayAttribute.labelRes(): Int = (label as DisplayAttribute.Label.Resource).res
+
+    private fun DisplayAttribute.labelArg(): Int? = (label as DisplayAttribute.Label.Resource).arg
+
     @Test
     fun `resolves known attributes to strings res IDs`() {
         val resolved = ConsentAttributeResolver.toDisplayAttributes(
             listOf(
-                ConsentAttribute("family_name", false),
-                ConsentAttribute("welsh_licence", false)
+                ConsentAttribute("family_name", false, nameSpace = baseNameSpace),
+                ConsentAttribute("welsh_licence", false, nameSpace = gbNameSpace)
             )
-        ).map { it.labelRes }
+        ).map { it.labelRes() }
 
         assertEquals(
             listOf(
@@ -28,26 +35,26 @@ class ConsentAttributeResolverTest {
     @Test
     fun `resolves any age_over_NN to the age label with its NN arg`() {
         val resolved = ConsentAttributeResolver.toDisplayAttributes(
-            listOf(ConsentAttribute("age_over_21", false))
+            listOf(ConsentAttribute("age_over_21", false, nameSpace = baseNameSpace))
         ).single()
 
-        assertEquals(R.string.holder_consent_attr_age_over, resolved.labelRes)
-        assertEquals(21, resolved.labelArg)
+        assertEquals(R.string.holder_consent_attr_age_over, resolved.labelRes())
+        assertEquals(21, resolved.labelArg())
     }
 
     @Test
     fun `applies order independent of request order`() {
         val requested = listOf(
-            ConsentAttribute("birth_place", false),
-            ConsentAttribute("given_name", false),
-            ConsentAttribute("age_over_18", false),
-            ConsentAttribute("document_number", true),
-            ConsentAttribute("title", false),
-            ConsentAttribute("birth_date", false),
-            ConsentAttribute("family_name", false)
+            ConsentAttribute("birth_place", false, nameSpace = baseNameSpace),
+            ConsentAttribute("given_name", false, nameSpace = baseNameSpace),
+            ConsentAttribute("age_over_18", false, nameSpace = baseNameSpace),
+            ConsentAttribute("document_number", true, nameSpace = baseNameSpace),
+            ConsentAttribute("title", false, nameSpace = gbNameSpace),
+            ConsentAttribute("birth_date", false, nameSpace = baseNameSpace),
+            ConsentAttribute("family_name", false, nameSpace = baseNameSpace)
         )
 
-        val ordered = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.labelRes }
+        val ordered = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.labelRes() }
 
         assertEquals(
             listOf(
@@ -66,33 +73,55 @@ class ConsentAttributeResolverTest {
     @Test
     fun `orders age_over instances lowest to highest`() {
         val requested = listOf(
-            ConsentAttribute("age_over_21", false),
-            ConsentAttribute("age_over_18", false)
+            ConsentAttribute("age_over_21", false, nameSpace = baseNameSpace),
+            ConsentAttribute("age_over_18", false, nameSpace = baseNameSpace)
         )
 
-        val ages = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.labelArg }
+        val ages = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.labelArg() }
 
         assertEquals(listOf(18, 21), ages)
     }
 
     @Test
-    fun `drops unknown attributes`() {
+    fun `renders unmapped attributes as a raw namespace - identifier label`() {
         val requested = listOf(
-            ConsentAttribute("family_name", false),
-            ConsentAttribute("eye_colour", false),
-            ConsentAttribute("mystery", false)
+            ConsentAttribute("family_name", false, nameSpace = baseNameSpace),
+            ConsentAttribute("eye_colour", false, nameSpace = baseNameSpace),
+            ConsentAttribute("un_mapped", false, nameSpace = "org.iso.18013.5.1.XX")
         )
 
-        val ordered = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.labelRes }
+        val labels = ConsentAttributeResolver.toDisplayAttributes(requested).map { it.label }
 
-        assertEquals(listOf(R.string.holder_consent_attr_family_name), ordered)
+        assertEquals(
+            listOf(
+                DisplayAttribute.Label.Resource(R.string.holder_consent_attr_family_name),
+                DisplayAttribute.Label.Raw("org.iso.18013.5.1 - eye_colour"),
+                DisplayAttribute.Label.Raw("org.iso.18013.5.1.XX - un_mapped")
+            ),
+            labels
+        )
+    }
+
+    @Test
+    fun `renders a known identifier in an unexpected namespace as raw`() {
+        // family_name is only mapped under org.iso.18013.5.1; a different namespace must not match.
+        val requested = listOf(
+            ConsentAttribute("family_name", false, nameSpace = gbNameSpace)
+        )
+
+        val label = ConsentAttributeResolver.toDisplayAttributes(requested).single().label
+
+        assertEquals(
+            DisplayAttribute.Label.Raw("org.iso.18013.5.1.GB - family_name"),
+            label
+        )
     }
 
     @Test
     fun `preserves intentToRetain flags`() {
         val requested = listOf(
-            ConsentAttribute("family_name", true),
-            ConsentAttribute("given_name", false)
+            ConsentAttribute("family_name", true, nameSpace = baseNameSpace),
+            ConsentAttribute("given_name", false, nameSpace = baseNameSpace)
         )
 
         val resolved = ConsentAttributeResolver.toDisplayAttributes(requested)

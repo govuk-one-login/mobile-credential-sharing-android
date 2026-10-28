@@ -69,7 +69,13 @@ class HolderConsentViewModelTest {
                     namespaces = listOf(
                         ConsentNamespace(
                             nameSpace = "org.iso.18013.5.1",
-                            attributes = listOf(ConsentAttribute("family_name", false))
+                            attributes = listOf(
+                                ConsentAttribute(
+                                    "family_name",
+                                    false,
+                                    nameSpace = "org.iso.18013.5.1"
+                                )
+                            )
                         )
                     )
                 )
@@ -80,7 +86,9 @@ class HolderConsentViewModelTest {
             val expected = HolderConsentUiState(
                 card = ConsentCard.from(
                     ConsentAttributeResolver.toDisplayAttributes(
-                        listOf(ConsentAttribute("family_name", false))
+                        listOf(
+                            ConsentAttribute("family_name", false, nameSpace = "org.iso.18013.5.1")
+                        )
                     )
                 )
             )

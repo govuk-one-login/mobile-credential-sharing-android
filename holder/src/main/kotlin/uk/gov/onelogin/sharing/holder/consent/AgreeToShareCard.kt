@@ -133,7 +133,7 @@ private fun CardHeading(count: Int) {
             .fillMaxWidth()
             .background(SharingColors.cardBackground)
             .padding(spacingDouble)
-            .semantics(mergeDescendants = true) { heading() },
+            .semantics(mergeDescendants = true) {},
         horizontalArrangement = Arrangement.spacedBy(spacingDouble),
         verticalAlignment = Alignment.Top
     ) {
@@ -222,8 +222,12 @@ private fun RowDivider() {
 }
 
 @Composable
-private fun DisplayAttribute.label(): String =
-    labelArg?.let { stringResource(labelRes, it) } ?: stringResource(labelRes)
+private fun DisplayAttribute.label(): String = when (val label = label) {
+    is DisplayAttribute.Label.Resource ->
+        label.arg?.let { stringResource(label.res, it) } ?: stringResource(label.res)
+
+    is DisplayAttribute.Label.Raw -> label.text
+}
 
 private fun AnnotatedString.Builder.emphasise(source: String, substring: String, style: SpanStyle) {
     if (substring.isEmpty()) return
@@ -239,7 +243,9 @@ private fun AgreeToShareCardPreview(
 ) {
     val card = ConsentCard.from(
         ConsentAttributeResolver.toDisplayAttributes(
-            elements.map { (id, retain) -> ConsentAttribute(id, retain) }
+            elements.map { (id, retain) ->
+                ConsentAttribute(id, retain, nameSpace = "org.iso.18013.5.1")
+            }
         )
     )
     GdsTheme {

@@ -87,7 +87,11 @@ class HolderConsentScreenTest {
                     ConsentNamespace(
                         nameSpace = "org.iso.18013.5.1",
                         attributes = elements.map { (id, retain) ->
-                            ConsentAttribute(elementIdentifier = id, intentToRetain = retain)
+                            ConsentAttribute(
+                                elementIdentifier = id,
+                                intentToRetain = retain,
+                                nameSpace = "org.iso.18013.5.1"
+                            )
                         }
                     )
                 )

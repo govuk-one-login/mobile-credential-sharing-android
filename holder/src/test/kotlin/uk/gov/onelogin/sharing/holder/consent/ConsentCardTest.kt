@@ -6,7 +6,10 @@ import org.junit.Test
 class ConsentCardTest {
 
     private fun attr(labelRes: Int, intentToRetain: Boolean, labelArg: Int? = null) =
-        DisplayAttribute(labelRes = labelRes, labelArg = labelArg, intentToRetain = intentToRetain)
+        DisplayAttribute(
+            label = DisplayAttribute.Label.Resource(res = labelRes, arg = labelArg),
+            intentToRetain = intentToRetain
+        )
 
     @Test
     fun `derives NO_DETAILS_KEPT when no attribute is retained`() {
