@@ -238,7 +238,7 @@ private fun AnnotatedString.Builder.emphasise(source: String, substring: String,
 
 @PreviewContent
 @Composable
-private fun AgreeToShareCardPreview(
+internal fun AgreeToShareCardPreview(
     @PreviewParameter(AgreeToShareCardPreviewProvider::class) elements: Map<String, Boolean>
 ) {
     val card = ConsentCard.from(
@@ -257,7 +257,7 @@ private fun AgreeToShareCardPreview(
     }
 }
 
-private class AgreeToShareCardPreviewProvider : PreviewParameterProvider<Map<String, Boolean>> {
+internal class AgreeToShareCardPreviewProvider : PreviewParameterProvider<Map<String, Boolean>> {
     override val values: Sequence<Map<String, Boolean>> = sequenceOf(
         mapOf("family_name" to false, "given_name" to false, "portrait" to false),
         mapOf("family_name" to true, "given_name" to true, "document_number" to true),
