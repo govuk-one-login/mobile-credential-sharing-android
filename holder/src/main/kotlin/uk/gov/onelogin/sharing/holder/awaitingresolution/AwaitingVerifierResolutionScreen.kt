@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -38,6 +39,7 @@ import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 
 @Composable
@@ -123,6 +125,7 @@ internal fun AwaitingVerifierResolutionContent(
                 Text(
                     text = stringResource(R.string.holder_awaiting_verifier_resolution_body_1),
                     textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 17.sp,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -133,6 +136,7 @@ internal fun AwaitingVerifierResolutionContent(
                 Text(
                     text = stringResource(R.string.holder_awaiting_verifier_resolution_body_2),
                     textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 17.sp,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -154,7 +158,7 @@ internal fun AwaitingVerifierResolutionContent(
 @Composable
 @PreviewLightDark
 @PreviewFontScale
-@PreviewScreenSizes
+@PreviewContent
 internal fun AwaitingVerifierResolutionScreenPreview() {
     GdsTheme {
         AwaitingVerifierResolutionContent()
