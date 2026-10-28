@@ -14,7 +14,7 @@ import org.hamcrest.Matchers.nullValue
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.AndroidCentralBluetoothTransportMatchers.hasMonitoringJob
@@ -41,7 +41,7 @@ class AndroidCentralBluetoothTransportTest {
     private val scanner = FakeAndroidBluetoothScanner(scannerFlow)
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
     private val testScope = TestScope(dispatcherRule.testDispatcher)
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val transport by lazy {
         AndroidCentralBluetoothTransport(

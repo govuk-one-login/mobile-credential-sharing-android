@@ -20,7 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.BluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScanEvent
 import uk.gov.onelogin.sharing.bluetooth.api.scanner.ScannerFailure
@@ -31,7 +31,7 @@ class AndroidBluetoothScannerTest {
     private lateinit var mockBluetoothAdapterProvider: BluetoothAdapterProvider
     private lateinit var mockBluetoothLeScanner: BluetoothLeScanner
     private lateinit var scanner: AndroidBluetoothScanner
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     @Before
     fun setUp() {

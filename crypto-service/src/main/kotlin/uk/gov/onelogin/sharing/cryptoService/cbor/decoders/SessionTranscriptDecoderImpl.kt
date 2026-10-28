@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.exc.StreamReadException
 import com.fasterxml.jackson.databind.DatabindException
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.base64Decode
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
@@ -30,17 +30,21 @@ class SessionTranscriptDecoderImpl(private val logger: Logger) : SessionTranscri
         cborBase64Url: String,
         taggedEReaderKey: ByteArray
     ): ByteArray {
-        require(
-            taggedEReaderKey.size >= 2 &&
-                taggedEReaderKey[0] == 0xD8.toByte() &&
-                taggedEReaderKey[1] == 0x18.toByte()
+        if (!(
+                taggedEReaderKey.size >= 2 &&
+                    taggedEReaderKey[0] == 0xD8.toByte() &&
+                    taggedEReaderKey[1] == 0x18.toByte()
+                )
         ) {
+            val exception =
+                IllegalArgumentException("CBOR parsing error: eReaderKey must be tag(24)")
             logger.error(
                 logTag,
                 "Cannot derive session transcript from encoded device engagement " +
-                    "and eReader bytes"
+                    "and eReader bytes",
+                exception
             )
-            "CBOR parsing error: eReaderKey must be tag(24)"
+            throw exception
         }
 
         val deviceEngagementBytes = cborBase64Url.base64Decode()

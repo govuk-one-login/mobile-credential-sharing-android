@@ -12,7 +12,7 @@ import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeDeviceEngagement
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveSessionTranscript
@@ -58,13 +58,18 @@ class VerifierCryptoServiceImpl(
         qrCodeData: String,
         updateContext: (VerifierCryptoContext) -> VerifierCryptoContext
     ) {
-        require(qrCodeData.isNotBlank()) {
+        try {
+            require(qrCodeData.isNotBlank()) {
+                "DeviceEngagementBytes must not be blank"
+            }
+        } catch (e: IllegalArgumentException) {
             logger.error(
                 logTag,
                 "error constructing SessionTranscript array due to" +
-                    " DeviceEngagementBytes is blank"
+                    " DeviceEngagementBytes is blank",
+                e
             )
-            "DeviceEngagementBytes must not be blank"
+            throw e
         }
 
         val engagementData = decodeDeviceEngagement(qrCodeData, logger)
@@ -229,8 +234,9 @@ class VerifierCryptoServiceImpl(
         if (deviceCurve != readerCurve) {
             val message = "Error computing shared secret due to " +
                 "EDeviceKey.Pub with incompatible curve: $deviceCurve"
-            logger.error(logTag, message)
-            throw SharedSecretException.IncompatibleCurve(deviceCurve.toString())
+            val exception = SharedSecretException.IncompatibleCurve(deviceCurve.toString())
+            logger.error(logTag, message, exception)
+            throw exception
         }
 
         return try {
@@ -241,8 +247,13 @@ class VerifierCryptoServiceImpl(
                 logger.debug(logTag, "Shared secret computed successfully")
             }
         } catch (e: InvalidKeyException) {
-            logger.error(logTag, "Error computing shared secret due to malformed EDeviceKey.Pub")
-            throw SharedSecretException.MalformedKey(e)
+            val thrown = SharedSecretException.MalformedKey(e)
+            logger.error(
+                logTag,
+                "Error computing shared secret due to malformed EDeviceKey.Pub",
+                thrown
+            )
+            throw thrown
         }
     }
 

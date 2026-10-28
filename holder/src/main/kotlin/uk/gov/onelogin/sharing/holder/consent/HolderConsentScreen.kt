@@ -16,6 +16,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,18 +29,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.launch
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 
 @Composable
 internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
@@ -53,7 +54,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
 
     presentation?.let {
         HolderConsentContent(
-            presentation = it,
+            state = it,
             showPrivacyPolicy = showPrivacyPolicy,
             onShowPrivacyPolicy = viewModel::onShowPrivacyPolicy,
             onClosePrivacyPolicy = viewModel::onClosePrivacyPolicy,
@@ -66,7 +67,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
 @Suppress("LongMethod")
 @Composable
 internal fun HolderConsentContent(
-    presentation: ConsentPresentation,
+    state: HolderConsentUiState,
     showPrivacyPolicy: Boolean = false,
     onShowPrivacyPolicy: () -> Unit = {},
     onClosePrivacyPolicy: () -> Unit = {},
@@ -76,7 +77,7 @@ internal fun HolderConsentContent(
     val scope = rememberCoroutineScope()
     var showDenyDialog by remember { mutableStateOf(false) }
 
-    val privacyPolicyUrl = presentation.privacyPolicyUrl
+    val privacyPolicyUrl = state.privacyPolicyUrl
     if (showPrivacyPolicy && privacyPolicyUrl != null) {
         PrivacyPolicyWebView(
             url = privacyPolicyUrl,
@@ -106,13 +107,13 @@ internal fun HolderConsentContent(
             style = MaterialTheme.typography.headlineSmall
         )
 
-        presentation.documents.forEach { document ->
+        state.documents.forEach { document ->
             ConsentDocumentSection(document)
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        presentation.normalisedOrganizationName?.let { orgName ->
+        state.normalisedOrganizationName?.let { orgName ->
             Text(
                 text = stringResource(R.string.holder_consent_organization_sentence, orgName),
                 style = MaterialTheme.typography.bodyMedium,
@@ -132,11 +133,17 @@ internal fun HolderConsentContent(
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = { showDenyDialog = true }) {
+            Button(
+                enabled = !state.isBusy,
+                onClick = { showDenyDialog = true }
+            ) {
                 Text(stringResource(R.string.holder_consent_deny))
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { scope.launch { onAccept() } }) {
+            Button(
+                enabled = !state.isBusy,
+                onClick = { scope.launch { onAccept() } }
+            ) {
                 Text(stringResource(R.string.holder_consent_accept))
             }
         }
@@ -217,28 +224,32 @@ private fun DenyConfirmationDialog(onConfirmDeny: () -> Unit, onDismiss: () -> U
     )
 }
 
+@PreviewContent
 @Composable
-@Preview(showBackground = true)
 internal fun HolderConsentScreenPreview() {
-    HolderConsentContent(
-        presentation = ConsentPresentation(
-            documents = listOf(
-                ConsentDocument(
-                    docType = "org.iso.18013.5.1.mDL",
-                    namespaces = listOf(
-                        ConsentNamespace(
-                            nameSpace = "org.iso.18013.5.1",
-                            attributes = listOf(
-                                ConsentAttribute("family_name", false),
-                                ConsentAttribute("document_number", false),
-                                ConsentAttribute("age_over_21", true)
+    GdsTheme {
+        Surface {
+            HolderConsentContent(
+                state = HolderConsentUiState(
+                    documents = listOf(
+                        ConsentDocument(
+                            docType = "org.iso.18013.5.1.mDL",
+                            namespaces = listOf(
+                                ConsentNamespace(
+                                    nameSpace = "org.iso.18013.5.1",
+                                    attributes = listOf(
+                                        ConsentAttribute("family_name", false),
+                                        ConsentAttribute("document_number", false),
+                                        ConsentAttribute("age_over_21", true)
+                                    )
+                                )
                             )
                         )
-                    )
+                    ),
+                    privacyPolicyUrl = "https://verifier.example/privacy",
+                    normalisedOrganizationName = "Organisation Ltd."
                 )
-            ),
-            privacyPolicyUrl = "https://verifier.example/privacy",
-            organizationName = "Organisation Ltd"
-        )
-    )
+            )
+        }
+    }
 }

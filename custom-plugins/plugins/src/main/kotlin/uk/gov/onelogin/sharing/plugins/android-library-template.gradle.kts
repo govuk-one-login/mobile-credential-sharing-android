@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.plugins
 
 import com.android.build.api.dsl.LibraryExtension
+import org.gradle.api.tasks.testing.Test
 import uk.gov.onelogin.sharing.plugins.Filters.licenseFilters
 import uk.gov.onelogin.sharing.plugins.publishing.PublishingCustomTasks.createLocalBuildMavenRepositoryTask
 import uk.gov.onelogin.sharing.plugins.publishing.PublishingCustomTasks.disableJavadocGeneration
@@ -93,6 +94,12 @@ dependencies {
     }
 
     listOf(
+        "uk-gov-logging-api"
+    ).map { libs.findLibrary(it).get().get() }.forEach {
+        testFixturesApi(testFixtures(it))
+    }
+
+    listOf(
         "uk-gov-ui-android-componentsv2",
         "uk-gov-ui-android-patterns",
         "uk-gov-ui-android-theme",
@@ -112,6 +119,16 @@ dependencies {
 createLocalBuildMavenRepositoryTask()
 
 project.disableJavadocGeneration()
+
+// To skip roborazzi screenshot testing.
+if (project.hasProperty("skipScreenshotTests")) {
+    tasks.withType(Test::class.java).configureEach {
+        filter {
+            excludeTestsMatching("*ScreenshotTest")
+            isFailOnNoMatchingTests = false
+        }
+    }
+}
 
 configure<LibraryExtension> {
     packaging {

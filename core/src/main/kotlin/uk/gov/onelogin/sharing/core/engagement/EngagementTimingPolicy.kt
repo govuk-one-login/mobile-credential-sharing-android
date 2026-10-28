@@ -35,7 +35,7 @@ data class EngagementTimingPolicy(
     val qrVisibleDuration: Duration get() = deadline - graceDelay
 
     companion object {
-        val DEFAULT_DEADLINE: Duration = 10.seconds
+        val DEFAULT_DEADLINE: Duration = 300.seconds
         val DEFAULT_GRACE_DELAY: Duration = 1.seconds
     }
 }

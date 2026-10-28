@@ -2,13 +2,13 @@ package uk.gov.onelogin.sharing.cryptoService.cose
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.SecurityDeserializerStub.embeddedCoseKey
 import uk.gov.onelogin.sharing.cryptoService.SecurityDeserializerStub.validCoseKey
 import uk.gov.onelogin.sharing.cryptoService.cose.toDto
 
 class DefaultCoseKeyToStringTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val converter by lazy {
         DefaultCoseKeyToString(logger)

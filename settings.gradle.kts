@@ -55,6 +55,7 @@ listOf(
     ":prerequisite-gate-api",
     ":prerequisite-gate-impl",
     ":sdk",
+    ":screenshot-testing",
     ":ui:ui-api",
     ":ui:ui-impl",
     ":verifier"

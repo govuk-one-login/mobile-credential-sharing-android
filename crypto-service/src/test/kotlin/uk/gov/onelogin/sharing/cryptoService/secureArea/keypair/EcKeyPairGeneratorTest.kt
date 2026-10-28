@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.secureArea.keypair
 import java.security.interfaces.ECPublicKey
 import junit.framework.TestCase
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.ALGORITHM
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.INVALID_ALGORITHM
@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGenerator
 import uk.gov.onelogin.sharing.cryptoService.secureArea.keypair.KeyPairGeneratorStubs.PARAMETER_SPEC
 
 class EcKeyPairGeneratorTest {
-    private val stubLogger = SystemLogger()
+    private val stubLogger = MemorisedLogger()
     private val keyPairGenerator = EcKeyPairGenerator(stubLogger)
 
     @Test

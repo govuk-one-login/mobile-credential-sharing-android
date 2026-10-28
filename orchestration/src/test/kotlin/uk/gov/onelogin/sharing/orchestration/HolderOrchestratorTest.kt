@@ -26,7 +26,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
@@ -116,7 +116,7 @@ class HolderOrchestratorTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val scope = TestScope(mainDispatcherRule.testDispatcher)
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val resetOrchestratorSessionLog = "Cleared Orchestrator holder session"
     private val startSessionAfterCompletionLog =
         "Starting an Orchestrator holder session after completing the previous journey"
@@ -1024,6 +1024,54 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `cancel then restart during signing discards the late device response`() = runTest {
+        val consentGate = CompletableDeferred<Unit>()
+        val fakeCryptoService = FakeHolderCryptoService()
+        fakeCryptoService.encryptedToReturn = byteArrayOf(0x05, 0x06)
+        val peripheralTransport = FakePeripheralBluetoothTransport()
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = peripheralTransport,
+            holderCryptoService = fakeCryptoService,
+            sessionFactory = sessionFactory,
+            confirmConsentUseCase = FakeConfirmConsentUseCase(gate = consentGate)
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        advanceUntilIdle()
+
+        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        peripheralTransport.emitState(
+            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+        )
+        advanceUntilIdle()
+
+        // Begin signing on the first session; it suspends on the local-auth gate.
+        orchestrator.confirmConsent()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+        // Cancel the in-flight session (marks the originating session complete) and then
+        // restart a fresh journey while the first signing job is still suspended.
+        orchestrator.cancel()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, isCancelled())
+
+        orchestrator.start()
+        advanceUntilIdle()
+        assertThat(orchestrator.holderSessionState.value, inPresentingEngagement())
+
+        // Late completion of the original signing job must not reach the restarted session:
+        // no device response is sent and no encryption is performed against the new session.
+        consentGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(0, peripheralTransport.sendMessageCalls)
+        assertEquals(null, fakeCryptoService.lastEncryptCounter)
+        assertThat(orchestrator.holderSessionState.value, inPresentingEngagement())
+    }
+
+    @Test
     fun `deny during signing cancels signing and shares no credential`() = runTest {
         val consentGate = CompletableDeferred<Unit>()
         val fakeCryptoService = FakeHolderCryptoService()
@@ -1076,22 +1124,24 @@ class HolderOrchestratorTest {
                 exception = CredentialSigningException.Recoverable()
             )
         )
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
-        orchestrator.start()
-        advanceUntilIdle()
+        orchestrator.holderSessionState.test {
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
 
-        peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-        peripheralTransport.emitState(
-            PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
-        )
-        advanceUntilIdle()
+            peripheralTransport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+            peripheralTransport.emitState(
+                PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3))
+            )
+            advanceUntilIdle()
 
-        orchestrator.confirmConsent()
-        advanceUntilIdle()
+            orchestrator.confirmConsent()
+            advanceUntilIdle()
 
-        assertEquals(0, peripheralTransport.sendMessageCalls)
-        assertEquals(null, fakeCryptoService.lastErrorSessionDataStatus)
-        assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+            assertEquals(0, peripheralTransport.sendMessageCalls)
+            assertEquals(null, fakeCryptoService.lastErrorSessionDataStatus)
+            assertThat(expectMostRecentItem(), isAwaitingUserConsent())
+        }
     }
 
     @Test
@@ -2432,46 +2482,47 @@ class HolderOrchestratorTest {
         }
 
     @Test
-    fun `refresh awaits stop of the old UUID before starting the new UUID advertising`() = runTest {
-        val engagementTimer = FakeSessionTimer()
-        val stopGate = CompletableDeferred<Unit>()
-        val operations = mutableListOf<String>()
-        val delegate = FakePeripheralBluetoothTransport()
-        val transport = object : PeripheralBluetoothTransport by delegate {
-            override suspend fun stop(serviceUuid: java.util.UUID, sendEndCommand: Boolean) {
-                stopGate.await()
-                operations += "stop"
-                delegate.stop(serviceUuid, sendEndCommand)
+    fun `refresh awaits stop of the old session before starting the new session advertising`() =
+        runTest {
+            val engagementTimer = FakeSessionTimer()
+            val stopGate = CompletableDeferred<Unit>()
+            val operations = mutableListOf<String>()
+            val delegate = FakePeripheralBluetoothTransport()
+            val transport = object : PeripheralBluetoothTransport by delegate {
+                override suspend fun stop(sendEndCommand: Boolean) {
+                    stopGate.await()
+                    operations += "stop"
+                    delegate.stop(sendEndCommand)
+                }
+
+                override suspend fun start(serviceUuid: java.util.UUID) {
+                    operations += "start"
+                    delegate.start(serviceUuid)
+                }
             }
 
-            override suspend fun start(serviceUuid: java.util.UUID) {
-                operations += "start"
-                delegate.start(serviceUuid)
-            }
-        }
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                engagementTimer = engagementTimer
+            )
 
-        val orchestrator = createOrchestrator(
-            peripheralBluetoothTransport = transport,
-            engagementTimer = engagementTimer
-        )
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
 
-        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+            orchestrator.start()
+            advanceUntilIdle()
 
-        orchestrator.start()
-        advanceUntilIdle()
+            operations.clear()
 
-        operations.clear()
+            engagementTimer.onTimeout?.invoke()
+            val refreshTrigger = backgroundScope.launch { engagementTimer.onTimeout?.invoke() }
+            advanceUntilIdle()
 
-        engagementTimer.onTimeout?.invoke()
-        val refreshTrigger = backgroundScope.launch { engagementTimer.onTimeout?.invoke() }
-        advanceUntilIdle()
+            assertEquals(emptyList<String>(), operations)
 
-        assertEquals(emptyList<String>(), operations)
+            stopGate.complete(Unit)
+            advanceUntilIdle()
+            refreshTrigger.join()
 
-        stopGate.complete(Unit)
-        advanceUntilIdle()
-        refreshTrigger.join()
-
-        assertEquals(listOf("stop", "start"), operations)
+            assertEquals(listOf("stop", "start"), operations)
     }
 }

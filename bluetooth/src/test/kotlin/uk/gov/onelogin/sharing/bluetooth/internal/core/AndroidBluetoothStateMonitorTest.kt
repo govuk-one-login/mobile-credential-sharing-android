@@ -17,7 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.ble.BluetoothContext
 
@@ -34,7 +34,7 @@ class AndroidBluetoothStateMonitorTest {
         every { mockManager.adapter } returns mockAdapter
         monitor = AndroidBluetoothStateMonitor(
             appContext = context,
-            logger = SystemLogger()
+            logger = MemorisedLogger()
         )
     }
 

@@ -12,7 +12,7 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.adapter.FakeBluetoothAdapterProvider
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingParameters
@@ -23,7 +23,7 @@ import uk.gov.onelogin.sharing.bluetooth.ble.stubBleAdvertiseData
 @RunWith(RobolectricTestRunner::class)
 internal class AndroidBluetoothAdvertiserProviderTest {
     private val advertiser = mockk<BluetoothLeAdvertiser>(relaxed = true)
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val adapter = FakeBluetoothAdapterProvider(
         isEnabled = true,
         advertiser = advertiser

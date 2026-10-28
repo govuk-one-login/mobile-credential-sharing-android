@@ -11,7 +11,7 @@ import org.hamcrest.Matchers.nullValue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
@@ -40,7 +40,7 @@ class HolderWelcomeViewModelTest {
     private val viewModel by lazy {
         HolderWelcomeViewModel(
             orchestrator = orchestrator,
-            analyticsLogger = SystemAnalyticsLogger(SystemLogger()),
+            analyticsLogger = SystemAnalyticsLogger(MemorisedLogger()),
             dispatcher = mainDispatcherRule.testDispatcher
         )
     }

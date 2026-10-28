@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream
 import java.security.InvalidKeyException
 import java.security.SignatureException
 import java.security.cert.X509Certificate
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.verifier.ReaderAuthenticationException
 

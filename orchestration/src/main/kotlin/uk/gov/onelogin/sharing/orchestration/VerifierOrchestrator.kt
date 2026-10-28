@@ -5,6 +5,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
+import java.util.MissingResourceException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,10 +16,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.cbor.deriveUntaggedCbor
@@ -67,7 +69,7 @@ import uk.gov.onelogin.sharing.verification.format.document.result.VerificationR
 private const val INVALID_SESSION_DATA = "Received invalid SessionData instance"
 
 @Keep
-@Suppress("LongParameterList", "TooManyFunctions", "UnusedPrivateProperty")
+@Suppress("LongParameterList", "TooManyFunctions", "UnusedPrivateProperty", "LargeClass")
 @ContributesBinding(scope = AppScope::class, binding = binding<Orchestrator.Verifier>())
 @SingleIn(AppScope::class)
 class VerifierOrchestrator(
@@ -304,11 +306,16 @@ class VerifierOrchestrator(
         verifierState: VerifierSessionState
     ) {
         if (verifierState is VerifierSessionState.Verifying) {
-            logger.debug(logTag, "Ignoring transport error while verifying: ${state.reason}")
+            logger.debug(
+                logTag,
+                "Ignoring transport error while verifying: ${state.reason.message}"
+            )
         } else {
             failWith(
-                "Bluetooth error: ${state.reason}",
-                InvalidBluetoothState(IllegalStateException("Bluetooth error: ${state.reason}"))
+                "Bluetooth error: ${state.reason.message}",
+                InvalidBluetoothState(
+                    IllegalStateException("Bluetooth error: ${state.reason.message}")
+                )
             )
         }
     }
@@ -400,7 +407,8 @@ class VerifierOrchestrator(
             sessionData.status != SessionDataStatus.OK
 
     private fun handleUnexpectedStatusWithData(status: SessionDataStatus) {
-        logger.error(logTag, "Received SessionData with data and error status: $status")
+        val message = "Received SessionData with data and error status: $status"
+        logger.error(logTag, message, LoggerException(message))
         appCoroutineScope.launch {
             terminateSession(
                 bleOpen = centralBluetoothTransport.isBleOpen,
@@ -416,7 +424,7 @@ class VerifierOrchestrator(
     }
 
     private fun handleTerminationWithoutData(terminationAlreadyReceived: Boolean) {
-        logger.error(logTag, INVALID_SESSION_DATA)
+        logger.error(logTag, INVALID_SESSION_DATA, LoggerException(INVALID_SESSION_DATA))
         logger.debug(
             logTag,
             "Received status-only SessionData. Termination received: $terminationAlreadyReceived"
@@ -510,7 +518,13 @@ class VerifierOrchestrator(
 
                 )
             }
-            logger.error(logTag, "DeviceRequest processing error: status ${status.code}")
+            "DeviceRequest processing error: status ${status.code}".let {
+                logger.error(
+                    logTag,
+                    it,
+                    RuntimeException(it)
+                )
+            }
             return
         }
 
@@ -529,7 +543,13 @@ class VerifierOrchestrator(
                     )
                 )
             }
-            logger.error(logTag, "Document not returned: status ${status.code}")
+            "Document not returned: status ${status.code}".let {
+                logger.error(
+                    logTag,
+                    it,
+                    IllegalArgumentException(it)
+                )
+            }
             return
         }
 
@@ -689,7 +709,6 @@ class VerifierOrchestrator(
                 "SessionEstablishment bytes: ${sessionEstablishmentBytes.toHexString()}"
             )
             val sent = centralBluetoothTransport.sendMessage(
-                serviceUuid = context.serviceUuid,
                 data = sessionEstablishmentBytes
             )
             sessionTimer.reset()

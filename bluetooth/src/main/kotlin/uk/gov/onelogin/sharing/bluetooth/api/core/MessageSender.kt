@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.bluetooth.api.core
 
-import java.util.UUID
-
 /**
  * Sends data to the connected remote device over BLE.
  */
@@ -9,9 +7,11 @@ fun interface MessageSender {
     /**
      * Sends [data] to the connected device, chunked according to the negotiated MTU.
      *
-     * @param serviceUuid The UUID of the active GATT service.
+     * The active GATT service is the one established during the connection (open/connect),
+     * so it does not need to be supplied per call.
+     *
      * @param data The CBOR-encoded SessionData bytes to transmit.
      * @return `true` if all chunks were sent successfully, `false` otherwise.
      */
-    suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean
+    suspend fun sendMessage(data: ByteArray): Boolean
 }

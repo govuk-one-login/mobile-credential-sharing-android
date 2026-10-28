@@ -6,7 +6,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSigStructureGenerator
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1ProtectedHeaders
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.CoseSign1UnprotectedHeaderGenerator
@@ -21,7 +21,7 @@ import uk.gov.onelogin.sharing.verification.cose.internal.path.TestCertificateGe
  */
 class CryptoServiceCborDefiniteLengthTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val certificateGenerator = TestCertificateGenerator(
         subject = "CN=Leaf,ST=London",

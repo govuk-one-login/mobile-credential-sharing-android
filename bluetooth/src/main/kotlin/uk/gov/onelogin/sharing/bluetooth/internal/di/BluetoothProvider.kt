@@ -6,9 +6,11 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueue
 import uk.gov.onelogin.sharing.bluetooth.internal.central.GattWriteQueueImpl
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 
 @BindingContainer
 @ContributesTo(AppScope::class)
@@ -20,4 +22,10 @@ object BluetoothProvider {
 
     @Provides
     fun provideGattWriteQueue(): GattWriteQueue = GattWriteQueueImpl(GattUuids.CLIENT_2_SERVER_UUID)
+
+    @Provides
+    fun provideMessageReassemblerFactory(logger: Logger): MessageReassembler.Factory =
+        MessageReassembler.Factory { maxReceiveBufferSize ->
+            MessageReassembler(maxReceiveBufferSize = maxReceiveBufferSize, logger = logger)
+        }
 }

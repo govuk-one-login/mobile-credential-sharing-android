@@ -3,12 +3,16 @@ package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import org.hamcrest.CoreMatchers.containsString
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.startsWith
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.INVALID_CBOR
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoderImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
+import uk.gov.onelogin.sharing.cryptoService.util.assertErrorLoggedWithThrowable
 import uk.gov.onelogin.sharing.cryptoService.util.getByteArrayFromHexStringFile
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 
@@ -28,7 +32,7 @@ class DeviceRequestDecoderImplTest {
         "deviceRequestExampleEmptyDocRequest.txt"
     )
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val deviceRequestDecoderImpl = DeviceRequestDecoderImpl(logger)
 
@@ -69,6 +73,11 @@ class DeviceRequestDecoderImplTest {
         assertFailsWith<DeviceRequestDecodingException> {
             deviceRequestDecoderImpl.deviceRequestDecoder(trailingDataBytes)
         }
+
+        logger.assertErrorLoggedWithThrowable(
+            DeviceRequestDecodingException::class.java,
+            containsString("Trailing data found")
+        )
     }
 
     @Test
@@ -78,6 +87,10 @@ class DeviceRequestDecoderImplTest {
         }
 
         assert(logger.any { it.message.startsWith("DeviceRequest CBOR decoding failed") })
+        logger.assertErrorLoggedWithThrowable(
+            DeviceRequestDecodingException::class.java,
+            startsWith("DeviceRequest CBOR decoding failed")
+        )
     }
 
     @Test
@@ -87,6 +100,10 @@ class DeviceRequestDecoderImplTest {
         }
 
         assert(logger.contains("DeviceRequest contains empty DocRequests"))
+        logger.assertErrorLoggedWithThrowable(
+            DeviceRequestValidationException::class.java,
+            equalTo("DeviceRequest contains empty DocRequests")
+        )
     }
 
     @Test
@@ -159,6 +176,11 @@ class DeviceRequestDecoderImplTest {
         assertFailsWith<DeviceRequestDecodingException> {
             deviceRequestDecoderImpl.deviceRequestDecoder(duplicateKeyCbor)
         }
+
+        logger.assertErrorLoggedWithThrowable(
+            DeviceRequestDecodingException::class.java,
+            containsString("Duplicate key")
+        )
     }
 
     private fun findSliceOffset(source: ByteArray, target: ByteArray): Int {
