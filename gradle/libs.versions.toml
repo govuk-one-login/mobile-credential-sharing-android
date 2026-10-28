@@ -35,6 +35,7 @@ mockk = "1.14.11" # https://github.com/mockk/mockk/releases
 org-hamcrest = "3.0" # https://github.com/hamcrest/JavaHamcrest/releases
 robolectric = "4.16.1" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.76.0" # https://github.com/takahirom/roborazzi/releases
+composable-preview-scanner = "0.9.3" # https://github.com/sergio-sastre/ComposablePreviewScanner/releases
 sonarqube = "7.3.0.8198" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.10.4" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
@@ -122,6 +123,8 @@ roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = 
 roborazzi-compose = { module = "io.github.takahirom.roborazzi:roborazzi-compose", version.ref = "roborazzi" }
 roborazzi-gradle = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-plugin", version.ref = "roborazzi" }
 roborazzi-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
+roborazzi-compose-preview-scanner-support = { module = "io.github.takahirom.roborazzi:roborazzi-compose-preview-scanner-support", version.ref = "roborazzi" }
+composable-preview-scanner = { module = "io.github.sergio-sastre.ComposablePreviewScanner:android", version.ref = "composable-preview-scanner" }
 sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube" }
 spotless-gradle = { module = "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin", version.ref = "spotless" }
 uk-gov-logging-api = { module = "uk.gov.logging:logging-api", version.ref = "uk-gov-logging" }
@@ -185,7 +188,9 @@ screenshot-testing = [
     "org-robolectric",
     "roborazzi",
     "roborazzi-compose",
+    "roborazzi-compose-preview-scanner-support",
     "roborazzi-rule",
+    "composable-preview-scanner",
 ]
 uk-gov-logging = [
     "uk-gov-logging-api",
