@@ -194,9 +194,9 @@ internal fun HolderConsentScreenPreview() {
     val card = ConsentCard.from(
         ConsentAttributeResolver.toDisplayAttributes(
             listOf(
-                ConsentAttribute("family_name", false),
-                ConsentAttribute("document_number", false),
-                ConsentAttribute("age_over_21", true)
+                ConsentAttribute("family_name", false, nameSpace = "org.iso.18013.5.1"),
+                ConsentAttribute("document_number", false, nameSpace = "org.iso.18013.5.1"),
+                ConsentAttribute("age_over_21", true, nameSpace = "org.iso.18013.5.1")
             )
         )
     )
