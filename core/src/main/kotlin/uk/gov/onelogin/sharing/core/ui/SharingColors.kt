@@ -10,7 +10,7 @@ object SharingColors {
     private const val GREY_4 = 0xFFF3F2F1
     private const val WHITE = 0xFFFFFFFF
     private const val CHARCOAL_1 = 0xFF0B0C0C
-    private const val CHARCOAL_2 = 0xFF262626
+    private const val CHARCOAL_2 = 0xFF3C3C3C
 
     val cardBackground: Color
         @Composable get() = customDynamicColor(light = Color(GREY_4), dark = Color(CHARCOAL_2))

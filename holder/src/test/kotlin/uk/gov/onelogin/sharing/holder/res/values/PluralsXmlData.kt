@@ -41,13 +41,13 @@ enum class WelshPluralsXmlData(
     val documentName: String
 ) {
     CONSENT_CARD_HEADING_ZERO(
-        expected = "Byddwch yn rhannu 0 manylion o\u2019ch trwydded yrru\u2019r DU",
+        expected = "Byddwch yn rhannu manylion 0 o\u2019ch trwydded yrru\u2019r DU",
         resourceId = R.plurals.consent_card_heading,
         quantity = 0,
         documentName = "trwydded yrru\u2019r DU"
     ),
     CONSENT_CARD_HEADING_ONE(
-        expected = "Byddwch yn rhannu 1 manylyn o\u2019ch trwydded yrru\u2019r DU",
+        expected = "Byddwch yn rhannu manylion 1 o\u2019ch trwydded yrru\u2019r DU",
         resourceId = R.plurals.consent_card_heading,
         quantity = 1,
         documentName = "trwydded yrru\u2019r DU"
