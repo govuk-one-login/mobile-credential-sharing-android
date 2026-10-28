@@ -37,6 +37,7 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.cryptoService.verifier.DocRequestBuilderImpl.Companion.NAMESPACE_ISO
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
@@ -194,9 +195,9 @@ internal fun HolderConsentScreenPreview() {
     val card = ConsentCard.from(
         ConsentAttributeResolver.toDisplayAttributes(
             listOf(
-                ConsentAttribute("family_name", false, nameSpace = "org.iso.18013.5.1"),
-                ConsentAttribute("document_number", false, nameSpace = "org.iso.18013.5.1"),
-                ConsentAttribute("age_over_21", true, nameSpace = "org.iso.18013.5.1")
+                ConsentAttribute("family_name", false, NAMESPACE_ISO),
+                ConsentAttribute("document_number", false, NAMESPACE_ISO),
+                ConsentAttribute("age_over_21", true, NAMESPACE_ISO)
             )
         )
     )
