@@ -32,7 +32,9 @@ object AgreeToShareCardSamples {
 
     fun card(attributes: List<Pair<String, Boolean>>): ConsentCard = ConsentCard.from(
         ConsentAttributeResolver.toDisplayAttributes(
-            attributes.map { (id, retain) -> ConsentAttribute(id, retain) }
+            attributes.map { (id, retain) ->
+                ConsentAttribute(id, retain, nameSpace = "org.iso.18013.5.1")
+            }
         )
     )
 }
