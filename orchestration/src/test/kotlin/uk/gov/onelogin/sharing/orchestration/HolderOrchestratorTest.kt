@@ -2360,6 +2360,7 @@ class HolderOrchestratorTest {
             }
         }
 
+    @Suppress("LongMethod")
     @Test
     fun `refreshing at the deadline replaces the old session instance with a new one`() = runTest {
         val engagementTimer = FakeSessionTimer()
@@ -2412,8 +2413,6 @@ class HolderOrchestratorTest {
 
             assert(sessionFactory.getCurrentSession() === secondSession)
             assert(sessionFactory.getCurrentSession() !== firstSession)
-            // The replaced session reaches a terminal Complete.Expired state (policy: every
-            // created session completes), while the new session owns the live engagement.
             assertEquals(
                 HolderSessionState.Complete.Expired,
                 firstSession.currentState.value
@@ -2524,5 +2523,5 @@ class HolderOrchestratorTest {
             refreshTrigger.join()
 
             assertEquals(listOf("stop", "start"), operations)
-    }
+        }
 }
