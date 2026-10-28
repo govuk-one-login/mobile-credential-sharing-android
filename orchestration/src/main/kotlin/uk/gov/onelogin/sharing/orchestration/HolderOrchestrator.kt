@@ -476,9 +476,9 @@ class HolderOrchestrator(
             sendEndCommand = false
         )
 
-        sessionFlow.value = sessionFactory.create()
-
         oldSession.transitionTo(HolderSessionState.Complete.Expired)
+
+        sessionFlow.value = sessionFactory.create()
 
         performPreflightChecks()
     }

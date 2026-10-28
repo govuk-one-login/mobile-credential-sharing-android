@@ -21,6 +21,7 @@ import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationEx
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.navigateToRetryHolderPrerequisites
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
+import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -83,8 +84,12 @@ internal suspend fun convertSessionStateToNavigation(
     when (state) {
         HolderSessionState.NotStarted -> {
             {
-                navController.navigateToHolderPrerequisitesScreen {
-                    exitJourneyOptions()
+                val alreadyPresentingQr = navController.currentDestination
+                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                if (!alreadyPresentingQr) {
+                    navController.navigateToHolderPrerequisitesScreen {
+                        exitJourneyOptions()
+                    }
                 }
             }
         }

@@ -20,6 +20,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
+import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
+import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -86,6 +88,75 @@ class MonitorHolderSessionStateTest {
             ).invoke()
 
             assert(controller.currentBackStackEntry?.destination?.route == startRoute)
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `NotStarted during refresh stays on the QR screen`() = runTest {
+        composeTestRule.run {
+            setContent {
+                context = LocalContext.current
+                controller = TestNavHostController(context).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                    navigatorProvider.addNavigator(DialogNavigator())
+                }
+
+                Render(viewModelFactory)
+            }
+
+            // Arrive on the QR screen (as during an active presentation / grace window).
+            convertSessionStateToNavigation(
+                context = context,
+                navController = controller,
+                state = HolderSessionState.PresentingEngagement("qr")
+            ).invoke()
+            waitUntil {
+                controller.currentBackStackEntry?.destination
+                    ?.route == HolderPresentQrRoute::class.qualifiedName
+            }
+
+            // Refresh emits a transient NotStarted for the new session. While already presenting,
+            // this must NOT navigate away (e.g. to the Prerequisites screen).
+            convertSessionStateToNavigation(
+                context = context,
+                navController = controller,
+                state = HolderSessionState.NotStarted
+            ).invoke()
+
+            assert(
+                controller.currentBackStackEntry?.destination
+                    ?.route == HolderPresentQrRoute::class.qualifiedName
+            )
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `NotStarted when not presenting navigates to the Prerequisites screen`() = runTest {
+        composeTestRule.run {
+            setContent {
+                context = LocalContext.current
+                controller = TestNavHostController(context).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                    navigatorProvider.addNavigator(DialogNavigator())
+                }
+
+                Render(viewModelFactory)
+            }
+
+            // From the journey start (not on the QR screen), NotStarted still routes to
+            // Prerequisites as normal.
+            convertSessionStateToNavigation(
+                context = context,
+                navController = controller,
+                state = HolderSessionState.NotStarted
+            ).invoke()
+
+            waitUntil {
+                controller.currentBackStackEntry?.destination
+                    ?.route == HolderPrerequisitesRoute::class.qualifiedName
+            }
         }
     }
 
