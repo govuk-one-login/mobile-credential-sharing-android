@@ -201,7 +201,7 @@ class ValidatePrivacyPolicyUseCaseImplTest {
     }
 
     @Test
-    fun `missing organizationName does not fail validation`() {
+    fun `missing organizationName throws ORGANIZATION_NAME_MISSING`() {
         val validUrl = "https://example.gov.uk/privacy"
         val siaBytes = buildSiaExtensionValue(SIA_PRIVACY_OID, validUrl)
 
@@ -212,15 +212,36 @@ class ValidatePrivacyPolicyUseCaseImplTest {
             issuer = "CN=Root CA"
         ).leaf().withExtension(OID_SIA, false, siaBytes).build()
 
-        val authenticatedRequest = useCase.validate(
-            VerifiedReaderRequest(
-                sampleDocRequest,
-                leafCertNoOrg
-            )
-        )
+        val failure = assertThrows(ReaderAuthenticationFailure::class.java) {
+            useCase.validate(VerifiedReaderRequest(sampleDocRequest, leafCertNoOrg))
+        }
 
-        assertEquals(validUrl, authenticatedRequest.privacyPolicyUrl.toString())
-        assertEquals(null, authenticatedRequest.readerOrganizationName)
+        assertEquals(
+            ReaderAuthenticationReason.ORGANIZATION_NAME_MISSING,
+            failure.reason
+        )
+    }
+
+    @Test
+    fun `blank organizationName throws ORGANIZATION_NAME_MISSING`() {
+        val validUrl = "https://example.gov.uk/privacy"
+        val siaBytes = buildSiaExtensionValue(SIA_PRIVACY_OID, validUrl)
+
+        val leafCertBlankOrg = TestCertificateGenerator(
+            subject = "CN=Reader Leaf,O=   ,C=GB",
+            keyPair = keyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root CA"
+        ).leaf().withExtension(OID_SIA, false, siaBytes).build()
+
+        val failure = assertThrows(ReaderAuthenticationFailure::class.java) {
+            useCase.validate(VerifiedReaderRequest(sampleDocRequest, leafCertBlankOrg))
+        }
+
+        assertEquals(
+            ReaderAuthenticationReason.ORGANIZATION_NAME_MISSING,
+            failure.reason
+        )
     }
 
     @Test

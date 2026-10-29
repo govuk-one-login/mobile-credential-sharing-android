@@ -624,9 +624,7 @@ class HolderOrchestrator(
 
                 sessionFlow.value.sessionContext.authenticatedReaderRequest?.let {
                     logger.debug(logTag, "privacy policy = ${it.privacyPolicyUrl}")
-                    it.readerOrganizationName?.let { orgName ->
-                        logger.debug(logTag, "organisation name = $orgName")
-                    }
+                    logger.debug(logTag, "organisation name = ${it.readerOrganizationName}")
                 }
 
                 if (!deviceRequestContainsPortrait(deviceRequest)) {
@@ -722,9 +720,14 @@ class HolderOrchestrator(
                 )
             }
 
+            val authenticatedReaderRequest = currentContext.authenticatedReaderRequest
+                ?: error(
+                    "AuthenticatedReaderRequest must be present before building the consent screen"
+                )
+
             val presentation = ConsentPresentationFactory.create(
                 matchedAttributes = result.matchedAttributes,
-                authenticatedReaderRequest = currentContext.authenticatedReaderRequest
+                authenticatedReaderRequest = authenticatedReaderRequest
             )
 
             logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)

@@ -53,7 +53,7 @@ private val DIVIDER_THICKNESS = 1.dp
 @Composable
 internal fun AgreeToShareCard(
     card: ConsentCard,
-    organizationName: String?,
+    organizationName: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -126,33 +126,29 @@ private fun ColumnScope.NoDetailsKeptSection(card: ConsentCard) {
 }
 
 @Composable
-private fun ColumnScope.AllDetailsKeptSection(card: ConsentCard, organizationName: String?) {
+private fun ColumnScope.AllDetailsKeptSection(card: ConsentCard, organizationName: String) {
     SectionDivider()
     AttributeList(card.attributes)
-    organizationName?.let {
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_all_kept, it))
-        }
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_all_kept, organizationName))
     }
 }
 
 @Composable
-private fun ColumnScope.SomeDetailsKeptSection(card: ConsentCard, organizationName: String?) {
-    organizationName?.let {
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_will_keep, it))
-        }
-        SectionDivider()
-        AttributeList(card.keptAttributes)
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_will_not_keep, it))
-        }
-        SectionDivider()
-        AttributeList(card.notKeptAttributes)
+private fun ColumnScope.SomeDetailsKeptSection(card: ConsentCard, organizationName: String) {
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_will_keep, organizationName))
     }
+    SectionDivider()
+    AttributeList(card.keptAttributes)
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_will_not_keep, organizationName))
+    }
+    SectionDivider()
+    AttributeList(card.notKeptAttributes)
 }
 
 @Composable

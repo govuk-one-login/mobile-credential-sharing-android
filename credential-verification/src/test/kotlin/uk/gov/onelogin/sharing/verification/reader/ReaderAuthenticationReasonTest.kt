@@ -18,6 +18,7 @@ class ReaderAuthenticationReasonTest {
             "UNSUPPORTED_READER_AUTH_ALGORITHM",
             "UNTRUSTED_READER_CERTIFICATE",
             "PRIVACY_POLICY_URL_INVALID",
+            "ORGANIZATION_NAME_MISSING",
             "MALFORMED_DEVICE_REQUEST"
         )
 

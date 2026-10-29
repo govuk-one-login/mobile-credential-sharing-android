@@ -46,8 +46,16 @@ class ReaderAuthenticationResultTest {
             )
         )
 
-        val req1 = AuthenticatedReaderRequest(docRequest = docRequest1, privacyPolicyUrl = uri)
-        val req2 = AuthenticatedReaderRequest(docRequest = docRequest2, privacyPolicyUrl = uri)
+        val req1 = AuthenticatedReaderRequest(
+            docRequest = docRequest1,
+            privacyPolicyUrl = uri,
+            readerOrganizationName = "GOV.UK OneLogin"
+        )
+        val req2 = AuthenticatedReaderRequest(
+            docRequest = docRequest2,
+            privacyPolicyUrl = uri,
+            readerOrganizationName = "GOV.UK OneLogin"
+        )
 
         val success1 = ReaderAuthenticationResult.Success(req1)
         val success2 = ReaderAuthenticationResult.Success(req1)
