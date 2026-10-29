@@ -1154,8 +1154,10 @@ class HolderOrchestrator(
 
         if (sent && sessionDataToSend != null) {
             holderSessionTerminator.terminate()
+        } else if (sendEndCommand) {
+            holderSessionTerminator.terminate()
         } else {
-            stopAdvertising(sendEndCommand = sendEndCommand)
+            stopAdvertising(sendEndCommand = false)
         }
 
         safeTransitionTo(finalState)

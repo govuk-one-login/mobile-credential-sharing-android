@@ -18,6 +18,8 @@ import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolut
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
+import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoadingScreen
+import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.navigateToRetryHolderPrerequisites
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
@@ -174,10 +176,24 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        HolderSessionState.ProcessingEstablishment -> {
+            {
+                navController.navigateToLoadingScreen(LoadingScreenType.GettingDetails) {
+                    launchSingleTop = true
+                }
+            }
+        }
+
+        HolderSessionState.ProcessingResponse -> {
+            {
+                navController.navigateToLoadingScreen(LoadingScreenType.SharingDetails) {
+                    launchSingleTop = true
+                }
+            }
+        }
+
         HolderSessionState.Complete.Expired,
         HolderSessionState.ReadyToPresent,
-        HolderSessionState.ProcessingEstablishment,
-        HolderSessionState.ProcessingResponse,
         HolderSessionState.SendingTermination
         -> {
             {}
