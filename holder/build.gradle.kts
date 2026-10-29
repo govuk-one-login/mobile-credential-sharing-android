@@ -63,6 +63,7 @@ dependencies {
         projects.sdk,
         projects.prerequisiteGateImpl,
         testFixtures(libs.uk.gov.ui.android.componentsv2),
+        testFixtures(projects.analytics),
         testFixtures(projects.bluetooth),
         testFixtures(projects.cryptoService),
         testFixtures(projects.core),
@@ -77,6 +78,7 @@ dependencies {
     listOf(
         projects.bluetooth,
         projects.cryptoService,
+        testFixtures(projects.analytics),
         testFixtures(projects.bluetooth),
         testFixtures(projects.cryptoService),
         testFixtures(projects.core),

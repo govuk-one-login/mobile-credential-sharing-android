@@ -14,8 +14,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -27,7 +29,7 @@ class HolderWelcomeViewModel(
     orchestrator: Orchestrator.Holder,
     @Suppress("UnusedPrivateProperty")
     private val analyticsLogger: AnalyticsLogger,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     val uiState: StateFlow<HolderWelcomeUiState> = orchestrator
@@ -43,6 +45,11 @@ class HolderWelcomeViewModel(
             SharingStarted.Eagerly,
             HolderWelcomeUiState()
         )
+
+    fun sendScreenEvent() = viewModelScope.launch(dispatcher) {
+        HolderWelcomeScreenAnalytics.screen.screenViewEvent
+            .let(analyticsLogger::logEventV3Dot1)
+    }
 }
 
 data class HolderWelcomeUiState(val qrData: String? = null)
