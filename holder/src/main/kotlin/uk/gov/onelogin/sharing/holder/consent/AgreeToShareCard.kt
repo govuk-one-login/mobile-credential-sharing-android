@@ -56,7 +56,7 @@ private const val LARGE_FONT_SCALE_THRESHOLD = 1.5f
  * @param organizationName The verified Verifier (DVS) organisation name.
  */
 @Composable
-internal fun AgreeToShareCard(card: ConsentCard, organizationName: String?) {
+internal fun AgreeToShareCard(card: ConsentCard, organizationName: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -149,33 +149,29 @@ private fun ColumnScope.NoDetailsKeptSection(card: ConsentCard) {
 }
 
 @Composable
-private fun ColumnScope.AllDetailsKeptSection(card: ConsentCard, organizationName: String?) {
+private fun ColumnScope.AllDetailsKeptSection(card: ConsentCard, organizationName: String) {
     SectionDivider()
     AttributeList(card.attributes)
-    organizationName?.let {
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_all_kept, it))
-        }
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_all_kept, organizationName))
     }
 }
 
 @Composable
-private fun ColumnScope.SomeDetailsKeptSection(card: ConsentCard, organizationName: String?) {
-    organizationName?.let {
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_will_keep, it))
-        }
-        SectionDivider()
-        AttributeList(card.keptAttributes)
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_will_not_keep, it))
-        }
-        SectionDivider()
-        AttributeList(card.notKeptAttributes)
+private fun ColumnScope.SomeDetailsKeptSection(card: ConsentCard, organizationName: String) {
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_will_keep, organizationName))
     }
+    SectionDivider()
+    AttributeList(card.keptAttributes)
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_will_not_keep, organizationName))
+    }
+    SectionDivider()
+    AttributeList(card.notKeptAttributes)
 }
 
 @Composable

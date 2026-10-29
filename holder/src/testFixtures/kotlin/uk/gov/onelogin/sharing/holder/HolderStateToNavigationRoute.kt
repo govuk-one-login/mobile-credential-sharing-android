@@ -7,7 +7,6 @@ import com.google.testing.junit.testparameterinjector.TestParametersValuesProvid
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
-import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionRoute
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
@@ -62,7 +61,7 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
             },
             Triple(
                 "'AwaitingUserConsent' -> AwaitingUserConsent",
-                HolderSessionState.AwaitingUserConsent(DeviceRequestStub.deviceRequestStub)
+                HolderSessionStateStubs.awaitingUserConsentStub
             ) {
                 instanceOf<HolderConsentRoute>(
                     HolderConsentRoute::class.java

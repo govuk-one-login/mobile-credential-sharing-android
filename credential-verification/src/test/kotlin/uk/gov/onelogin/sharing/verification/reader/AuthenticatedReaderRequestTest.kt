@@ -23,9 +23,21 @@ class AuthenticatedReaderRequestTest {
         val uri1: Uri = mockk()
         val uri2: Uri = mockk()
 
-        val req1 = AuthenticatedReaderRequest(docRequest = docRequest1, privacyPolicyUrl = uri1)
-        val req2 = AuthenticatedReaderRequest(docRequest = docRequest2, privacyPolicyUrl = uri1)
-        val req3 = AuthenticatedReaderRequest(docRequest = docRequest1, privacyPolicyUrl = uri2)
+        val req1 = AuthenticatedReaderRequest(
+            docRequest = docRequest1,
+            privacyPolicyUrl = uri1,
+            readerOrganizationName = "GOV.UK OneLogin"
+        )
+        val req2 = AuthenticatedReaderRequest(
+            docRequest = docRequest2,
+            privacyPolicyUrl = uri1,
+            readerOrganizationName = "GOV.UK OneLogin"
+        )
+        val req3 = AuthenticatedReaderRequest(
+            docRequest = docRequest1,
+            privacyPolicyUrl = uri2,
+            readerOrganizationName = "GOV.UK OneLogin"
+        )
 
         assertEquals(docRequest1, req1.docRequest)
         assertEquals(uri1, req1.privacyPolicyUrl)
