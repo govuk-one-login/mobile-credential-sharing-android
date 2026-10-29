@@ -12,6 +12,7 @@ import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolut
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
+import uk.gov.onelogin.sharing.holder.gettingdetails.GettingDetailsRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
@@ -99,6 +100,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     SharingDetailsRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<SharingDetailsRoute>()
+                )
+            },
+            Triple(
+                "'ProcessingEstablishment' -> GettingDetailsRoute",
+                HolderSessionState.ProcessingEstablishment
+            ) {
+                instanceOf<GettingDetailsRoute>(
+                    GettingDetailsRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<GettingDetailsRoute>()
                 )
             },
             Triple(
