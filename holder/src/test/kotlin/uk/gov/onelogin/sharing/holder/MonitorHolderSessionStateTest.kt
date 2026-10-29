@@ -160,6 +160,48 @@ class MonitorHolderSessionStateTest {
         }
     }
 
+    @Test
+    @UiThreadTest
+    fun `PresentingEngagement while already on the QR screen does not re-navigate`() = runTest {
+        composeTestRule.run {
+            setContent {
+                context = LocalContext.current
+                controller = TestNavHostController(context).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                    navigatorProvider.addNavigator(DialogNavigator())
+                }
+
+                Render(viewModelFactory)
+            }
+
+            // First arrival at the QR screen.
+            convertSessionStateToNavigation(
+                context = context,
+                navController = controller,
+                state = HolderSessionState.PresentingEngagement("qr_a")
+            ).invoke()
+            waitUntil {
+                controller.currentBackStackEntry?.destination
+                    ?.route == HolderPresentQrRoute::class.qualifiedName
+            }
+            val backStackSize = controller.currentBackStack.value.size
+
+            // A refreshed PresentingEngagement must not push another navigation; the QR content is
+            // updated in place by the ViewModel.
+            convertSessionStateToNavigation(
+                context = context,
+                navController = controller,
+                state = HolderSessionState.PresentingEngagement("qr_b")
+            ).invoke()
+
+            assert(
+                controller.currentBackStackEntry?.destination
+                    ?.route == HolderPresentQrRoute::class.qualifiedName
+            )
+            assert(controller.currentBackStack.value.size == backStackSize)
+        }
+    }
+
     @Composable
     private fun Render(viewModelFactory: MetroViewModelFactory) {
         CompositionLocalProvider(

@@ -2351,7 +2351,9 @@ class HolderOrchestratorTest {
                 engagementTimer.onTimeout?.invoke()
                 advanceUntilIdle()
 
-                // New session starts NotStarted, then routes to Preflight (not re-advertising).
+                // S1 expires, then the new session starts NotStarted and routes to Preflight
+                // (not re-advertising) because Bluetooth is now unavailable. (Complete.Expired is
+                // filtered out of the observed stream.)
                 assertEquals(HolderSessionState.NotStarted, awaitItem())
                 assertThat(
                     awaitItem(),

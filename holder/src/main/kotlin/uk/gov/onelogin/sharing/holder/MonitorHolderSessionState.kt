@@ -69,7 +69,7 @@ fun MonitorHolderSessionState(
  * returned value to perform navigation.
  */
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 internal suspend fun convertSessionStateToNavigation(
     context: Context,
     navController: NavHostController,
@@ -81,12 +81,15 @@ internal suspend fun convertSessionStateToNavigation(
             inclusive = true
         }
     }
+
+    val isOnQrScreen: () -> Boolean = {
+        navController.currentDestination?.route == HolderPresentQrRoute::class.qualifiedName
+    }
+
     when (state) {
         HolderSessionState.NotStarted -> {
             {
-                val alreadyPresentingQr = navController.currentDestination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
-                if (!alreadyPresentingQr) {
+                if (!isOnQrScreen()) {
                     navController.navigateToHolderPrerequisitesScreen {
                         exitJourneyOptions()
                     }
@@ -104,8 +107,10 @@ internal suspend fun convertSessionStateToNavigation(
 
         is HolderSessionState.PresentingEngagement -> {
             {
-                navController.navigateToHolderPresentQrScreen {
-                    exitJourneyOptions()
+                if (!isOnQrScreen()) {
+                    navController.navigateToHolderPresentQrScreen {
+                        exitJourneyOptions()
+                    }
                 }
             }
         }

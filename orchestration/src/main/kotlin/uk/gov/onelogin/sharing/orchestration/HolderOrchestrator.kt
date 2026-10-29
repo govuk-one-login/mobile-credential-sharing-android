@@ -16,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -109,11 +110,12 @@ class HolderOrchestrator(
     @OptIn(ExperimentalCoroutinesApi::class)
     override val holderSessionState: StateFlow<HolderSessionState> = sessionFlow.flatMapLatest {
         it.currentState
-    }.stateIn(
-        appCoroutineScope,
-        SharingStarted.Eagerly,
-        sessionFlow.value.currentState.value
-    )
+    }.filterNot { it is HolderSessionState.Complete.Expired }
+        .stateIn(
+            appCoroutineScope,
+            SharingStarted.Eagerly,
+            sessionFlow.value.currentState.value
+        )
 
     init {
         transportStateJob = appCoroutineScope.launch {
@@ -476,9 +478,9 @@ class HolderOrchestrator(
             sendEndCommand = false
         )
 
-        oldSession.transitionTo(HolderSessionState.Complete.Expired)
-
         sessionFlow.value = sessionFactory.create()
+
+        oldSession.transitionTo(HolderSessionState.Complete.Expired)
 
         performPreflightChecks()
     }
