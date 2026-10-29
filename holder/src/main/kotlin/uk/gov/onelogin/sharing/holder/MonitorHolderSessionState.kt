@@ -137,32 +137,7 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Complete.Success -> {
-            when (state.successReason) {
-                SuccessReason.UnfulfillableRequest -> {
-                    {
-                        navController.navigateToHolderSuccessScreen {
-                            exitJourneyOptions()
-                        }
-                    }
-                }
-
-                SuccessReason.Denied -> {
-                    {
-                        navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
-                            exitJourneyOptions()
-                        }
-                    }
-                }
-
-                SuccessReason.Approved -> {
-                    {
-                        navController.navigateToAwaitingVerifierResolutionScreen {
-                            exitJourneyOptions()
-                            launchSingleTop = true
-                        }
-                    }
-                }
-            }
+            convertSuccessStateToNavigation(state, navController, exitJourneyOptions)
         }
 
         HolderSessionState.Complete.Cancelled -> {
@@ -202,6 +177,37 @@ private fun handleHolderSessionFailure(
         navController.navigateToUnrecoverableHolderError {
             popUpTo<HolderRoutes> {
                 inclusive = true
+            }
+        }
+    }
+}
+
+private fun convertSuccessStateToNavigation(
+    state: HolderSessionState.Complete.Success,
+    navController: NavHostController,
+    exitJourneyOptions: NavOptionsBuilder.() -> Unit
+): () -> Unit = when (state.successReason) {
+    SuccessReason.UnfulfillableRequest -> {
+        {
+            navController.navigateToHolderSuccessScreen {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    SuccessReason.Denied -> {
+        {
+            navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    SuccessReason.Approved -> {
+        {
+            navController.navigateToAwaitingVerifierResolutionScreen {
+                exitJourneyOptions()
+                launchSingleTop = true
             }
         }
     }
