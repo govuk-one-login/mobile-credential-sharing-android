@@ -29,10 +29,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
 import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.navigateToHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.holder.sharingdetails.SharingDetailsAnalytics
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
@@ -59,6 +61,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     ShareCredential(
         orchestrator = orchestrator,
         holderSessionState = orchestrator.holderSessionState,
+        analyticsLogger = uiGraph.appGraph().analyticsLogger(),
         modifier = modifier,
         navController = navController,
         viewModelFactory = uiGraph.metroViewModelFactory
@@ -69,6 +72,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
 internal fun ShareCredential(
     orchestrator: Orchestrator.Holder,
     holderSessionState: StateFlow<HolderSessionState>,
+    analyticsLogger: AnalyticsLogger,
     viewModelFactory: MetroViewModelFactory,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
@@ -80,6 +84,9 @@ internal fun ShareCredential(
 
     val onCancel: () -> Unit = {
         scope.launch {
+            if (state is HolderSessionState.ProcessingResponse) {
+                SharingDetailsAnalytics.logCloseButton(analyticsLogger)
+            }
             if (state.shouldConfirmCancellation()) {
                 withContext(uiDispatcher) {
                     navController.navigateToHolderUserCancellationDialog()

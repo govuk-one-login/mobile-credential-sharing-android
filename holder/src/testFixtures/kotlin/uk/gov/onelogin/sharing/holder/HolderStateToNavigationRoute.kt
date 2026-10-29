@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.holder.sharingdetails.SharingDetailsRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -88,6 +89,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     AwaitingVerifierResolutionRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<AwaitingVerifierResolutionRoute>()
+                )
+            },
+            Triple(
+                "'ProcessingResponse' -> SharingDetailsRoute",
+                HolderSessionState.ProcessingResponse
+            ) {
+                instanceOf<SharingDetailsRoute>(
+                    SharingDetailsRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<SharingDetailsRoute>()
                 )
             },
             Triple(

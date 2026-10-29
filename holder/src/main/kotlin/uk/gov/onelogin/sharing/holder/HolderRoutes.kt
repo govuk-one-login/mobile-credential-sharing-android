@@ -16,6 +16,7 @@ import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigatio
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.configureRetryHolderPrerequisites
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
+import uk.gov.onelogin.sharing.holder.sharingdetails.SharingDetailsNavigationExt.configureSharingDetailsScreen
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.configureHolderSuccessScreen
 
 @Keep
@@ -31,6 +32,7 @@ data object HolderRoutes {
             configureRetryHolderPrerequisites()
             configureHolderPresentQrScreen()
             configureHolderConsentScreen()
+            configureSharingDetailsScreen()
             configureBluetoothConnectionErrorRoute()
             configureAwaitingVerifierResolutionScreen()
             configureHolderSuccessScreen()

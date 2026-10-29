@@ -21,6 +21,7 @@ import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationEx
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.navigateToRetryHolderPrerequisites
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
+import uk.gov.onelogin.sharing.holder.sharingdetails.SharingDetailsNavigationExt.navigateToSharingDetailsScreen
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -164,9 +165,16 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        HolderSessionState.ProcessingResponse -> {
+            {
+                navController.navigateToSharingDetailsScreen {
+                    launchSingleTop = true
+                }
+            }
+        }
+
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
-        HolderSessionState.ProcessingResponse,
         HolderSessionState.SendingTermination
         -> {
             // Do nothing with UI-less states
