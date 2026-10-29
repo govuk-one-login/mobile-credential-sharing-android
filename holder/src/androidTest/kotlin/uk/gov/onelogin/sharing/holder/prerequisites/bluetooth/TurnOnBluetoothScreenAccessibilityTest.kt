@@ -61,9 +61,8 @@ class TurnOnBluetoothScreenAccessibilityTest {
                     description.appendText("DuplicateSpeakableTextCheck result")
                 }
 
-                override fun matchesSafely(item: AccessibilityCheckResult): Boolean {
-                    return item.sourceCheckClass == DuplicateSpeakableTextCheck::class.java
-                }
+                override fun matchesSafely(item: AccessibilityCheckResult): Boolean =
+                    item.sourceCheckClass == DuplicateSpeakableTextCheck::class.java
             }
         )
     }
