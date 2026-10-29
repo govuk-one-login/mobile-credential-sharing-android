@@ -1,13 +1,17 @@
 package uk.gov.onelogin.sharing.ui.impl
 
-import android.R.drawable.ic_menu_close_clear_cancel
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -29,8 +33,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
@@ -40,6 +44,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.ShareCredentialAnalytics.closeButton
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
+import uk.gov.onelogin.sharing.uiimpl.R
 
 /**
  * Composable entry point for the Holder role (credential sharing).
@@ -73,6 +78,7 @@ private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) {
     analyticsLogger.closeButton()
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ShareCredential(
     analyticsLogger: AnalyticsLogger,
@@ -122,17 +128,12 @@ internal fun ShareCredential(
                     .safeContentPadding()
             ) {
                 if (state.userCanCancel()) {
-                    IconButton(
-                        onClick = {
+                    CloseButtonAppBar(
+                        onCancel = {
                             scope.launch { logCloseButtonEvent(analyticsLogger) }
                             onCancel()
                         }
-                    ) {
-                        Icon(
-                            painter = painterResource(ic_menu_close_clear_cancel),
-                            contentDescription = "Close"
-                        )
-                    }
+                    )
                 }
 
                 NavHost(
@@ -147,4 +148,31 @@ internal fun ShareCredential(
     }
 
     BackHandler(state.userCanCancel(), onBack = onCancel)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun CloseButtonAppBar(
+    modifier: Modifier = Modifier,
+    scrollBehaviour: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
+    onCancel: () -> Unit = {}
+) {
+    TopAppBar(
+        title = {},
+        modifier = modifier,
+        navigationIcon = {
+            IconButton(onCancel) {
+                Icon(
+                    painter = painterResource(R.drawable.filled_close),
+                    contentDescription = "Close",
+                    tint = GdsLocalColorScheme.current.topBarIcon
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            scrolledContainerColor = GdsLocalColorScheme.current.topBarScrolledBackground
+        ),
+        scrollBehavior = scrollBehaviour
+    )
 }
