@@ -1,11 +1,9 @@
 package uk.gov.onelogin.sharing.ui.impl
 
-import android.R.drawable.ic_menu_close_clear_cancel
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +42,7 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
+import uk.gov.onelogin.sharing.uiimpl.R
 
 /**
  * Composable entry point for the Holder role (credential sharing).
@@ -152,7 +151,7 @@ internal fun CloseButtonAppBar(
         navigationIcon = {
             IconButton(onCancel) {
                 Icon(
-                    painter = painterResource(ic_menu_close_clear_cancel),
+                    painter = painterResource(R.drawable.filled_close),
                     contentDescription = "Close",
                     tint = GdsLocalColorScheme.current.topBarIcon
                 )
