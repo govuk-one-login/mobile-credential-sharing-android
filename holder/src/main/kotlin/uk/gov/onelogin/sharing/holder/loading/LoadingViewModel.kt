@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.gettingdetails
+package uk.gov.onelogin.sharing.holder.loading
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,12 +15,12 @@ import uk.gov.onelogin.sharing.core.HolderUiScope
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 @ViewModelKey
-class GettingDetailsViewModel(
+class LoadingViewModel(
     private val analyticsLogger: AnalyticsLogger,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
-    fun logScreenView() = viewModelScope.launch(dispatcher) {
-        GettingDetailsAnalytics.logScreenView(analyticsLogger)
+    fun logScreenView(type: LoadingScreenType) = viewModelScope.launch(dispatcher) {
+        LoadingAnalytics.logScreenView(analyticsLogger, type)
     }
 }

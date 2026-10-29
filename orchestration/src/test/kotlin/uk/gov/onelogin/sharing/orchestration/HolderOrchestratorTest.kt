@@ -1802,7 +1802,11 @@ class HolderOrchestratorTest {
     @Test
     fun `cancels when timer fires`() = runTest {
         val transport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+        val terminator = FakeHolderSessionTerminator()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            holderSessionTerminator = terminator
+        )
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
         orchestrator.start()
         transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
@@ -1812,7 +1816,8 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertThat(orchestrator.holderSessionState.value, isCancelled())
-        assertEquals(1, transport.stopCalls)
+        assertEquals(1, terminator.terminateCalls)
+        assertEquals(0, transport.stopCalls)
     }
 
     @Test
@@ -1907,6 +1912,31 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertEquals(1, sessionTimer.stopCalls)
+    }
+
+    @Test
+    fun `cancel gracefully terminates the session so the central disconnects`() = runTest {
+        // Regression: cancelling must perform the same graceful teardown as deny
+        // (settle delay -> GATT End -> stop) via the terminator, rather than a bare
+        // transport.stop(). Otherwise a lingering central can reconnect on the next
+        // journey and drive the fresh session into ProcessingEstablishment.
+        val transport = FakePeripheralBluetoothTransport()
+        val terminator = FakeHolderSessionTerminator()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            holderSessionTerminator = terminator
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        orchestrator.cancel()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isCancelled())
+        assertEquals(1, terminator.terminateCalls)
+        assertEquals(0, transport.stopCalls)
     }
 
     @Test

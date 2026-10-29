@@ -20,9 +20,9 @@ import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigat
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.navigateToRetryHolderPrerequisites
-import uk.gov.onelogin.sharing.holder.gettingdetails.GettingDetailsNavigationExt.navigateToGettingDetailsScreen
+import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoadingScreen
+import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
-import uk.gov.onelogin.sharing.holder.sharingdetails.SharingDetailsNavigationExt.navigateToSharingDetailsScreen
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -168,7 +168,7 @@ internal suspend fun convertSessionStateToNavigation(
 
         HolderSessionState.ProcessingEstablishment -> {
             {
-                navController.navigateToGettingDetailsScreen {
+                navController.navigateToLoadingScreen(LoadingScreenType.GettingDetails) {
                     launchSingleTop = true
                 }
             }
@@ -176,7 +176,7 @@ internal suspend fun convertSessionStateToNavigation(
 
         HolderSessionState.ProcessingResponse -> {
             {
-                navController.navigateToSharingDetailsScreen {
+                navController.navigateToLoadingScreen(LoadingScreenType.SharingDetails) {
                     launchSingleTop = true
                 }
             }

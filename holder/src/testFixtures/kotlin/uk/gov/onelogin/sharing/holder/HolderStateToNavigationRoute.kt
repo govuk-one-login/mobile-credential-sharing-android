@@ -12,11 +12,11 @@ import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolut
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
-import uk.gov.onelogin.sharing.holder.gettingdetails.GettingDetailsRoute
+import uk.gov.onelogin.sharing.holder.loading.LoadingRoute
+import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
-import uk.gov.onelogin.sharing.holder.sharingdetails.SharingDetailsRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -93,23 +93,19 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'ProcessingResponse' -> SharingDetailsRoute",
+                "'ProcessingResponse' -> LoadingRoute(SharingDetails)",
                 HolderSessionState.ProcessingResponse
             ) {
-                instanceOf<SharingDetailsRoute>(
-                    SharingDetailsRoute::class.java
-                ).matches(
-                    currentBackStackEntry?.toRoute<SharingDetailsRoute>()
+                equalTo(LoadingRoute(LoadingScreenType.SharingDetails)).matches(
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
                 )
             },
             Triple(
-                "'ProcessingEstablishment' -> GettingDetailsRoute",
+                "'ProcessingEstablishment' -> LoadingRoute(GettingDetails)",
                 HolderSessionState.ProcessingEstablishment
             ) {
-                instanceOf<GettingDetailsRoute>(
-                    GettingDetailsRoute::class.java
-                ).matches(
-                    currentBackStackEntry?.toRoute<GettingDetailsRoute>()
+                equalTo(LoadingRoute(LoadingScreenType.GettingDetails)).matches(
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
                 )
             },
             Triple(

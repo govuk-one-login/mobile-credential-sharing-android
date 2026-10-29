@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.sharingdetails
+package uk.gov.onelogin.sharing.holder.loading
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,21 +18,23 @@ import androidx.compose.ui.unit.dp
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
-import uk.gov.onelogin.sharing.holder.R
 
 @Composable
-internal fun SharingDetailsScreen(viewModel: SharingDetailsViewModel = metroViewModel()) {
+internal fun LoadingScreen(
+    type: LoadingScreenType,
+    viewModel: LoadingViewModel = metroViewModel()
+) {
     val metrics = rememberMetricsStateHolder()
-    LaunchedEffect(Unit) {
-        metrics.putScreenState("SharingDetailsScreen")
-        viewModel.logScreenView()
+    LaunchedEffect(type) {
+        metrics.putScreenState(type.name)
+        viewModel.logScreenView(type)
     }
 
-    SharingDetailsContent()
+    LoadingContent(type = type)
 }
 
 @Composable
-internal fun SharingDetailsContent() {
+internal fun LoadingContent(type: LoadingScreenType) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -42,7 +44,7 @@ internal fun SharingDetailsContent() {
     ) {
         CircularProgressIndicator()
         Text(
-            text = stringResource(R.string.holder_sharing_details_label),
+            text = stringResource(type.labelRes),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge,
@@ -53,6 +55,12 @@ internal fun SharingDetailsContent() {
 
 @Composable
 @Preview(showBackground = true)
-internal fun SharingDetailsScreenPreview() {
-    SharingDetailsContent()
+internal fun LoadingScreenGettingDetailsPreview() {
+    LoadingContent(type = LoadingScreenType.GettingDetails)
+}
+
+@Composable
+@Preview(showBackground = true)
+internal fun LoadingScreenSharingDetailsPreview() {
+    LoadingContent(type = LoadingScreenType.SharingDetails)
 }
