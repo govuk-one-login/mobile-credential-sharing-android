@@ -25,13 +25,14 @@ object AccessibilityHelper {
         R : TestRule,
         A : ComponentActivity
         > AndroidComposeTestRule<R, A>.performAccessibilityCheck(
-        content: @Composable () -> Unit
+        content: @Composable () -> Unit,
+        validator: AccessibilityValidator = accessibilityValidator
     ) {
         assumeTrue(
             "Skipping accessibility test due to API level not being 34+",
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
         )
-        enableAccessibilityChecks(accessibilityValidator)
+        enableAccessibilityChecks(validator)
         setContent { content() }
 
         onRoot().tryPerformAccessibilityChecks()

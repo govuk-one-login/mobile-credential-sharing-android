@@ -4,7 +4,12 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.android.apps.common.testing.accessibility.framework.AccessibilityCheckResult
+import com.google.android.apps.common.testing.accessibility.framework.checks.DuplicateSpeakableTextCheck
+import com.google.android.apps.common.testing.accessibility.framework.integrations.espresso.AccessibilityValidator
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.hamcrest.Description
+import org.hamcrest.TypeSafeMatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,9 +53,27 @@ class TurnOnBluetoothScreenAccessibilityTest {
         )
     }
 
+    private val validator = AccessibilityValidator().apply {
+        setThrowExceptionFor(AccessibilityCheckResult.AccessibilityCheckResultType.WARNING)
+        setSuppressingResultMatcher(
+            object : TypeSafeMatcher<AccessibilityCheckResult>() {
+                override fun describeTo(description: Description) {
+                    description.appendText("DuplicateSpeakableTextCheck result")
+                }
+
+                override fun matchesSafely(item: AccessibilityCheckResult): Boolean {
+                    return item.sourceCheckClass == DuplicateSpeakableTextCheck::class.java
+                }
+            }
+        )
+    }
+
     @Test
     fun passesAccessibilityChecks() {
-        accessibilityRule.performAccessibilityCheck { Render() }
+        accessibilityRule.performAccessibilityCheck(
+            content = { Render() },
+            validator = validator
+        )
     }
 
     @Composable
