@@ -21,8 +21,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothAnalytics.turnOnBluetoothButton
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothAnalytics.turnOnBluetoothScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
@@ -65,14 +66,10 @@ class TurnOnBluetoothViewModel(
     }
 
     fun sendScreenEvent() = viewModelScope.launch(dispatcher) {
-        TurnOnBluetoothAnalytics.screen
-            .screenViewEvent
-            .let(analyticsLogger::logEventV3Dot1)
+        analyticsLogger.turnOnBluetoothScreen()
     }
 
     fun sendTurnOnBluetoothEvent() = viewModelScope.launch(dispatcher) {
-        TurnOnBluetoothAnalytics.turnOnButton
-            .buttonEvent
-            .let(analyticsLogger::logEventV3Dot1)
+        analyticsLogger.turnOnBluetoothButton()
     }
 }

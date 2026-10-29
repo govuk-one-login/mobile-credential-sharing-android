@@ -22,13 +22,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.hasItem
+import org.hamcrest.Matchers.contains
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.MemorisedLogger
-import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
-import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -71,7 +70,7 @@ class TurnOnBluetoothScreenTest {
     private val logger = MemorisedLogger()
 
     private val analyticsLogger by lazy {
-        StoredAnalyticsLogger()
+        FakeAnalyticsLogger()
     }
 
     private val resolver by lazy {
@@ -139,10 +138,15 @@ class TurnOnBluetoothScreenTest {
 
             waitUntil { launchedAction != null }
             assertEquals(PrerequisiteAction.EnableBluetooth, launchedAction)
+
+            waitUntil { analyticsLogger.size >= 2 }
         }
         assertThat(
             analyticsLogger,
-            hasSentEvents(hasItem(TurnOnBluetoothViewModelTestData.expectedTurnOnBluetoothEvent))
+            contains(
+                TurnOnBluetoothViewModelTestData.expectedScreenEvent,
+                TurnOnBluetoothViewModelTestData.expectedTurnOnBluetoothEvent
+            )
         )
     }
 
@@ -167,11 +171,11 @@ class TurnOnBluetoothScreenTest {
     fun `Displaying the screen sends a screen view event`() = runTest {
         composeTestRule.run {
             setContent { TurnOnBluetoothScreen(viewModel = viewModel) }
-            waitUntil { analyticsLogger.sentAnalyticsEvents.isNotEmpty() }
+            waitUntil { analyticsLogger.size != 0 }
         }
         assertThat(
             analyticsLogger,
-            hasSentEvents(hasItem(TurnOnBluetoothViewModelTestData.expectedScreenEvent))
+            contains(TurnOnBluetoothViewModelTestData.expectedScreenEvent)
         )
     }
 
@@ -251,12 +255,12 @@ class TurnOnBluetoothScreenTest {
             }
 
             assertTitleIsDisplayed()
-            waitUntil { analyticsLogger.sentAnalyticsEvents.isNotEmpty() }
+            waitUntil { analyticsLogger.size != 0 }
         }
 
         assertThat(
             analyticsLogger,
-            hasSentEvents(hasItem(TurnOnBluetoothViewModelTestData.expectedScreenEvent))
+            contains(TurnOnBluetoothViewModelTestData.expectedScreenEvent)
         )
     }
 

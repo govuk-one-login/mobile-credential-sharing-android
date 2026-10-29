@@ -45,6 +45,12 @@ mavenPublishingConfig {
 
 dependencies {
     listOf(
+        testFixtures(projects.core),
+        projects.prerequisiteGateImpl,
+        testFixtures(projects.orchestration)
+    ).forEach(::androidTestImplementation)
+
+    listOf(
         projects.core,
         projects.exchangeFormat
     ).forEach(::api)

@@ -38,6 +38,7 @@ import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDial
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.ui.impl.ShareCredentialAnalytics.closeButton
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 
 /**
@@ -68,10 +69,9 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     )
 }
 
-private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) =
-    ShareCredentialAnalytics.closeButton
-        .buttonEvent
-        .let(analyticsLogger::logEventV3Dot1)
+private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) {
+    analyticsLogger.closeButton()
+}
 
 @Composable
 internal fun ShareCredential(
