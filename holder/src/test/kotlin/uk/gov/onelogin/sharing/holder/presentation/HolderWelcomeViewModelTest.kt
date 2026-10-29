@@ -25,14 +25,15 @@ class HolderWelcomeViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     val qrData = "QR code"
-    private var initialHolderState: HolderSessionState = HolderSessionState.PresentingEngagement(
-        qrData
+
+    private val holderState = MutableStateFlow<HolderSessionState>(
+        HolderSessionState.PresentingEngagement(qrData)
     )
 
     private val orchestrator by lazy {
         FakeOrchestrator(
             parser = FakeQrParser(),
-            initialHolderState = MutableStateFlow(initialHolderState)
+            initialHolderState = holderState
         )
     }
 
@@ -45,14 +46,42 @@ class HolderWelcomeViewModelTest {
     }
 
     @Test
-    fun `Provides QR data during the 'PresentingEngagement' session state`() = runTest(
+    fun `Shows the QR when PresentingEngagement has showQr true`() = runTest(
         mainDispatcherRule.testDispatcher
     ) {
         viewModel.uiState.test {
-            assertThat(
-                awaitItem().qrData,
-                equalTo(qrData)
-            )
+            val visible = awaitItem()
+            assertThat(visible.qrData, equalTo(qrData))
+            assertThat(visible.showQr, equalTo(true))
+        }
+    }
+
+    @Test
+    fun `Hides the QR (spinner) when the orchestrator flips showQr to false in place`() = runTest(
+        mainDispatcherRule.testDispatcher
+    ) {
+        viewModel.uiState.test {
+            assertThat(awaitItem().showQr, equalTo(true))
+            holderState.value = HolderSessionState.PresentingEngagement(qrData, showQr = false)
+
+            val hidden = awaitItem()
+            assertThat(hidden.qrData, equalTo(qrData))
+            assertThat(hidden.showQr, equalTo(false))
+        }
+    }
+
+    @Test
+    fun `Reflects a refreshed engagement with new QR data and showQr true`() = runTest(
+        mainDispatcherRule.testDispatcher
+    ) {
+        viewModel.uiState.test {
+            assertThat(awaitItem().qrData, equalTo(qrData))
+            holderState.value = HolderSessionState.PresentingEngagement(qrData, showQr = false)
+            assertThat(awaitItem().showQr, equalTo(false))
+            holderState.value = HolderSessionState.PresentingEngagement("new_qr")
+            val refreshed = awaitItem()
+            assertThat(refreshed.qrData, equalTo("new_qr"))
+            assertThat(refreshed.showQr, equalTo(true))
         }
     }
 
@@ -60,13 +89,12 @@ class HolderWelcomeViewModelTest {
     fun `Has no QR data for inapplicable session states`() = runTest(
         mainDispatcherRule.testDispatcher
     ) {
-        initialHolderState = HolderSessionState.NotStarted
+        holderState.value = HolderSessionState.NotStarted
 
         viewModel.uiState.test {
-            assertThat(
-                awaitItem().qrData,
-                nullValue(String::class.java)
-            )
+            val item = awaitItem()
+            assertThat(item.qrData, nullValue(String::class.java))
+            assertThat(item.showQr, equalTo(false))
         }
     }
 }

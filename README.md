@@ -179,7 +179,7 @@ The SDK recognises two failure outcomes:
 
 The consumer initialises the SDK with the app context and a logger, then creates a
 `CredentialPresenter` by passing the `CredentialProvider` implementation.
-
+(Update to new interface)
 ```kotlin
 val sdk = CredentialSharingSdkImpl(
   applicationContext = context,

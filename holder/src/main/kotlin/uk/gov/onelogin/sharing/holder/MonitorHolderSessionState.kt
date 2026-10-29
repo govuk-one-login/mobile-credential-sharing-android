@@ -21,6 +21,7 @@ import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationEx
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.navigateToRetryHolderPrerequisites
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
+import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -68,7 +69,7 @@ fun MonitorHolderSessionState(
  * returned value to perform navigation.
  */
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 internal suspend fun convertSessionStateToNavigation(
     context: Context,
     navController: NavHostController,
@@ -80,11 +81,18 @@ internal suspend fun convertSessionStateToNavigation(
             inclusive = true
         }
     }
+
+    val isOnQrScreen: () -> Boolean = {
+        navController.currentDestination?.route == HolderPresentQrRoute::class.qualifiedName
+    }
+
     when (state) {
         HolderSessionState.NotStarted -> {
             {
-                navController.navigateToHolderPrerequisitesScreen {
-                    exitJourneyOptions()
+                if (!isOnQrScreen()) {
+                    navController.navigateToHolderPrerequisitesScreen {
+                        exitJourneyOptions()
+                    }
                 }
             }
         }
@@ -99,8 +107,10 @@ internal suspend fun convertSessionStateToNavigation(
 
         is HolderSessionState.PresentingEngagement -> {
             {
-                navController.navigateToHolderPresentQrScreen {
-                    exitJourneyOptions()
+                if (!isOnQrScreen()) {
+                    navController.navigateToHolderPresentQrScreen {
+                        exitJourneyOptions()
+                    }
                 }
             }
         }
@@ -164,12 +174,12 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        HolderSessionState.Complete.Expired,
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
         HolderSessionState.ProcessingResponse,
         HolderSessionState.SendingTermination
         -> {
-            // Do nothing with UI-less states
             {}
         }
     }

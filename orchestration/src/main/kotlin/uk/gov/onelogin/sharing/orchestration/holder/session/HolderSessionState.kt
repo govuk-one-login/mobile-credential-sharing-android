@@ -51,8 +51,18 @@ sealed class HolderSessionState :
 
     /**
      * The holder device is now showing encoded engagement data.
+     *
+     * @param qrData The encoded Device Engagement QR payload. Always present while this state is
+     * active; the session is refreshed in place (new keys, new BLE UUID, new payload) at the
+     * deadline, which emits a fresh [PresentingEngagement] via a new session.
+     * @param showQr Whether the QR should be displayed. The orchestrator sets this to `false` for
+     * the grace window shortly before the refresh deadline (the UI shows a loading indicator while
+     * the current session keeps advertising), then a refreshed session emits a new
+     * [PresentingEngagement] with `showQr = true`. This is a presentation hint carried on the
+     * state; it is updated in place without a state transition.
      */
-    data class PresentingEngagement(val qrData: String) : HolderSessionState()
+    data class PresentingEngagement(val qrData: String, val showQr: Boolean = true) :
+        HolderSessionState()
 
     /**
      * State for when the Android-powered device is connected with another device and the
@@ -134,6 +144,15 @@ sealed class HolderSessionState :
          * journey.
          */
         data object Cancelled : Complete("Journey cancelled by User")
+
+        /**
+         * The engagement session reached its deadline without a Verifier connecting and was
+         * refreshed. The expired session is replaced by a new one carrying fresh keys, a new BLE
+         * UUID, and a new QR payload. This terminal state records the expiry so that every created
+         * session reaches a [Complete] state; it is not surfaced to the UI (the journey continues
+         * on the replacement session).
+         */
+        data object Expired : Complete("Engagement session expired and was refreshed")
     }
 
     companion object {
