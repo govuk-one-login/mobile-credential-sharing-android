@@ -27,14 +27,14 @@ kotlin = "2.4.21" # https://github.com/JetBrains/kotlin/releases
 kotlin-symbol-processing = "2.3.12" # https://github.com/google/ksp/releases ; update with 'kotlin'
 kotlinx-collections-immutable = "0.5.2" # https://github.com/Kotlin/kotlinx.collections.immutable/releases
 kotlinx-bytestring = "0.9.1"
-kotlinx-serialization = "1.11.0" # https://github.com/Kotlin/kotlinx.serialization/releases
+kotlinx-serialization = "1.12.0" # https://github.com/Kotlin/kotlinx.serialization/releases
 ktlint = "1.8.0" # https://github.com/pinterest/ktlint/releases/
 lifecycle = "2.10.0" # https://developer.android.com/jetpack/androidx/releases/lifecycle#2.9.4
 metro = "1.4.5"  # https://github.com/ZacSweers/Metro/releases
 mockk = "1.14.11" # https://github.com/mockk/mockk/releases
 org-hamcrest = "3.0" # https://github.com/hamcrest/JavaHamcrest/releases
 robolectric = "4.16.1" # https://github.com/robolectric/robolectric/releases
-roborazzi = "1.76.0" # https://github.com/takahirom/roborazzi/releases
+roborazzi = "1.77.0" # https://github.com/takahirom/roborazzi/releases
 composable-preview-scanner = "0.9.3" # https://github.com/sergio-sastre/ComposablePreviewScanner/releases
 sonarqube = "7.3.0.8198" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.10.4" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
