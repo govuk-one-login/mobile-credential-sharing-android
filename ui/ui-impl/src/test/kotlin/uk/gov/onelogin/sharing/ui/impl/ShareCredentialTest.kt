@@ -254,7 +254,7 @@ class ShareCredentialTest {
                 analyticsLogger = uiGraph.appGraph().analyticsLogger(),
                 viewModelFactory = uiGraph.metroViewModelFactory,
                 navController = controller
-                )
+            )
         }
 
         composeTestRule.waitForIdle()
@@ -291,7 +291,7 @@ class ShareCredentialTest {
                 analyticsLogger = uiGraph.appGraph().analyticsLogger(),
                 viewModelFactory = uiGraph.metroViewModelFactory,
                 navController = controller
-                )
+            )
         }
 
         composeTestRule.waitForIdle()

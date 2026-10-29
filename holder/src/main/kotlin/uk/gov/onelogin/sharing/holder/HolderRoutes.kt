@@ -12,10 +12,10 @@ import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavig
 import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.configureHolderUserCancellationDialog
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configureHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.configureUnrecoverableHolderError
+import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.configureLoadingScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesNavigationExt.configureRetryHolderPrerequisites
-import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.configureLoadingScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.configureHolderSuccessScreen
 

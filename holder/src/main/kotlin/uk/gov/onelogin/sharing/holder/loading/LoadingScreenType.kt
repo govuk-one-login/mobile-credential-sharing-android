@@ -19,15 +19,12 @@ enum class LoadingScreenType(
     val screenName: String,
     val firebaseScreenId: String
 ) {
-    /** Shown during `ProcessingEstablishment` (QR code -> this -> Agree to share). */
     GettingDetails(
         labelRes = R.string.holder_getting_details_label,
         screenName = "Getting list of details",
-        // TODO: Confirm the firebaseScreenID for the ProcessingEstablishment screen.
-        firebaseScreenId = "TODO-PROCESSING-ESTABLISHMENT-SCREEN-ID"
+        firebaseScreenId = "06328966-cd42-49c4-a573-9140ace45297"
     ),
 
-    /** Shown during `ProcessingResponse` (Agree to share -> this -> Details shared). */
     SharingDetails(
         labelRes = R.string.holder_sharing_details_label,
         screenName = "Sharing your details",

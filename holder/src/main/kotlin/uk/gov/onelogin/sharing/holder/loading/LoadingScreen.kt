@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,8 +17,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 
 @Composable
 internal fun LoadingScreen(
@@ -34,7 +37,15 @@ internal fun LoadingScreen(
 }
 
 @Composable
-internal fun LoadingContent(type: LoadingScreenType) {
+internal fun LoadingContent(
+    type: LoadingScreenType,
+    /**
+     * Fixed progress used only to render a static, non-animating indicator in previews and
+     * screenshot tests (an indeterminate [CircularProgressIndicator] animates forever, which stalls
+     * Roborazzi's frame capture). Leave `null` for the real screen to keep the indeterminate spinner.
+     */
+    progress: Float? = null
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -42,7 +53,11 @@ internal fun LoadingContent(type: LoadingScreenType) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator()
+        if (progress == null) {
+            CircularProgressIndicator()
+        } else {
+            CircularProgressIndicator(progress = { progress })
+        }
         Text(
             text = stringResource(type.labelRes),
             textAlign = TextAlign.Center,
@@ -54,13 +69,24 @@ internal fun LoadingContent(type: LoadingScreenType) {
 }
 
 @Composable
-@Preview(showBackground = true)
+@PreviewContent
 internal fun LoadingScreenGettingDetailsPreview() {
-    LoadingContent(type = LoadingScreenType.GettingDetails)
+    GdsTheme {
+        Surface {
+            LoadingContent(type = LoadingScreenType.GettingDetails, progress = PREVIEW_PROGRESS)
+        }
+    }
 }
 
 @Composable
-@Preview(showBackground = true)
+@PreviewContent
 internal fun LoadingScreenSharingDetailsPreview() {
-    LoadingContent(type = LoadingScreenType.SharingDetails)
+    GdsTheme {
+        Surface {
+            LoadingContent(type = LoadingScreenType.SharingDetails, progress = PREVIEW_PROGRESS)
+        }
+    }
 }
+
+/** Arbitrary fixed progress for a stable, non-animating preview/screenshot frame. */
+private const val PREVIEW_PROGRESS = 0.7f

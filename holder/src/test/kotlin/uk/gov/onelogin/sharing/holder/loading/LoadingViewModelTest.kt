@@ -30,22 +30,21 @@ class LoadingViewModelTest {
     }
 
     @Test
-    fun `Logs the screen view event for the given type`(
-        @TestParameter type: LoadingScreenType
-    ) = runTest(mainDispatcherRule.testDispatcher) {
-        viewModel.logScreenView(type).join()
+    fun `Logs the screen view event for the given type`(@TestParameter type: LoadingScreenType) =
+        runTest(mainDispatcherRule.testDispatcher) {
+            viewModel.logScreenView(type).join()
 
-        assertThat(
-            analyticsLogger,
-            hasSentEvents(
-                contains(
-                    ViewEvent.Screen(
-                        name = type.screenName,
-                        id = type.firebaseScreenId,
-                        params = walletSharingRequiredParameters
-                    ).asLegacyEvent()
+            assertThat(
+                analyticsLogger,
+                hasSentEvents(
+                    contains(
+                        ViewEvent.Screen(
+                            name = type.screenName,
+                            id = type.firebaseScreenId,
+                            params = walletSharingRequiredParameters
+                        ).asLegacyEvent()
+                    )
                 )
             )
-        )
-    }
+        }
 }

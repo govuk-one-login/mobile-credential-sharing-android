@@ -930,7 +930,7 @@ class HolderOrchestrator(
                     logger.debug(
                         logTag,
                         "Reader Authenticated: Org = ${authReq.readerOrganizationName}," +
-                                " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
+                            " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
                     )
                     if (!docRequestContainsPortrait(authReq.docRequest)) {
                         val exception = IllegalStateException(PORTRAIT_POLICY_VIOLATION)
@@ -1073,7 +1073,7 @@ class HolderOrchestrator(
     private fun docRequestContainsPortrait(docRequest: DocRequest): Boolean =
         docRequest.itemsRequest.nameSpaces.any { (namespace, elements) ->
             namespace == DocumentType.Mdl.NAMESPACE &&
-                    elements.containsKey(MdlAttribute.Portrait.value)
+                elements.containsKey(MdlAttribute.Portrait.value)
         }
 
     private fun handleConnectionLoss(address: String? = null, isGattEnd: Boolean = false) {

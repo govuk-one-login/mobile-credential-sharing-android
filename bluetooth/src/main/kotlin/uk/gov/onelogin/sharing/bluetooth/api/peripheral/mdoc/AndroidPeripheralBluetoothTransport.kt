@@ -167,6 +167,7 @@ class AndroidPeripheralBluetoothTransport(
     }
 
     private fun handleGattEvent(event: GattServerEvent) {
+        var suppressStateEmission = false
         when (event) {
             is GattServerEvent.Connected -> {
                 if (!isServiceReady) {
@@ -175,6 +176,7 @@ class AndroidPeripheralBluetoothTransport(
                         "Rejecting connection from ${event.address} - service not ready"
                     )
                     gattServerManager.cancelCurrentConnection()
+                    suppressStateEmission = true
                 }
             }
 
@@ -190,13 +192,14 @@ class AndroidPeripheralBluetoothTransport(
                 // don't perform additional logic for other events
             }
         }
-        event.let(serverEventTransformer::transform)?.let { bluetoothState ->
-            _state.value = bluetoothState
-        }.also {
-            logger.debug(
-                logTag,
-                "Completed handling gatt server event: $event"
-            )
+        if (!suppressStateEmission) {
+            event.let(serverEventTransformer::transform)?.let { bluetoothState ->
+                _state.value = bluetoothState
+            }
         }
+        logger.debug(
+            logTag,
+            "Completed handling gatt server event: $event"
+        )
     }
 }
