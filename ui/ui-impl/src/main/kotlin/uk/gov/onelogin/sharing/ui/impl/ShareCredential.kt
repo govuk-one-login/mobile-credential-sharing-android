@@ -5,9 +5,15 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
@@ -65,6 +72,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("LongMethod")
 internal fun ShareCredential(
@@ -114,12 +122,7 @@ internal fun ShareCredential(
                     .systemBarsPadding()
             ) {
                 if (state.userCanCancel()) {
-                    IconButton(onClick = onCancel) {
-                        Icon(
-                            painter = painterResource(ic_menu_close_clear_cancel),
-                            contentDescription = "Close"
-                        )
-                    }
+                    CloseButtonAppBar(onCancel = onCancel)
                 }
 
                 NavHost(
@@ -134,4 +137,31 @@ internal fun ShareCredential(
     }
 
     BackHandler(state.userCanCancel(), onBack = onCancel)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun CloseButtonAppBar(
+    modifier: Modifier = Modifier,
+    scrollBehaviour: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
+    onCancel: () -> Unit = {}
+) {
+    TopAppBar(
+        title = {},
+        modifier = modifier,
+        navigationIcon = {
+            IconButton(onCancel) {
+                Icon(
+                    painter = painterResource(ic_menu_close_clear_cancel),
+                    contentDescription = "Close",
+                    tint = GdsLocalColorScheme.current.topBarIcon
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            scrolledContainerColor = GdsLocalColorScheme.current.topBarScrolledBackground
+        ),
+        scrollBehavior = scrollBehaviour
+    )
 }
