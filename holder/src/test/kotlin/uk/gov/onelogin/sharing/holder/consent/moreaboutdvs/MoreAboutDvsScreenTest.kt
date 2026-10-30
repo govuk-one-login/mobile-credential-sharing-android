@@ -26,8 +26,12 @@ class MoreAboutDvsScreenTest {
 
     private val resources = ApplicationProvider.getApplicationContext<Context>().resources
 
+    private var organizationName: String? = "Stub-DVS Ltd."
+
     val presentation by lazy {
-        createConsentPresentation()
+        createConsentPresentation(
+            organizationName = organizationName
+        )
     }
 
     @Test
@@ -44,21 +48,31 @@ class MoreAboutDvsScreenTest {
         )
     }
 
+    @Test
+    fun `Undefined organizations show 'Unknown' in the title`() = verifyUiElements(
+        expectedOrganization = "Unknown"
+    ) {
+        organizationName = null
+
+        MoreAboutDvsScreen(
+            presentation = presentation
+        )
+    }
+
     private fun verifyUiElements(
+        expectedOrganization: String = presentation.organizationName!!,
         content: @Composable () -> Unit
     ) = runTest {
 
         composeTestRule.run {
             setContent {
-                GdsTheme {
-                    content()
-                }
+                GdsTheme { content() }
             }
 
             onNodeWithText(
                 resources.getString(
                     R.string.more_about_dvs_title,
-                    presentation.organizationName
+                    expectedOrganization
                 )
             ).assertExists("Cannot find the title!")
                 .assertIsDisplayed()
