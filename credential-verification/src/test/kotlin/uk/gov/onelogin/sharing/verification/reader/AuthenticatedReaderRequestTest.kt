@@ -5,39 +5,21 @@ import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
+import uk.gov.onelogin.sharing.verification.reader.ReaderRequestStubs.authenticatedReaderRequest
+import uk.gov.onelogin.sharing.verification.reader.ReaderRequestStubs.docRequest
 
 class AuthenticatedReaderRequestTest {
 
     @Test
     fun `AuthenticatedReaderRequest holds properties and supports equality`() {
-        val docRequest1 = DocRequest(
-            itemsRequest =
-                ItemsRequest(docType = "org.iso.18013.5.1.mDL", nameSpaces = emptyMap())
-        )
-        val docRequest2 = DocRequest(
-            itemsRequest =
-                ItemsRequest(docType = "org.iso.18013.5.1.mDL", nameSpaces = emptyMap())
-        )
+        val docRequest1 = docRequest()
+        val docRequest2 = docRequest()
         val uri1: Uri = mockk()
         val uri2: Uri = mockk()
 
-        val req1 = AuthenticatedReaderRequest(
-            docRequest = docRequest1,
-            privacyPolicyUrl = uri1,
-            readerOrganizationName = "GOV.UK OneLogin"
-        )
-        val req2 = AuthenticatedReaderRequest(
-            docRequest = docRequest2,
-            privacyPolicyUrl = uri1,
-            readerOrganizationName = "GOV.UK OneLogin"
-        )
-        val req3 = AuthenticatedReaderRequest(
-            docRequest = docRequest1,
-            privacyPolicyUrl = uri2,
-            readerOrganizationName = "GOV.UK OneLogin"
-        )
+        val req1 = authenticatedReaderRequest(docRequest = docRequest1, privacyPolicyUrl = uri1)
+        val req2 = authenticatedReaderRequest(docRequest = docRequest2, privacyPolicyUrl = uri1)
+        val req3 = req1.copy(privacyPolicyUrl = uri2)
 
         assertEquals(docRequest1, req1.docRequest)
         assertEquals(uri1, req1.privacyPolicyUrl)
