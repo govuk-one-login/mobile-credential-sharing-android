@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
-import android.Manifest
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -8,12 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.PermissionStatus
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakeMultiplePermissionsState
-import uk.gov.onelogin.sharing.core.presentation.permissions.FakePermissionState
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
