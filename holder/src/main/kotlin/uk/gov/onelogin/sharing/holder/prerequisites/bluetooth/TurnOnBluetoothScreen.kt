@@ -94,7 +94,7 @@ internal fun TurnOnBluetoothContent(onTurnOnBluetooth: () -> Unit, modifier: Mod
             text = stringResource(R.string.holder_turn_on_bluetooth_button),
             onClick = onTurnOnBluetooth
         ),
-        forceScroll = false
+        forceScroll = true
     )
 }
 
