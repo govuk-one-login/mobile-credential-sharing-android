@@ -35,6 +35,15 @@
     <string name="consent_card_all_kept">%1$s will keep these details as a record of this check.</string>
     <string name="consent_card_none_kept">These details will only be used for this check. They will not be saved.</string>
     <string name="consent_doc_mdl">UK driving licence</string>
+
+    <!-- Agree to Share screen -->
+    <string name="consent_screen_title">Review what you’ll share</string>
+    <string name="consent_screen_privacy_notice_link">Read about %1$s and their privacy notice</string>
+    <plurals name="consent_screen_agree_button">
+        <item quantity="one">Agree and share %1$d detail</item>
+        <item quantity="other">Agree and share %1$d details</item>
+    </plurals>
+    <string name="consent_screen_cancel_button">Cancel and go back to documents</string>
     <string name="consent_attr_document_number">Licence number</string>
     <string name="consent_attr_portrait">Photo</string>
     <string name="consent_attr_title">Title</string>

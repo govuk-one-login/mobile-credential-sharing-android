@@ -8,4 +8,9 @@
     <string name="holder_consent_deny_dialog_dismiss">Cancel</string>
     <string name="holder_consent_privacy_policy_link">View privacy policy</string>
     <string name="holder_consent_privacy_policy_close">Close privacy policy</string>
+
+    <!-- DCMAW-23706 Agree to Share screen design copy -->
+    <string name="holder_consent_screen_title">@string/consent_screen_title</string>
+    <string name="holder_consent_screen_privacy_notice_link">@string/consent_screen_privacy_notice_link</string>
+    <string name="holder_consent_screen_cancel_button">@string/consent_screen_cancel_button</string>
 </resources>
