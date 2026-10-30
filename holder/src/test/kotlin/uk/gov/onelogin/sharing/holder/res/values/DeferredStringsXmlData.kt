@@ -51,5 +51,21 @@ enum class DeferredStringsXmlData(
     HOLDER_PREREQUISITES_READY_TO_PRESENT(
         defersTo = R.string.generating_qr_code_data,
         resourceId = R.string.holder_prerequisites_ready_to_present
+    ),
+    DETAILS_SHARED(
+        defersTo = R.string.details_shared,
+        resourceId = R.string.holder_awaiting_verifier_resolution_title
+    ),
+    PERSON_WILL_CHECK_DETAILS_SHARED(
+        defersTo = R.string.person_will_check_details_shared,
+        resourceId = R.string.holder_awaiting_verifier_resolution_body_1
+    ),
+    BLUETOOTH_CONNECTION_WILL_END(
+        defersTo = R.string.bluetooth_connection_will_end,
+        resourceId = R.string.holder_awaiting_verifier_resolution_body_2
+    ),
+    GO_BACK_TO_DOCUMENTS(
+        defersTo = R.string.go_back_to_documents,
+        resourceId = R.string.holder_awaiting_verifier_resolution_button
     )
 }

@@ -50,6 +50,8 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.androidx.compose.material.icons.core,
+        libs.androidx.compose.material.icons.extended,
         libs.androidx.lifecycle.viewmodel.compose,
         libs.metro.viewmodel.compose,
         libs.zxing.core,

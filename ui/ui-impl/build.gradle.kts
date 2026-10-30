@@ -50,6 +50,7 @@ dependencies {
 
     listOf(
         projects.prerequisiteGateImpl,
+        testFixtures(libs.uk.gov.ui.android.componentsv2),
         testFixtures(projects.core),
         testFixtures(projects.orchestration),
         testFixtures(projects.holder),

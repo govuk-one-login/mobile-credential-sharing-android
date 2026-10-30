@@ -6,4 +6,8 @@
     <string name="get_ready_to_share">Paratoi i rannu</string>
     <string name="you_will_connect_via_qr_later">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny yn nes ymlaen.</string>
     <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>
+    <string name="details_shared">Manylion wedi’u rhannu</string>
+    <string name="person_will_check_details_shared">Bydd y person yn gwirio’r manylion rydych wedi’u rhannu.</string>
+    <string name="bluetooth_connection_will_end">Bydd eich cysylltiad Bluetooth gyda hwy nawr yn dod i ben.</string>
+    <string name="go_back_to_documents">Ewch yn ôl i dogfennau</string>
 </resources>

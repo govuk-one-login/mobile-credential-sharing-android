@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+    <string name="holder_awaiting_verifier_resolution_title">@string/details_shared</string>
+    <string name="holder_awaiting_verifier_resolution_body_1">@string/person_will_check_details_shared</string>
+    <string name="holder_awaiting_verifier_resolution_body_2">@string/bluetooth_connection_will_end</string>
+    <string name="holder_awaiting_verifier_resolution_button">@string/go_back_to_documents</string>
+</resources>
