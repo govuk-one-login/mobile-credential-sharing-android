@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="MissingTranslation">
+<resources>
 
     <string name="allow_bluetooth" translatable="true">Allow Bluetooth</string>
     <string name="allow_bluetooth_before_sharing_details" translatable="true">Before you can share details from your UK driving licence, you need to allow this app to use Bluetooth.</string>
