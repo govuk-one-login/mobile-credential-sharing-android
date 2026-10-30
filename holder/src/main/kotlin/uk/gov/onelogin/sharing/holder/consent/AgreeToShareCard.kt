@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -68,44 +69,9 @@ internal fun AgreeToShareCard(
         CardHeading(count = card.attributeCount)
 
         when (card.retentionVariant) {
-            RetentionVariant.NO_DETAILS_KEPT -> {
-                SectionDivider()
-                AttributeList(card.attributes)
-                SectionDivider()
-                RetentionBand {
-                    RetentionText(stringResource(R.string.holder_consent_card_none_kept))
-                }
-            }
-
-            RetentionVariant.ALL_DETAILS_KEPT -> {
-                SectionDivider()
-                AttributeList(card.attributes)
-                organizationName?.let {
-                    SectionDivider()
-                    RetentionBand {
-                        RetentionText(stringResource(R.string.holder_consent_card_all_kept, it))
-                    }
-                }
-            }
-
-            RetentionVariant.SOME_DETAILS_KEPT -> {
-                organizationName?.let {
-                    SectionDivider()
-                    RetentionBand {
-                        RetentionText(stringResource(R.string.holder_consent_card_will_keep, it))
-                    }
-                    SectionDivider()
-                    AttributeList(card.keptAttributes)
-                    SectionDivider()
-                    RetentionBand {
-                        RetentionText(
-                            stringResource(R.string.holder_consent_card_will_not_keep, it)
-                        )
-                    }
-                    SectionDivider()
-                    AttributeList(card.notKeptAttributes)
-                }
-            }
+            RetentionVariant.NO_DETAILS_KEPT -> NoDetailsKeptSection(card)
+            RetentionVariant.ALL_DETAILS_KEPT -> AllDetailsKeptSection(card, organizationName)
+            RetentionVariant.SOME_DETAILS_KEPT -> SomeDetailsKeptSection(card, organizationName)
         }
     }
 }
@@ -146,6 +112,46 @@ private fun CardHeading(count: Int) {
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Start
         )
+    }
+}
+
+@Composable
+private fun ColumnScope.NoDetailsKeptSection(card: ConsentCard) {
+    SectionDivider()
+    AttributeList(card.attributes)
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_none_kept))
+    }
+}
+
+@Composable
+private fun ColumnScope.AllDetailsKeptSection(card: ConsentCard, organizationName: String?) {
+    SectionDivider()
+    AttributeList(card.attributes)
+    organizationName?.let {
+        SectionDivider()
+        RetentionBand {
+            RetentionText(stringResource(R.string.holder_consent_card_all_kept, it))
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.SomeDetailsKeptSection(card: ConsentCard, organizationName: String?) {
+    organizationName?.let {
+        SectionDivider()
+        RetentionBand {
+            RetentionText(stringResource(R.string.holder_consent_card_will_keep, it))
+        }
+        SectionDivider()
+        AttributeList(card.keptAttributes)
+        SectionDivider()
+        RetentionBand {
+            RetentionText(stringResource(R.string.holder_consent_card_will_not_keep, it))
+        }
+        SectionDivider()
+        AttributeList(card.notKeptAttributes)
     }
 }
 
