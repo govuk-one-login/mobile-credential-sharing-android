@@ -41,6 +41,33 @@ class StringsXmlTest {
             )
         }
 
+    @Suppress("SpreadOperator")
+    @Test
+    fun formattableStringsMatchEnglishValues(@TestParameter input: FormattableStringsXmlData) =
+        runTest {
+            assertEquals(
+                input.translations["en"],
+                resources.getString(
+                    input.resourceId,
+                    *input.arguments
+                )
+            )
+        }
+
+    @Config(qualifiers = "cy")
+    @Suppress("SpreadOperator")
+    @Test
+    fun formattableStringsMatchWelshValues(@TestParameter input: FormattableStringsXmlData) =
+        runTest {
+            assertEquals(
+                input.translations["cy"],
+                resources.getString(
+                    input.resourceId,
+                    *input.arguments
+                )
+            )
+        }
+
     @Test
     fun screenSpecificStringsDeferToBaseValues(@TestParameter input: DeferredStringsXmlData) =
         runTest {

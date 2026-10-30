@@ -133,5 +133,13 @@ sealed class MdlAttribute(open val value: String) : Parcelable {
         private const val MIN_AGE = 0
         private const val MAX_AGE = 99
         const val MAX_LENGTH = 150
+
+        fun List<MdlAttribute>.withIntentToRetain(): Map<MdlAttribute, Boolean> = associate {
+            it to true
+        }
+
+        fun List<MdlAttribute>.withoutIntentToRetain(): Map<MdlAttribute, Boolean> = associate {
+            it to false
+        }
     }
 }

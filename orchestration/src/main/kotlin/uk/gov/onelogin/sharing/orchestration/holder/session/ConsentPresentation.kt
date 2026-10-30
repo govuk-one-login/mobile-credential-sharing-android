@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
+
 /**
  * The information shown to the User on the consent screen.
  *
@@ -51,4 +53,17 @@ data class ConsentNamespace(val nameSpace: String, val attributes: List<ConsentA
  * DeviceResponse (for example `family_name`, or a resolved `age_over_18`).
  * @param intentToRetain Whether the Verifier declared an intent to retain this attribute.
  */
-data class ConsentAttribute(val elementIdentifier: String, val intentToRetain: Boolean)
+data class ConsentAttribute(val elementIdentifier: String, val intentToRetain: Boolean) {
+
+    internal constructor(
+        entry: Map.Entry<MdlAttribute, Boolean>
+    ) : this(
+        elementIdentifier = entry.key.value,
+        intentToRetain = entry.value
+    )
+
+    companion object {
+        fun Map<MdlAttribute, Boolean>.toConsentAttributes(): List<ConsentAttribute> =
+            map(::ConsentAttribute)
+    }
+}
