@@ -107,12 +107,12 @@ internal suspend fun convertSessionStateToNavigation(
                 }
             } else {
                 {
-                navController.navigateToGetReadyToShare {
-                    exitJourneyOptions()
+                    navController.navigateToGetReadyToShare {
+                        exitJourneyOptions()
+                    }
                 }
             }
         }
-            }
 
         is HolderSessionState.PresentingEngagement -> {
             {
