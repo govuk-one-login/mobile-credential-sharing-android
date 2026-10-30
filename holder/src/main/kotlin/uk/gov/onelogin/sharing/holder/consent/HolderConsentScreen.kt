@@ -108,11 +108,13 @@ internal fun HolderConsentContent(
 
         state.card?.let { card ->
             Spacer(modifier = Modifier.height(16.dp))
-            AgreeToShareCard(
-                card = card,
-                organizationName = state.normalisedOrganizationName,
-                modifier = Modifier.fillMaxWidth()
-            )
+            AgreeToShareCardTheme {
+                AgreeToShareCard(
+                    card = card,
+                    organizationName = state.normalisedOrganizationName,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))

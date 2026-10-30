@@ -21,7 +21,9 @@ class AgreeToShareCardTest {
 
     @Composable
     private fun Render(card: ConsentCard) {
-        AgreeToShareCard(card = card, organizationName = ORGANIZATION_NAME)
+        AgreeToShareCardTheme {
+            AgreeToShareCard(card = card, organizationName = ORGANIZATION_NAME)
+        }
     }
 
     @Test
