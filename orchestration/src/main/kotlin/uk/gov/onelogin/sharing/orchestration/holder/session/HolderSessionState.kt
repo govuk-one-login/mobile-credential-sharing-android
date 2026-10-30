@@ -44,14 +44,14 @@ sealed class HolderSessionState :
         val onComplete: () -> Unit = {}
     ) : HolderSessionState(),
         Iterable<MissingPrerequisite> by missingPrerequisites {
-            /**
-             * Check if device's Bluetooth is turned off, and the user can enable it
-             */
-            fun requiresBluetoothEnabled(): Boolean = missingPrerequisites.any {
-                it.prerequisite == Prerequisite.BLUETOOTH &&
-                        it.getAction() == PrerequisiteAction.EnableBluetooth
-            }
+        /**
+         * Check if device's Bluetooth is turned off, and the user can enable it
+         */
+        fun requiresBluetoothEnabled(): Boolean = missingPrerequisites.any {
+            it.prerequisite == Prerequisite.BLUETOOTH &&
+                it.getAction() == PrerequisiteAction.EnableBluetooth
         }
+    }
 
     /**
      * The User's completed the [Preflight] validations, so the device is ready to
