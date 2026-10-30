@@ -1,5 +1,6 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.retry
+package uk.gov.onelogin.sharing.holder.getreadytoshare
 
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.ContributesIntoMap
@@ -21,24 +22,31 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareAnalyticsEvents.allowBluetoothButton
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareAnalyticsEvents.findOutHowSharingWorksButton
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareAnalyticsEvents.getReadyToShareScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.ResolvePrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator
 
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 @ViewModelKey
-class RetryHolderPrerequisitesViewModel(
+class GetReadyToShareViewModel(
     navigator: RetryPrerequisitesNavigator<HolderSessionState>,
+    private val analyticsLogger: AnalyticsLogger,
     private val orchestrator: Orchestrator.Holder,
     private val resolver: ResolvePrerequisiteAction<HolderSessionState>,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : ViewModel(),
-    ResolvePrerequisiteAction<HolderSessionState> by resolver {
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main
+) : ViewModel() {
 
     val navigationEvent: SharedFlow<RetryPrerequisitesNavigator.NavigationEvent> = navigator
         .events
@@ -50,7 +58,7 @@ class RetryHolderPrerequisitesViewModel(
         .flowOn(dispatcher)
         .shareIn(
             viewModelScope.plus(dispatcher),
-            SharingStarted.Companion.Lazily
+            SharingStarted.Lazily
         )
 
     private val _hasRecheckedPrerequisites = MutableStateFlow(false)
@@ -63,7 +71,7 @@ class RetryHolderPrerequisitesViewModel(
         .flowOn(dispatcher)
         .stateIn(
             viewModelScope.plus(dispatcher),
-            SharingStarted.Companion.Eagerly,
+            SharingStarted.Eagerly,
             (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
                 ?.map(MissingPrerequisite::prerequisite)
         )
@@ -72,5 +80,22 @@ class RetryHolderPrerequisitesViewModel(
         _hasRecheckedPrerequisites.update { true }
         (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
             ?.onComplete()
+    }
+
+    fun sendScreenEvent(): Job = viewModelScope.launch {
+        analyticsLogger.getReadyToShareScreen()
+    }
+
+    fun onAllowBluetooth(launcher: ActivityResultLauncher<PrerequisiteAction>): Job =
+        viewModelScope.launch {
+            withContext(mainDispatcher) {
+                resolver.resolve(launcher)
+            }
+
+            analyticsLogger.allowBluetoothButton()
+        }
+
+    fun onFindOutMore(): Job = viewModelScope.launch {
+        analyticsLogger.findOutHowSharingWorksButton()
     }
 }

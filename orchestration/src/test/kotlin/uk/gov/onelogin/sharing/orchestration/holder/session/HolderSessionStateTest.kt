@@ -28,6 +28,7 @@ class HolderSessionStateTest {
         @TestParameter state: HolderSessionState = testValues(
             AwaitingUserConsent(mockk(relaxed = true)),
             ProcessingEstablishment,
+            Preflight(listOf()),
             PresentingEngagement("unit test"),
             ProcessingResponse
         )
@@ -43,7 +44,6 @@ class HolderSessionStateTest {
             Cancelled,
             Failed(mockk(relaxed = true)),
             NotStarted,
-            Preflight(listOf()),
             ReadyToPresent,
             AwaitingVerifierResolution,
             Success(),
