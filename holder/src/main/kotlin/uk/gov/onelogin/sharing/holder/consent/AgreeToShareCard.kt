@@ -22,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -32,10 +31,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import uk.gov.android.ui.theme.m3.ExtraTypography
-import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
-import uk.gov.onelogin.sharing.core.ui.SharingColors
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
@@ -63,7 +61,7 @@ internal fun AgreeToShareCard(
             .clip(RoundedCornerShape(CARD_CORNER_RADIUS))
             .border(
                 width = DIVIDER_THICKNESS,
-                color = SharingColors.border,
+                color = GdsLocalColorScheme.current.dividerCard,
                 shape = RoundedCornerShape(CARD_CORNER_RADIUS)
             )
     ) {
@@ -131,7 +129,7 @@ private fun CardHeading(count: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SharingColors.cardBackground)
+            .background(GdsLocalColorScheme.current.cardBackground)
             .padding(spacingDouble)
             .semantics(mergeDescendants = true) {},
         horizontalArrangement = Arrangement.spacedBy(spacingDouble),
@@ -156,7 +154,7 @@ private fun AttributeList(attributes: List<DisplayAttribute>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SharingColors.attributeListBackground)
+            .background(GdsLocalColorScheme.current.rowBackground)
     ) {
         attributes.forEachIndexed { index, attribute ->
             AttributeRow(attribute.label())
@@ -186,7 +184,7 @@ private fun RetentionBand(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SharingColors.cardBackground)
+            .background(GdsLocalColorScheme.current.cardBackground)
             .padding(spacingDouble),
         verticalArrangement = Arrangement.spacedBy(spacingDouble)
     ) {
@@ -208,7 +206,7 @@ private fun RetentionText(text: String) {
 private fun SectionDivider() {
     HorizontalDivider(
         thickness = DIVIDER_THICKNESS,
-        color = SharingColors.divider
+        color = GdsLocalColorScheme.current.dividerCard
     )
 }
 
@@ -217,7 +215,7 @@ private fun RowDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = spacingDouble),
         thickness = DIVIDER_THICKNESS,
-        color = SharingColors.divider
+        color = GdsLocalColorScheme.current.dividerCard
     )
 }
 
@@ -248,7 +246,7 @@ internal fun AgreeToShareCardPreview(
             }
         )
     )
-    GdsTheme {
+    AgreeToShareCardTheme {
         AgreeToShareCard(
             card = card,
             organizationName = "Example Organisation.",
