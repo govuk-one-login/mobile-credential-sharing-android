@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.ui.impl
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,6 +80,7 @@ private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("LongMethod")
 internal fun ShareCredential(
     analyticsLogger: AnalyticsLogger,
     orchestrator: Orchestrator.Holder,
@@ -125,7 +126,7 @@ internal fun ShareCredential(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .safeContentPadding()
+                    .systemBarsPadding()
             ) {
                 if (state.userCanCancel()) {
                     CloseButtonAppBar(

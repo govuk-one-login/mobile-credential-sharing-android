@@ -61,7 +61,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels from the QR code screen" to userCancellation,
             "QR generation fails" to userJourneyFailure,
             "QR code handshake completes" to HolderSessionState.ProcessingEstablishment,
-            "Handshake fails and begins termination" to HolderSessionState.SendingTermination
+            "Handshake fails and begins termination" to HolderSessionState.SendingTermination,
+            "Engagement session expires and is refreshed" to HolderSessionState.Complete.Expired
         ).map { (testName, transition) ->
             Triple(
                 testName,

@@ -5,6 +5,7 @@ import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingVerifierResolution
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Cancelled
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Expired
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Failed
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.Success
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.NotStarted
@@ -53,7 +54,8 @@ val validHolderTransitions: HolderSessionStateTransitions = mapOf(
         PresentingEngagement::class
     ) + fullErrorHandling,
     PresentingEngagement::class to setOf(
-        ProcessingEstablishment::class
+        ProcessingEstablishment::class,
+        Expired::class
     ) + fullErrorHandling,
     ProcessingEstablishment::class to setOf(
         AwaitingUserConsent::class,

@@ -15,6 +15,8 @@ class StoredAnalyticsLogger(
     val sentAnalyticsEvents: List<AnalyticsEvent> get() = _sentAnalyticsEvents
     val ignoredAnalyticsEvents: List<AnalyticsEvent> get() = _ignoredAnalyticsEvents
 
+    val size: Int get() = _sentAnalyticsEvents.size
+
     init {
         setEnabled(isEnabledFlag.value)
     }

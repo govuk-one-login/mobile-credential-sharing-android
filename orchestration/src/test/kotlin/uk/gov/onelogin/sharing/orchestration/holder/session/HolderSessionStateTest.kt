@@ -31,6 +31,7 @@ class HolderSessionStateTest {
             AwaitingUserConsent(mockk(relaxed = true)),
             AwaitingVerifierResolution,
             ProcessingEstablishment,
+            Preflight(listOf()),
             PresentingEngagement("unit test"),
             ProcessingResponse
         )
