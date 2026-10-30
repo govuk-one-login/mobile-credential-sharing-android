@@ -77,7 +77,7 @@ internal fun HolderConsentContent(
     var showDenyDialog by remember { mutableStateOf(false) }
 
     val privacyPolicyUrl = state.privacyPolicyUrl
-    if (showPrivacyPolicy && privacyPolicyUrl != null) {
+    if (showPrivacyPolicy) {
         PrivacyPolicyWebView(
             url = privacyPolicyUrl,
             onClose = onClosePrivacyPolicy
@@ -119,17 +119,16 @@ internal fun HolderConsentContent(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        state.normalisedOrganizationName?.let { orgName ->
-            Text(
-                text = stringResource(R.string.holder_consent_organization_sentence, orgName),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+        Text(
+            text = stringResource(
+                R.string.holder_consent_organization_sentence,
+                state.normalisedOrganizationName
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 8.dp)
+        )
 
-        if (privacyPolicyUrl != null) {
-            PrivacyPolicyLink(onClick = onShowPrivacyPolicy)
-        }
+        PrivacyPolicyLink(onClick = onShowPrivacyPolicy)
 
         Spacer(modifier = Modifier.height(16.dp))
 

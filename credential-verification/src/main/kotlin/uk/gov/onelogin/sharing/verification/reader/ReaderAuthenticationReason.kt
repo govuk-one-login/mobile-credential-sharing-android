@@ -22,6 +22,9 @@ enum class ReaderAuthenticationReason {
     /** The privacy-policy SIA extension entry or URL violates validation rules. */
     PRIVACY_POLICY_URL_INVALID,
 
+    /** The organizationName (O) attribute is missing from the leaf certificate Subject DN. */
+    ORGANIZATION_NAME_MISSING,
+
     /** The decrypted DeviceRequest bytes could not be decoded. */
     MALFORMED_DEVICE_REQUEST
 }

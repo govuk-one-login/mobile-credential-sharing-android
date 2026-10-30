@@ -80,6 +80,7 @@ class HolderConsentScreenTest {
 
     private fun consentPresentation(elements: Map<String, Boolean>) = ConsentPresentation(
         organizationName = ORGANIZATION_NAME,
+        privacyPolicyUrl = "https://verifier.example/privacy",
         documents = listOf(
             ConsentDocument(
                 docType = "org.iso.18013.5.1.mDL",
@@ -101,12 +102,8 @@ class HolderConsentScreenTest {
 
     private val presentationWithPrivacyPolicy = ConsentPresentation(
         documents = presentationWithoutRetain.documents,
+        organizationName = ORGANIZATION_NAME,
         privacyPolicyUrl = "https://verifier.example/privacy"
-    )
-
-    private val presentationWithoutPrivacyPolicy = ConsentPresentation(
-        documents = presentationWithoutRetain.documents,
-        privacyPolicyUrl = null
     )
 
     @Test
@@ -313,21 +310,6 @@ class HolderConsentScreenTest {
             composeTestRule.setContent { Render() }
 
             composeTestRule.assertPrivacyPolicyLinkIsDisplayed()
-        }
-
-    @Test
-    fun `Privacy policy link is absent when no URL is present`() =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithoutPrivacyPolicy
-                )
-            }
-
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.assertPrivacyPolicyLinkDoesNotExist()
         }
 
     @Test

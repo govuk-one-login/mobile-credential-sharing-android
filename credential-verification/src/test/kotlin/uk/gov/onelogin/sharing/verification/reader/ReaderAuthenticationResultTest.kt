@@ -8,9 +8,9 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
-import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
 import uk.gov.onelogin.sharing.verification.ClassInfoExt.scanResult
+import uk.gov.onelogin.sharing.verification.reader.ReaderRequestStubs.authenticatedReaderRequest
+import uk.gov.onelogin.sharing.verification.reader.ReaderRequestStubs.docRequest
 
 class ReaderAuthenticationResultTest {
 
@@ -33,21 +33,11 @@ class ReaderAuthenticationResultTest {
     @Test
     fun `Success outcome supports equality and copy`() {
         val uri: Uri = mockk()
-        val docRequest1 = DocRequest(
-            itemsRequest = ItemsRequest(
-                docType = "org.iso.18013.5.1.mDL",
-                nameSpaces = emptyMap()
-            )
-        )
-        val docRequest2 = DocRequest(
-            itemsRequest = ItemsRequest(
-                docType = "org.iso.18013.5.1.aamva",
-                nameSpaces = emptyMap()
-            )
-        )
+        val docRequest1 = docRequest()
+        val docRequest2 = docRequest(docType = "org.iso.18013.5.1.aamva")
 
-        val req1 = AuthenticatedReaderRequest(docRequest = docRequest1, privacyPolicyUrl = uri)
-        val req2 = AuthenticatedReaderRequest(docRequest = docRequest2, privacyPolicyUrl = uri)
+        val req1 = authenticatedReaderRequest(docRequest = docRequest1, privacyPolicyUrl = uri)
+        val req2 = authenticatedReaderRequest(docRequest = docRequest2, privacyPolicyUrl = uri)
 
         val success1 = ReaderAuthenticationResult.Success(req1)
         val success2 = ReaderAuthenticationResult.Success(req1)

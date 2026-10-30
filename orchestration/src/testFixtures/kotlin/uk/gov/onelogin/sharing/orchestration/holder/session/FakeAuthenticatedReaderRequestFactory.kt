@@ -19,7 +19,7 @@ class FakeAuthenticatedReaderRequestFactory(
     private val privacyPolicyUrl: Uri = mockk {
         every { this@mockk.toString() } returns DEFAULT_PRIVACY_POLICY_URL
     },
-    private val readerOrganizationName: String? = DEFAULT_ORGANISATION_NAME
+    private val readerOrganizationName: String = DEFAULT_ORGANISATION_NAME
 ) : AuthenticatedReaderRequestFactory {
     override fun create(docRequest: DocRequest): AuthenticatedReaderRequest =
         AuthenticatedReaderRequest(

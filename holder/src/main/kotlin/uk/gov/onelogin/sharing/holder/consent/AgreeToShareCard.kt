@@ -32,9 +32,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import uk.gov.android.ui.theme.m3.ExtraTypography
-import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.core.ui.SharingColors
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
@@ -53,7 +53,7 @@ private val DIVIDER_THICKNESS = 1.dp
 @Composable
 internal fun AgreeToShareCard(
     card: ConsentCard,
-    organizationName: String?,
+    organizationName: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -62,7 +62,7 @@ internal fun AgreeToShareCard(
             .clip(RoundedCornerShape(CARD_CORNER_RADIUS))
             .border(
                 width = DIVIDER_THICKNESS,
-                color = GdsLocalColorScheme.current.dividerCard,
+                color = SharingColors.border,
                 shape = RoundedCornerShape(CARD_CORNER_RADIUS)
             )
     ) {
@@ -95,7 +95,7 @@ private fun CardHeading(count: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GdsLocalColorScheme.current.cardBackground)
+            .background(SharingColors.cardBackground)
             .padding(spacingDouble)
             .semantics(mergeDescendants = true) {},
         horizontalArrangement = Arrangement.spacedBy(spacingDouble),
@@ -126,33 +126,29 @@ private fun ColumnScope.NoDetailsKeptSection(card: ConsentCard) {
 }
 
 @Composable
-private fun ColumnScope.AllDetailsKeptSection(card: ConsentCard, organizationName: String?) {
+private fun ColumnScope.AllDetailsKeptSection(card: ConsentCard, organizationName: String) {
     SectionDivider()
     AttributeList(card.attributes)
-    organizationName?.let {
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_all_kept, it))
-        }
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_all_kept, organizationName))
     }
 }
 
 @Composable
-private fun ColumnScope.SomeDetailsKeptSection(card: ConsentCard, organizationName: String?) {
-    organizationName?.let {
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_will_keep, it))
-        }
-        SectionDivider()
-        AttributeList(card.keptAttributes)
-        SectionDivider()
-        RetentionBand {
-            RetentionText(stringResource(R.string.holder_consent_card_will_not_keep, it))
-        }
-        SectionDivider()
-        AttributeList(card.notKeptAttributes)
+private fun ColumnScope.SomeDetailsKeptSection(card: ConsentCard, organizationName: String) {
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_will_keep, organizationName))
     }
+    SectionDivider()
+    AttributeList(card.keptAttributes)
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_will_not_keep, organizationName))
+    }
+    SectionDivider()
+    AttributeList(card.notKeptAttributes)
 }
 
 @Composable
@@ -160,7 +156,7 @@ private fun AttributeList(attributes: List<DisplayAttribute>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GdsLocalColorScheme.current.rowBackground)
+            .background(SharingColors.attributeListBackground)
     ) {
         attributes.forEachIndexed { index, attribute ->
             AttributeRow(attribute.label())
@@ -190,7 +186,7 @@ private fun RetentionBand(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GdsLocalColorScheme.current.cardBackground)
+            .background(SharingColors.cardBackground)
             .padding(spacingDouble),
         verticalArrangement = Arrangement.spacedBy(spacingDouble)
     ) {
@@ -212,7 +208,7 @@ private fun RetentionText(text: String) {
 private fun SectionDivider() {
     HorizontalDivider(
         thickness = DIVIDER_THICKNESS,
-        color = GdsLocalColorScheme.current.dividerCard
+        color = SharingColors.divider
     )
 }
 
@@ -221,7 +217,7 @@ private fun RowDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = spacingDouble),
         thickness = DIVIDER_THICKNESS,
-        color = GdsLocalColorScheme.current.dividerCard
+        color = SharingColors.divider
     )
 }
 

@@ -81,7 +81,9 @@ class HolderConsentViewModelTest {
                 )
             )
             val presentation = ConsentPresentation(
-                documents = documents
+                documents = documents,
+                organizationName = "Organisation Ltd",
+                privacyPolicyUrl = "https://verifier.example/privacy"
             )
             val expected = HolderConsentUiState(
                 card = ConsentCard.from(
@@ -90,7 +92,9 @@ class HolderConsentViewModelTest {
                             ConsentAttribute("family_name", false, nameSpace = "org.iso.18013.5.1")
                         )
                     )
-                )
+                ),
+                normalisedOrganizationName = "Organisation Ltd.",
+                privacyPolicyUrl = "https://verifier.example/privacy"
             )
 
             viewModel.presentation.test {
