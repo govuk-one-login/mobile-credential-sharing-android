@@ -8,6 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestParameterInjector::class)
 class StringsXmlTest {
@@ -20,6 +21,25 @@ class StringsXmlTest {
             resources.getString(input.resourceId)
         )
     }
+
+    @Test
+    fun translatableStringsMatchEnglishValues(@TestParameter input: TranslatableStringsData) =
+        runTest {
+            assertEquals(
+                input["en"],
+                resources.getString(input.resourceId)
+            )
+        }
+
+    @Config(qualifiers = "cy")
+    @Test
+    fun translatableStringsMatchWelshValues(@TestParameter input: TranslatableStringsData) =
+        runTest {
+            assertEquals(
+                input["cy"],
+                resources.getString(input.resourceId)
+            )
+        }
 
     @Test
     fun screenSpecificStringsDeferToBaseValues(@TestParameter input: DeferredStringsXmlData) =

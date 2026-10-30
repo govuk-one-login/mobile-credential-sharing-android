@@ -122,6 +122,18 @@
         },
         {
           "check-types": [
+            "accessibility"
+          ],
+          "config": {
+            "file": ".github/workflows/testing.yml",
+            "name": "Screenshot tests",
+            "path": "jobs.screenshot_tests"
+          },
+          "phase": "pre-merge",
+          "provider": "GitHub"
+        },
+        {
+          "check-types": [
             "code quality",
             "unit test coverage",
             "vulnerability detection"

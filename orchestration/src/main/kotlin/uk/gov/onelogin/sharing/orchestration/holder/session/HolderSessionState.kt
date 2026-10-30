@@ -166,6 +166,7 @@ sealed class HolderSessionState :
 
         @JvmStatic
         private val cancellableStates = listOf(
+            Preflight::class,
             PresentingEngagement::class
         ) + cancelConfirmationRequired
     }
