@@ -9,9 +9,7 @@ import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
-import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
-import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
+import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -26,7 +24,7 @@ class AwaitingVerifierResolutionViewModelTest {
         initialHolderState = MutableStateFlow(HolderSessionState.Complete.Success()),
         startCount = 1
     )
-    private val analyticsLogger = StoredAnalyticsLogger()
+    private val analyticsLogger = FakeAnalyticsLogger()
 
     private val viewModel = AwaitingVerifierResolutionViewModel(analyticsLogger, orchestrator)
 
@@ -42,9 +40,8 @@ class AwaitingVerifierResolutionViewModelTest {
         viewModel.logScreenView()
         assertThat(
             analyticsLogger,
-            hasSentEvents(
-                contains(AwaitingVerifierResolutionViewModel.screenViewEvent.asLegacyEvent())
-            )
+            contains(AwaitingVerifierResolutionTestData.expectedScreenEvent)
+
         )
     }
 
@@ -53,9 +50,8 @@ class AwaitingVerifierResolutionViewModelTest {
         viewModel.logGoBackToDocuments()
         assertThat(
             analyticsLogger,
-            hasSentEvents(
-                contains(AwaitingVerifierResolutionViewModel.goBackToDocumentsEvent.asLegacyEvent())
-            )
+            contains(AwaitingVerifierResolutionTestData.expectedGoBackToDocumentsEvent)
+
         )
     }
 }
