@@ -9,6 +9,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
 import org.junit.Rule
+import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -30,6 +31,8 @@ class HolderConsentViewModelTest {
     private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
     private var confirmConsentCount = 0
 
+    private val analyticsLogger = FakeAnalyticsLogger()
+
     private val orchestratorWithConsentTracking = FakeOrchestrator(
         initialHolderState = holderState,
         onConfirmConsent = { confirmConsentCount++ }
@@ -38,13 +41,17 @@ class HolderConsentViewModelTest {
     private val viewModel by lazy {
         HolderConsentViewModel(
             orchestrator = orchestrator,
+            analyticsLogger = analyticsLogger,
             dispatcher = dispatcherRule.testDispatcher
         )
     }
 
     @Test
     fun `onAccept calls confirmConsent on orchestrator`() = runTest(dispatcherRule.testDispatcher) {
-        val viewModel = HolderConsentViewModel(orchestrator = orchestratorWithConsentTracking)
+        val viewModel = HolderConsentViewModel(
+            orchestrator = orchestratorWithConsentTracking,
+            analyticsLogger = analyticsLogger
+        )
 
         viewModel.onAccept().join()
 
@@ -53,7 +60,10 @@ class HolderConsentViewModelTest {
 
     @Test
     fun `onDeny causes orchestrator cancellation`() = runTest(dispatcherRule.testDispatcher) {
-        val viewModel = HolderConsentViewModel(orchestrator = orchestratorWithConsentTracking)
+        val viewModel = HolderConsentViewModel(
+            orchestrator = orchestratorWithConsentTracking,
+            analyticsLogger = analyticsLogger
+        )
 
         viewModel.onDeny().join()
 

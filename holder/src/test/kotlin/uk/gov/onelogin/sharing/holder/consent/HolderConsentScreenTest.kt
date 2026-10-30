@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.annotation.Config
+import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.ORGANIZATION_NAME
@@ -50,6 +51,7 @@ class HolderConsentScreenTest {
     private val viewModel by lazy {
         HolderConsentViewModel(
             orchestrator = orchestrator,
+            analyticsLogger = FakeAnalyticsLogger(),
             dispatcher = dispatcherRule.testDispatcher
         )
     }

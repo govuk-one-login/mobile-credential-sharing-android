@@ -15,7 +15,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.agreeAndShareButton
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.cancelAndGoBackButton
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.consentScreen
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.readPrivacyNoticeButton
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -25,6 +30,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ViewModelKey
 class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
+    private val analyticsLogger: AnalyticsLogger,
     dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
@@ -67,8 +73,21 @@ class HolderConsentViewModel(
         _showPrivacyPolicy.value = false
     }
 
+    fun sendScreenEvent() = viewModelScope.launch {
+        analyticsLogger.consentScreen()
+    }
+
+    fun onReadPrivacyNotice() = viewModelScope.launch {
+        analyticsLogger.readPrivacyNoticeButton()
+    }
+
     fun onAccept() = viewModelScope.launch {
+        analyticsLogger.agreeAndShareButton()
         orchestrator.confirmConsent()
+    }
+
+    fun onCancelAndGoBack() = viewModelScope.launch {
+        analyticsLogger.cancelAndGoBackButton()
     }
 
     fun onDeny() = viewModelScope.launch {

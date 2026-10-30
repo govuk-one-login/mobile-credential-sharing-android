@@ -50,6 +50,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderConsentScreen")
+        viewModel.sendScreenEvent()
     }
 
     presentation?.let {
