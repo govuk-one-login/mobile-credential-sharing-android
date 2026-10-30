@@ -1,0 +1,275 @@
+@file:Suppress("TooManyFunctions")
+
+package uk.gov.onelogin.sharing.holder.consent
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.dp
+import uk.gov.android.ui.theme.m3.ExtraTypography
+import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
+import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
+
+private val CARD_CORNER_RADIUS = 16.dp
+private val DOCUMENT_ICON_WIDTH = 70.dp
+private val DOCUMENT_ICON_HEIGHT = 50.dp
+private val DIVIDER_THICKNESS = 1.dp
+
+/**
+ * Renders the 'Agree to Share' card from an already resolved [ConsentCard]. All ordering,
+ * label resolution and retention grouping happen in the view model; this composable only renders.
+ *
+ * @param card The resolved, display-ready model for a single document.
+ * @param organizationName The verified Verifier (DVS) organisation name.
+ */
+@Composable
+internal fun AgreeToShareCard(
+    card: ConsentCard,
+    organizationName: String?,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(CARD_CORNER_RADIUS))
+            .border(
+                width = DIVIDER_THICKNESS,
+                color = GdsLocalColorScheme.current.dividerCard,
+                shape = RoundedCornerShape(CARD_CORNER_RADIUS)
+            )
+    ) {
+        CardHeading(count = card.attributeCount)
+
+        when (card.retentionVariant) {
+            RetentionVariant.NO_DETAILS_KEPT -> NoDetailsKeptSection(card)
+            RetentionVariant.ALL_DETAILS_KEPT -> AllDetailsKeptSection(card, organizationName)
+            RetentionVariant.SOME_DETAILS_KEPT -> SomeDetailsKeptSection(card, organizationName)
+        }
+    }
+}
+
+@Composable
+private fun CardHeading(count: Int) {
+    val documentName = stringResource(R.string.holder_consent_doc_mdl)
+    val headingTemplate =
+        pluralStringResource(R.plurals.consent_card_heading, count, count, documentName)
+
+    val bold = SpanStyle(
+        fontFamily = ExtraTypography.bodyLargeBold.fontFamily,
+        fontWeight = ExtraTypography.bodyLargeBold.fontWeight
+    )
+    val headingText = buildAnnotatedString {
+        append(headingTemplate)
+        emphasise(headingTemplate, count.toString(), bold)
+        emphasise(headingTemplate, documentName, bold)
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(GdsLocalColorScheme.current.cardBackground)
+            .padding(spacingDouble)
+            .semantics(mergeDescendants = true) {},
+        horizontalArrangement = Arrangement.spacedBy(spacingDouble),
+        verticalAlignment = Alignment.Top
+    ) {
+        Image(
+            painter = painterResource(R.drawable.credential_thumbnail_mdl),
+            contentDescription = null,
+            modifier = Modifier.size(width = DOCUMENT_ICON_WIDTH, height = DOCUMENT_ICON_HEIGHT)
+        )
+        Text(
+            text = headingText,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Start
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.NoDetailsKeptSection(card: ConsentCard) {
+    SectionDivider()
+    AttributeList(card.attributes)
+    SectionDivider()
+    RetentionBand {
+        RetentionText(stringResource(R.string.holder_consent_card_none_kept))
+    }
+}
+
+@Composable
+private fun ColumnScope.AllDetailsKeptSection(card: ConsentCard, organizationName: String?) {
+    SectionDivider()
+    AttributeList(card.attributes)
+    organizationName?.let {
+        SectionDivider()
+        RetentionBand {
+            RetentionText(stringResource(R.string.holder_consent_card_all_kept, it))
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.SomeDetailsKeptSection(card: ConsentCard, organizationName: String?) {
+    organizationName?.let {
+        SectionDivider()
+        RetentionBand {
+            RetentionText(stringResource(R.string.holder_consent_card_will_keep, it))
+        }
+        SectionDivider()
+        AttributeList(card.keptAttributes)
+        SectionDivider()
+        RetentionBand {
+            RetentionText(stringResource(R.string.holder_consent_card_will_not_keep, it))
+        }
+        SectionDivider()
+        AttributeList(card.notKeptAttributes)
+    }
+}
+
+@Composable
+private fun AttributeList(attributes: List<DisplayAttribute>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(GdsLocalColorScheme.current.rowBackground)
+    ) {
+        attributes.forEachIndexed { index, attribute ->
+            AttributeRow(attribute.label())
+            if (index != attributes.lastIndex) {
+                RowDivider()
+            }
+        }
+    }
+}
+
+@Composable
+private fun AttributeRow(label: String) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onBackground,
+        textAlign = TextAlign.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(spacingDouble)
+            .semantics(mergeDescendants = true) {}
+    )
+}
+
+@Composable
+private fun RetentionBand(content: @Composable () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(GdsLocalColorScheme.current.cardBackground)
+            .padding(spacingDouble),
+        verticalArrangement = Arrangement.spacedBy(spacingDouble)
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun RetentionText(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onBackground,
+        textAlign = TextAlign.Start
+    )
+}
+
+@Composable
+private fun SectionDivider() {
+    HorizontalDivider(
+        thickness = DIVIDER_THICKNESS,
+        color = GdsLocalColorScheme.current.dividerCard
+    )
+}
+
+@Composable
+private fun RowDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = spacingDouble),
+        thickness = DIVIDER_THICKNESS,
+        color = GdsLocalColorScheme.current.dividerCard
+    )
+}
+
+@Composable
+private fun DisplayAttribute.label(): String = when (val label = label) {
+    is DisplayAttribute.Label.Resource ->
+        label.arg?.let { stringResource(label.res, it) } ?: stringResource(label.res)
+
+    is DisplayAttribute.Label.Raw -> label.text
+}
+
+private fun AnnotatedString.Builder.emphasise(source: String, substring: String, style: SpanStyle) {
+    if (substring.isEmpty()) return
+    val start = source.indexOf(substring)
+    if (start < 0) return
+    addStyle(style, start, start + substring.length)
+}
+
+@PreviewContent
+@Composable
+internal fun AgreeToShareCardPreview(
+    @PreviewParameter(AgreeToShareCardPreviewProvider::class) elements: Map<String, Boolean>
+) {
+    val card = ConsentCard.from(
+        ConsentAttributeResolver.toDisplayAttributes(
+            elements.map { (id, retain) ->
+                ConsentAttribute(id, retain, nameSpace = "org.iso.18013.5.1")
+            }
+        )
+    )
+    AgreeToShareCardTheme {
+        AgreeToShareCard(
+            card = card,
+            organizationName = "Example Organisation.",
+            modifier = Modifier.padding(spacingDouble)
+        )
+    }
+}
+
+internal class AgreeToShareCardPreviewProvider : PreviewParameterProvider<Map<String, Boolean>> {
+    override val values: Sequence<Map<String, Boolean>> = sequenceOf(
+        mapOf("family_name" to false, "given_name" to false, "portrait" to false),
+        mapOf("family_name" to true, "given_name" to true, "document_number" to true),
+        mapOf(
+            "document_number" to true,
+            "family_name" to true,
+            "portrait" to false,
+            "age_over_18" to false
+        )
+    )
+}

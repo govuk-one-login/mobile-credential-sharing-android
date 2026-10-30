@@ -37,10 +37,9 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.cryptoService.verifier.DocRequestBuilderImpl.Companion.NAMESPACE_ISO
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 
 @Composable
 internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
@@ -107,8 +106,15 @@ internal fun HolderConsentContent(
             style = MaterialTheme.typography.headlineSmall
         )
 
-        state.documents.forEach { document ->
-            ConsentDocumentSection(document)
+        state.card?.let { card ->
+            Spacer(modifier = Modifier.height(16.dp))
+            AgreeToShareCardTheme {
+                AgreeToShareCard(
+                    card = card,
+                    organizationName = state.normalisedOrganizationName,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -165,45 +171,6 @@ private fun PrivacyPolicyLink(onClick: () -> Unit) {
 }
 
 @Composable
-private fun ConsentDocumentSection(document: ConsentDocument) {
-    Text(
-        text = document.docType,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(top = 16.dp)
-    )
-
-    document.namespaces.forEach { namespace ->
-        ConsentNamespaceSection(namespace)
-    }
-}
-
-@Composable
-private fun ConsentNamespaceSection(namespace: ConsentNamespace) {
-    Text(
-        text = namespace.nameSpace,
-        style = MaterialTheme.typography.titleSmall,
-        modifier = Modifier.padding(top = 8.dp)
-    )
-
-    namespace.attributes.forEach { attribute ->
-        ConsentAttributeRow(attribute)
-    }
-}
-
-@Composable
-private fun ConsentAttributeRow(attribute: ConsentAttribute) {
-    Text(
-        text = "${attribute.elementIdentifier} — ${
-            stringResource(
-                R.string.holder_consent_intent_to_retain,
-                attribute.intentToRetain
-            )
-        }",
-        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
-    )
-}
-
-@Composable
 private fun DenyConfirmationDialog(onConfirmDeny: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -227,25 +194,20 @@ private fun DenyConfirmationDialog(onConfirmDeny: () -> Unit, onDismiss: () -> U
 @PreviewContent
 @Composable
 internal fun HolderConsentScreenPreview() {
+    val card = ConsentCard.from(
+        ConsentAttributeResolver.toDisplayAttributes(
+            listOf(
+                ConsentAttribute("family_name", false, NAMESPACE_ISO),
+                ConsentAttribute("document_number", false, NAMESPACE_ISO),
+                ConsentAttribute("age_over_21", true, NAMESPACE_ISO)
+            )
+        )
+    )
     GdsTheme {
         Surface {
             HolderConsentContent(
                 state = HolderConsentUiState(
-                    documents = listOf(
-                        ConsentDocument(
-                            docType = "org.iso.18013.5.1.mDL",
-                            namespaces = listOf(
-                                ConsentNamespace(
-                                    nameSpace = "org.iso.18013.5.1",
-                                    attributes = listOf(
-                                        ConsentAttribute("family_name", false),
-                                        ConsentAttribute("document_number", false),
-                                        ConsentAttribute("age_over_21", true)
-                                    )
-                                )
-                            )
-                        )
-                    ),
+                    card = card,
                     privacyPolicyUrl = "https://verifier.example/privacy",
                     normalisedOrganizationName = "Organisation Ltd."
                 )

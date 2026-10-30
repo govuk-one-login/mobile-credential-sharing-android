@@ -50,5 +50,11 @@ data class ConsentNamespace(val nameSpace: String, val attributes: List<ConsentA
  * @param elementIdentifier The credential element identifier that will be included in the
  * DeviceResponse (for example `family_name`, or a resolved `age_over_18`).
  * @param intentToRetain Whether the Verifier declared an intent to retain this attribute.
+ * @param nameSpace The namespace the attribute belongs to (for example `org.iso.18013.5.1` or the
+ * custom `org.iso.18013.5.1.GB`). Used to resolve the display label.
  */
-data class ConsentAttribute(val elementIdentifier: String, val intentToRetain: Boolean)
+data class ConsentAttribute(
+    val elementIdentifier: String,
+    val intentToRetain: Boolean,
+    val nameSpace: String
+)

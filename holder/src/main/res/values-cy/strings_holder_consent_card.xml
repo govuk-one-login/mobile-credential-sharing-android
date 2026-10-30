@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_consent_card_will_keep">@string/consent_card_will_keep</string>
+    <string name="holder_consent_card_will_not_keep">@string/consent_card_will_not_keep</string>
+
+    <string name="holder_consent_card_all_kept">@string/consent_card_all_kept</string>
+
+    <string name="holder_consent_card_none_kept">@string/consent_card_none_kept</string>
+
+    <string name="holder_consent_doc_mdl">@string/consent_doc_mdl</string>
+
+    <string name="holder_consent_attr_document_number">@string/consent_attr_document_number</string>
+    <string name="holder_consent_attr_portrait">@string/consent_attr_portrait</string>
+    <string name="holder_consent_attr_title">@string/consent_attr_title</string>
+    <string name="holder_consent_attr_family_name">@string/consent_attr_family_name</string>
+    <string name="holder_consent_attr_given_name">@string/consent_attr_given_name</string>
+    <string name="holder_consent_attr_expiry_date">@string/consent_attr_expiry_date</string>
+    <string name="holder_consent_attr_birth_date">@string/consent_attr_birth_date</string>
+    <string name="holder_consent_attr_age_over">@string/consent_attr_age_over</string>
+    <string name="holder_consent_attr_birth_place">@string/consent_attr_birth_place</string>
+    <string name="holder_consent_attr_resident_address">@string/consent_attr_resident_address</string>
+    <string name="holder_consent_attr_resident_city">@string/consent_attr_resident_city</string>
+    <string name="holder_consent_attr_resident_postal_code">@string/consent_attr_resident_postal_code</string>
+    <string name="holder_consent_attr_issue_date">@string/consent_attr_issue_date</string>
+    <string name="holder_consent_attr_issuing_authority">@string/consent_attr_issuing_authority</string>
+    <string name="holder_consent_attr_issuing_country">@string/consent_attr_issuing_country</string>
+    <string name="holder_consent_attr_un_distinguishing_sign">@string/consent_attr_un_distinguishing_sign</string>
+    <string name="holder_consent_attr_driving_privileges">@string/consent_attr_driving_privileges</string>
+    <string name="holder_consent_attr_provisional_driving_privileges">@string/consent_attr_provisional_driving_privileges</string>
+    <string name="holder_consent_attr_welsh_licence">@string/consent_attr_welsh_licence</string>
+</resources>

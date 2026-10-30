@@ -26,7 +26,7 @@ enum class VerifierAttributeOption(
         attributeGroup = AttributeGroup(
             mapOf(
                 MdlAttribute.Portrait to false,
-                MdlAttribute.AgeOver(AGE_21) to false
+                MdlAttribute.AgeOver(AGE_21) to true
             )
         )
     ),

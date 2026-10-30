@@ -26,7 +26,8 @@ object ConsentPresentationFactory {
                     attributes = attributes.map {
                         ConsentAttribute(
                             elementIdentifier = it.elementIdentifier,
-                            intentToRetain = it.intentToRetain
+                            intentToRetain = it.intentToRetain,
+                            nameSpace = nameSpace
                         )
                     }
                 )
