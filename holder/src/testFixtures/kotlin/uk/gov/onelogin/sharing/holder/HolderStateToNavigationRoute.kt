@@ -14,6 +14,7 @@ import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
@@ -58,6 +59,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     GetReadyToShareRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<GetReadyToShareRoute>()
+                )
+            },
+            Triple(
+                "'Preflight (Bluetooth off)' -> TurnOnBluetoothRoute",
+                HolderSessionStateStubs.preflightWithoutBluetooth
+            ) {
+                instanceOf<TurnOnBluetoothRoute>(
+                    TurnOnBluetoothRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<TurnOnBluetoothRoute>()
                 )
             },
             Triple(

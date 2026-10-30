@@ -51,5 +51,21 @@ enum class DeferredStringsXmlData(
     HOLDER_PREREQUISITES_READY_TO_PRESENT(
         defersTo = R.string.generating_qr_code_data,
         resourceId = R.string.holder_prerequisites_ready_to_present
+    ),
+    HOLDER_TURN_ON_BLUETOOTH_TITLE(
+        defersTo = R.string.turn_on_bluetooth,
+        resourceId = R.string.holder_turn_on_bluetooth_title
+    ),
+    HOLDER_TURN_ON_BLUETOOTH_BODY_1(
+        defersTo = R.string.turn_on_bluetooth_before_sharing,
+        resourceId = R.string.holder_turn_on_bluetooth_body_1
+    ),
+    HOLDER_TURN_ON_BLUETOOTH_BODY_2(
+        defersTo = R.string.use_qr_code_to_connect_next,
+        resourceId = R.string.holder_turn_on_bluetooth_body_2
+    ),
+    HOLDER_TURN_ON_BLUETOOTH_BUTTON(
+        defersTo = R.string.holder_turn_on_bluetooth_title,
+        resourceId = R.string.holder_turn_on_bluetooth_button
     )
 }
