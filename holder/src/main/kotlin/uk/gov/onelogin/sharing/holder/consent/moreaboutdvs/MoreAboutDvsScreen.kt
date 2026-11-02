@@ -81,13 +81,20 @@ internal fun MoreAboutDvsContent(
         textAlign = GdsHeadingAlignment.LeftAligned
     )
 
+    val privacyNoticeBody = LeftAlignedScreenBodyV2.Text(
+        text = stringResource(
+            R.string.more_about_dvs_privacy_body,
+            organizationName
+        )
+    )
+
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(
             R.string.more_about_dvs_title,
             organizationName
         ),
-        body = (bodyTexts + bulletText + privacyNoticeSubheading)
+        body = (bodyTexts + bulletText + privacyNoticeSubheading + privacyNoticeBody)
             .toPersistentList(),
         forceScroll = true,
     )

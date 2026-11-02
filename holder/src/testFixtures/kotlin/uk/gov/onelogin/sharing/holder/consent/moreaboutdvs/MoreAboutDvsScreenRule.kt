@@ -63,6 +63,14 @@ class MoreAboutDvsScreenRule(
     ).assertExists("Cannot find the main header!")
         .assert(isHeading())
 
+    fun assertValidPrivacyPolicyBody(
+        organizationName: String,
+        useUnmergedTree: Boolean = false
+    ) = onPrivacyPolicyBody(
+        organizationName = organizationName,
+        useUnmergedTree = useUnmergedTree
+    ).assertExists("Cannot find the main privacy policy body!")
+
     fun assertValidPrivacyPolicySubheading(
         organizationName: String,
         useUnmergedTree: Boolean = false
@@ -71,6 +79,17 @@ class MoreAboutDvsScreenRule(
         useUnmergedTree = useUnmergedTree
     ).assertExists("Cannot find the main privacy policy subheading!")
         .assert(isHeading())
+
+    fun onPrivacyPolicyBody(
+        organizationName: String,
+        useUnmergedTree: Boolean = false
+    ) = onNodeWithText(
+        resources.getString(
+            R.string.more_about_dvs_privacy_body,
+            organizationName
+        ),
+        useUnmergedTree = useUnmergedTree
+    )
 
     fun onPrivacyPolicySubheading(
         organizationName: String,

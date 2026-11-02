@@ -48,6 +48,14 @@ enum class FormattableStringsXmlData(
         resourceId = R.string.more_about_dvs,
         *(1..1).toPlaceholderStrings()
     ),
+    READ_DVS_S_PRIVACY_POLICY_TO_FIND_OUT(
+        translations = mapOf(
+            "en" to "Read <Argument 1>’s privacy notice to find out:",
+            "cy" to "Darllenwch hysbysiad preifatrwydd <Argument 1> i ddarganfod:"
+        ),
+        resourceId = R.string.read_dvs_s_privacy_policy_to_find_out,
+        *(1..1).toPlaceholderStrings()
+    ),
     THE_PERSON_CHECKING_IS_USING_AN_APP_POWERED_BY_DVS(
         translations = mapOf(
             "en" to "The person doing the check is using an app powered by <Argument 1>.",

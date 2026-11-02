@@ -60,6 +60,7 @@ class MoreAboutDvsScreenTest {
             assertValidBody(organizationName = expectedOrganization)
             assertValidBulletPoints(organizationName = expectedOrganization)
             assertValidPrivacyPolicySubheading(organizationName = expectedOrganization)
+            assertValidPrivacyPolicyBody(organizationName = expectedOrganization)
         }
     }
 }
