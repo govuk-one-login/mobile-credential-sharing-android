@@ -7,6 +7,8 @@ import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToString
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.onelogin.sharing.holder.R
 
@@ -70,6 +72,20 @@ class MoreAboutDvsScreenRule(
         organizationName = organizationName,
         useUnmergedTree = useUnmergedTree
     ).assertExists("Cannot find the main privacy policy body!")
+
+    fun assertValidPrivacyPolicyBulletPoints(
+        useUnmergedTree: Boolean = false
+    ) {
+        mapOf(
+            "first" to R.string.more_about_dvs_privacy_bullet_1,
+            "second" to R.string.more_about_dvs_privacy_bullet_2,
+        ).forEach { (description, resourceId) ->
+            onNodeWithText(
+                resources.getString(resourceId),
+                useUnmergedTree = useUnmergedTree,
+            ).assertExists("Cannot find $description privacy policy bullet point")
+        }
+    }
 
     fun assertValidPrivacyPolicySubheading(
         organizationName: String,
