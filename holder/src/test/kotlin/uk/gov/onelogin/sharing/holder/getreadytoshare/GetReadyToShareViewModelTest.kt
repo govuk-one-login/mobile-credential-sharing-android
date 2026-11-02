@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.retry
+package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import app.cash.turbine.test
 import io.mockk.mockk
@@ -7,6 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.test.runTest
@@ -15,7 +16,12 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.collection.IsCollectionWithSize.hasSize
 import org.junit.Rule
+import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.logging.api.analytics.AnalyticsEvent
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareTestData.expectedAllowBluetoothButtonEvent
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareTestData.expectedFindOutMoreButtonEvent
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
@@ -25,7 +31,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavi
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.usecases.RetryPrerequisitesNavigatorExt.from
 
-class RetryHolderPrerequisitesViewModelTest {
+class GetReadyToShareViewModelTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
@@ -50,14 +56,20 @@ class RetryHolderPrerequisitesViewModelTest {
         )
     }
 
+    private val analyticsLogger by lazy {
+        FakeAnalyticsLogger()
+    }
+
     private val viewModel by lazy {
-        RetryHolderPrerequisitesViewModel(
+        GetReadyToShareViewModel(
+            analyticsLogger = analyticsLogger,
             navigator = RetryPrerequisitesNavigator.from(navigationEvents.asFlow()),
             orchestrator = orchestrator,
             resolver = {
                 hasCalledResolver = true
             },
-            dispatcher = dispatcherRule.testDispatcher
+            dispatcher = dispatcherRule.testDispatcher,
+            mainDispatcher = dispatcherRule.testDispatcher
         )
     }
 
@@ -65,7 +77,7 @@ class RetryHolderPrerequisitesViewModelTest {
     fun `Resolving prerequisite actions defer to the resolver`() = runTest(
         dispatcherRule.testDispatcher
     ) {
-        viewModel.resolve(mockk())
+        viewModel.onAllowBluetooth(mockk())
 
         assertTrue { hasCalledResolver }
     }
@@ -142,5 +154,38 @@ class RetryHolderPrerequisitesViewModelTest {
         viewModel.hasRecheckedPrerequisites.test {
             assertTrue { awaitItem() }
         }
+    }
+
+    @Test
+    fun `Sends screen analytics events to the analytics logger`() = verifyAnalyticsEvent(
+        viewModel.sendScreenEvent(),
+        expectedScreenEvent
+    )
+
+    @Test
+    fun `Sends a button analytics event when allowing bluetooth`() = verifyAnalyticsEvent(
+        viewModel.onAllowBluetooth(mockk(relaxed = true)),
+        expectedAllowBluetoothButtonEvent
+    )
+
+    @Test
+    fun `Sends a button analytics event when finding out more`() = verifyAnalyticsEvent(
+        job = viewModel.onFindOutMore(),
+        expectedEvent = expectedFindOutMoreButtonEvent
+    )
+
+    /**
+     * Convenience function for confirming the contents of the analytics logger after performing
+     * a [Job] exposed by the [viewModel].
+     *
+     * Test parameters couldn't be used due to issues with calling view model functions as
+     * input parameters.
+     */
+    private fun verifyAnalyticsEvent(job: Job, expectedEvent: AnalyticsEvent) = runTest {
+        job.join()
+        assertThat(
+            analyticsLogger,
+            contains(expectedEvent)
+        )
     }
 }
