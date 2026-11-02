@@ -104,6 +104,7 @@ class HolderConsentViewModelTest {
                     )
                 ),
                 normalisedOrganizationName = "Organisation Ltd.",
+                organizationName = "Organisation Ltd",
                 privacyPolicyUrl = "https://verifier.example/privacy"
             )
 

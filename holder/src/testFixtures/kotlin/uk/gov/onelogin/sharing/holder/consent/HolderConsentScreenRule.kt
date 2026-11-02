@@ -5,7 +5,6 @@ import android.content.res.Resources
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -22,62 +21,44 @@ class HolderConsentScreenRule(
 ) : ComposeContentTestRule by composeTestRule {
 
     fun assertTitleIsDisplayed() = onNodeWithText(
-        resources.getString(R.string.holder_consent_title)
+        resources.getString(R.string.holder_consent_screen_title)
     ).assertIsDisplayed()
 
-    fun assertAcceptButtonIsDisplayed() = onAcceptButton().assertIsDisplayed()
-    fun assertAcceptButtonIsEnabled() = onAcceptButton().assertIsEnabled()
-    fun assertAcceptButtonIsNotEnabled() = onAcceptButton().assertIsNotEnabled()
+    fun assertAgreeButtonIsEnabled() = onAgreeButton().assertIsEnabled()
+    fun assertAgreeButtonIsNotEnabled() = onAgreeButton().assertIsNotEnabled()
 
-    fun assertDenyButtonIsEnabled() = onDenyButton().assertIsEnabled()
-    fun assertDenyButtonIsNotEnabled() = onDenyButton().assertIsNotEnabled()
-
-    fun assertDenyButtonIsDisplayed() = onDenyButton().assertIsDisplayed()
+    fun assertCancelButtonIsDisplayed() = onCancelButton().assertIsDisplayed()
+    fun assertCancelButtonIsEnabled() = onCancelButton().assertIsEnabled()
+    fun assertCancelButtonIsNotEnabled() = onCancelButton().assertIsNotEnabled()
 
     fun assertElementsDisplayed(text: String) {
         val nodes = onAllNodesWithText(text, substring = true).fetchSemanticsNodes()
         assert(nodes.isNotEmpty()) { "No nodes found containing '$text'" }
     }
 
-    fun clickDenyButton() = onDenyButton().performClick()
+    fun clickAgreeButton() = onAgreeButton().performClick()
+    fun clickCancelButton() = onCancelButton().performClick()
 
-    fun assertDenyDialogIsDisplayed() = onNodeWithText(
-        resources.getString(R.string.holder_consent_deny_dialog_title)
+    fun assertPrivacyNoticeLinkIsDisplayed(organizationName: String) = onNodeWithText(
+        resources.getString(
+            R.string.holder_consent_screen_privacy_notice_link,
+            organizationName
+        )
     ).assertIsDisplayed()
 
-    fun assertDenyDialogIsNotDisplayed() = onNodeWithText(
-        resources.getString(R.string.holder_consent_deny_dialog_title)
-    ).assertIsNotDisplayed()
-
-    fun clickDenyDialogConfirm() = onAllNodesWithText(
-        resources.getString(R.string.holder_consent_deny)
-    )[1].performClick()
-
-    fun clickDenyDialogDismiss() = onNodeWithText(
-        resources.getString(R.string.holder_consent_deny_dialog_dismiss)
+    fun clickPrivacyNoticeLink(organizationName: String) = onNodeWithText(
+        resources.getString(
+            R.string.holder_consent_screen_privacy_notice_link,
+            organizationName
+        )
     ).performClick()
 
-    fun assertPrivacyPolicyLinkIsDisplayed() = onNodeWithText(
-        resources.getString(R.string.holder_consent_privacy_policy_link)
-    ).assertIsDisplayed()
+    private fun onAgreeButton(): SemanticsNodeInteraction = onAllNodesWithText(
+        "Agree and share",
+        substring = true
+    )[0]
 
-    fun assertPrivacyPolicyLinkDoesNotExist() = onNodeWithText(
-        resources.getString(R.string.holder_consent_privacy_policy_link)
-    ).assertDoesNotExist()
-
-    fun clickPrivacyPolicyLink() = onNodeWithText(
-        resources.getString(R.string.holder_consent_privacy_policy_link)
-    ).performClick()
-
-    fun assertPrivacyPolicyCloseIsDisplayed() = onNodeWithText(
-        resources.getString(R.string.holder_consent_privacy_policy_close)
-    ).assertIsDisplayed()
-
-    private fun onAcceptButton(): SemanticsNodeInteraction = onNodeWithText(
-        resources.getString(R.string.holder_consent_accept)
-    )
-
-    private fun onDenyButton(): SemanticsNodeInteraction = onNodeWithText(
-        resources.getString(R.string.holder_consent_deny)
+    private fun onCancelButton(): SemanticsNodeInteraction = onNodeWithText(
+        resources.getString(R.string.holder_consent_screen_cancel_button)
     )
 }

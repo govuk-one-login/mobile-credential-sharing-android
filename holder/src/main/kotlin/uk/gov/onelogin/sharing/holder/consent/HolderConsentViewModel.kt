@@ -8,7 +8,6 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -52,6 +51,7 @@ class HolderConsentViewModel(
                         )
                     },
                     normalisedOrganizationName = it.normalisedOrganizationName,
+                    organizationName = it.organizationName,
                     isBusy = it.isBusy
                 )
             }
@@ -60,18 +60,6 @@ class HolderConsentViewModel(
             SharingStarted.Eagerly,
             null
         )
-
-    // Stores whether privacy policy is shown and survives configuration changes
-    private val _showPrivacyPolicy = MutableStateFlow(false)
-    val showPrivacyPolicy: StateFlow<Boolean> = _showPrivacyPolicy
-
-    fun onShowPrivacyPolicy() {
-        _showPrivacyPolicy.value = true
-    }
-
-    fun onClosePrivacyPolicy() {
-        _showPrivacyPolicy.value = false
-    }
 
     fun sendScreenEvent() = viewModelScope.launch {
         analyticsLogger.consentScreen()

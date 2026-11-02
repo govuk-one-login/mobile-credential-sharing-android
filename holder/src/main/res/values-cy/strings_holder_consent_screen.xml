@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_consent_screen_title">@string/consent_screen_title</string>
+    <string name="holder_consent_screen_privacy_notice_link">@string/consent_screen_privacy_notice_link</string>
+    <string name="holder_consent_screen_cancel_button">@string/consent_screen_cancel_button</string>
+</resources>
