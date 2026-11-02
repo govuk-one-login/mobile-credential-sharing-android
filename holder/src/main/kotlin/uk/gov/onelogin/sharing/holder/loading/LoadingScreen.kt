@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.loading
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,8 @@ internal fun LoadingScreen(
     type: LoadingScreenType,
     viewModel: LoadingViewModel = metroViewModel()
 ) {
+    BackHandler(enabled = type.blocksBackNavigation) { }
+
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(type) {
         metrics.putScreenState(type.name)

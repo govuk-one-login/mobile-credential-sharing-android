@@ -92,9 +92,7 @@ internal fun ShareCredential(
 
     val onCancel: () -> Unit = {
         scope.launch {
-            if (state is HolderSessionState.ProcessingEstablishment ||
-                state is HolderSessionState.ProcessingResponse
-            ) {
+            if (state is HolderSessionState.ProcessingEstablishment) {
                 LoadingAnalytics.logCloseButton(analyticsLogger)
             }
             if (state.shouldConfirmCancellation()) {

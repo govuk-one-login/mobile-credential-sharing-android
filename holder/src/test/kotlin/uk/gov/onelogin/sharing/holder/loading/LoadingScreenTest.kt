@@ -1,13 +1,24 @@
 package uk.gov.onelogin.sharing.holder.loading
 
 import android.content.Context
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,6 +44,78 @@ class LoadingScreenTest {
             dispatcher = dispatcherRule.testDispatcher
         )
     }
+
+    @Test
+    fun `Only the non-interactive transitional screen blocks back navigation`() {
+        assertTrue(LoadingScreenType.SharingDetails.blocksBackNavigation)
+        assertFalse(LoadingScreenType.GettingDetails.blocksBackNavigation)
+    }
+
+    @Test
+    fun `Back press is swallowed when the type blocks back navigation`() =
+        runTest(dispatcherRule.testDispatcher) {
+            lateinit var navController: TestNavHostController
+            var backDispatcher: OnBackPressedDispatcherOwner? = null
+
+            composeTestRule.setContent {
+                backDispatcher = LocalOnBackPressedDispatcherOwner.current
+                navController = TestNavHostController(LocalContext.current).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                }
+                NavHost(navController = navController, startDestination = "previous") {
+                    composable("previous") {}
+                    composable("loading") {
+                        LoadingScreen(
+                            type = LoadingScreenType.SharingDetails,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+
+            composeTestRule.runOnUiThread { navController.navigate("loading") }
+            composeTestRule.waitForIdle()
+
+            composeTestRule.runOnUiThread {
+                backDispatcher!!.onBackPressedDispatcher.onBackPressed()
+            }
+            composeTestRule.waitForIdle()
+
+            assertThat(navController.currentDestination?.route, equalTo("loading"))
+        }
+
+    @Test
+    fun `Back press is not swallowed when the type does not block back navigation`() =
+        runTest(dispatcherRule.testDispatcher) {
+            lateinit var navController: TestNavHostController
+            var backDispatcher: OnBackPressedDispatcherOwner? = null
+
+            composeTestRule.setContent {
+                backDispatcher = LocalOnBackPressedDispatcherOwner.current
+                navController = TestNavHostController(LocalContext.current).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                }
+                NavHost(navController = navController, startDestination = "previous") {
+                    composable("previous") {}
+                    composable("loading") {
+                        LoadingScreen(
+                            type = LoadingScreenType.GettingDetails,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+
+            composeTestRule.runOnUiThread { navController.navigate("loading") }
+            composeTestRule.waitForIdle()
+
+            composeTestRule.runOnUiThread {
+                backDispatcher!!.onBackPressedDispatcher.onBackPressed()
+            }
+            composeTestRule.waitForIdle()
+
+            assertThat(navController.currentDestination?.route, equalTo("previous"))
+        }
 
     @Test
     fun `Label for the type is displayed`(@TestParameter type: LoadingScreenType) =
