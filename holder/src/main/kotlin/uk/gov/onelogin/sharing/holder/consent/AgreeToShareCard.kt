@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -42,6 +43,7 @@ private val CARD_CORNER_RADIUS = 16.dp
 private val DOCUMENT_ICON_WIDTH = 70.dp
 private val DOCUMENT_ICON_HEIGHT = 50.dp
 private val DIVIDER_THICKNESS = 1.dp
+private const val LARGE_FONT_SCALE_THRESHOLD = 1.5f
 
 /**
  * Renders the 'Agree to Share' card from an already resolved [ConsentCard]. All ordering,
@@ -93,26 +95,47 @@ private fun CardHeading(count: Int) {
         emphasise(headingTemplate, documentName, bold)
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(GdsLocalColorScheme.current.cardBackground)
-            .padding(spacingDouble)
-            .semantics(mergeDescendants = true) {},
-        horizontalArrangement = Arrangement.spacedBy(spacingDouble),
-        verticalAlignment = Alignment.Top
-    ) {
+    val documentIcon: @Composable () -> Unit = {
         Image(
             painter = painterResource(R.drawable.credential_thumbnail_mdl),
             contentDescription = null,
             modifier = Modifier.size(width = DOCUMENT_ICON_WIDTH, height = DOCUMENT_ICON_HEIGHT)
         )
+    }
+    val headingLabel: @Composable (Modifier) -> Unit = { modifier ->
         Text(
             text = headingText,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            textAlign = TextAlign.Start
+            textAlign = TextAlign.Start,
+            modifier = modifier
         )
+    }
+
+    val containerModifier = Modifier
+        .fillMaxWidth()
+        .background(GdsLocalColorScheme.current.cardBackground)
+        .padding(spacingDouble)
+        .semantics(mergeDescendants = true) {}
+
+    // At very large font scales the text drops to the line below
+    if (LocalDensity.current.fontScale >= LARGE_FONT_SCALE_THRESHOLD) {
+        Column(
+            modifier = containerModifier,
+            verticalArrangement = Arrangement.spacedBy(spacingDouble)
+        ) {
+            documentIcon()
+            headingLabel(Modifier.fillMaxWidth())
+        }
+    } else {
+        Row(
+            modifier = containerModifier,
+            horizontalArrangement = Arrangement.spacedBy(spacingDouble),
+            verticalAlignment = Alignment.Top
+        ) {
+            documentIcon()
+            headingLabel(Modifier.weight(1f))
+        }
     }
 }
 
