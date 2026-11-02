@@ -23,6 +23,10 @@
         <item quantity="one">You’ll share %1$d detail from your %2$s</item>
         <item quantity="other">You’ll share %1$d details from your %2$s</item>
     </plurals>
+    <plurals name="consent_card_heading_emphasis">
+        <item quantity="one">%1$d detail</item>
+        <item quantity="other">%1$d details</item>
+    </plurals>
     <string name="consent_card_will_keep">%1$s will keep these details as a record of this check:</string>
     <string name="consent_card_will_not_keep">%1$s will not keep:</string>
     <string name="consent_card_all_kept">%1$s will keep these details as a record of this check.</string>
