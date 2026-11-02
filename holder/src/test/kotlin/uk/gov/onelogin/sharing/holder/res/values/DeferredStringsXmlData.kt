@@ -68,4 +68,16 @@ enum class DeferredStringsXmlData(
         defersTo = R.string.dvs_is_certified_under_uk_digital_verification_services_meaning_that,
         resourceId = R.string.more_about_dvs_body_3
     ),
+    MORE_ABOUT_DVS_BULLET_1(
+        defersTo = R.string.use_encryption_when_storing_your_details,
+        resourceId = R.string.more_about_dvs_bullet_1
+    ),
+    MORE_ABOUT_DVS_BULLET_2(
+        defersTo = R.string.keep_your_details_only_as_long_as_needed,
+        resourceId = R.string.more_about_dvs_bullet_2
+    ),
+    MORE_ABOUT_DVS_BULLET_3(
+        defersTo = R.string.never_use_your_details_for_marketing_purposes,
+        resourceId = R.string.more_about_dvs_bullet_3
+    ),
 }

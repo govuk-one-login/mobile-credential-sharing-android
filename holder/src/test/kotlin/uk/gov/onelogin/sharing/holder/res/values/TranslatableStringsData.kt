@@ -37,6 +37,27 @@ enum class TranslatableStringsData(
             "cy" to "Paratoi i rannu"
         )
     ),
+    KEEP_YOUR_DETAILS_ONLY_AS_LONG_AS_NEEDED(
+        resourceId = R.string.keep_your_details_only_as_long_as_needed,
+        translations = mapOf(
+            "en" to "keep your details only as long as they need to",
+            "cy" to "cadw eich manylion ond cyhyd ag y mae angen"
+        )
+    ),
+    NEVER_USE_YOUR_DETAILS_FOR_MARKETING_PURPOSES(
+        resourceId = R.string.never_use_your_details_for_marketing_purposes,
+        translations = mapOf(
+            "en" to "never use your details for marketing purposes",
+            "cy" to "peidio byth â defnyddio’ch manylion at ddibenion marchnata"
+        )
+    ),
+    USE_ENCRYPTION_WHEN_STORING_YOUR_DETAILS(
+        resourceId = R.string.use_encryption_when_storing_your_details,
+        translations = mapOf(
+            "en" to "use encryption when storing your details",
+            "cy" to "ddefnyddio amgryptio wrth storio’ch manylion"
+        )
+    ),
     YOU_WILL_CONNECT_VIA_QR_LATER(
         resourceId = R.string.you_will_connect_via_qr_later,
         translations = mapOf(
@@ -54,7 +75,7 @@ enum class TranslatableStringsData(
             "cy" to "Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, " +
                 "bydd angen i chi ei droi ymlaen hefyd."
         )
-    )
+    ),
     ;
 
     operator fun get(localeCode: String): String? = translations[localeCode]
