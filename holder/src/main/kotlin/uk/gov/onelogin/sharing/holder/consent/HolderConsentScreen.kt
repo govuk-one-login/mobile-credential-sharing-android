@@ -14,7 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,7 +60,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
             onAccept = viewModel::onAccept,
             onDeny = viewModel::onDeny
         )
-    } ?: CircularProgressIndicator()
+    }
 }
 
 @Suppress("LongMethod")

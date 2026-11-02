@@ -35,17 +35,16 @@ class LoadingScreenTest {
     }
 
     @Test
-    fun `Label for the type is displayed`(
-        @TestParameter type: LoadingScreenType
-    ) = runTest(dispatcherRule.testDispatcher) {
-        composeTestRule.setContent {
-            LoadingScreen(type = type, viewModel = viewModel)
-        }
+    fun `Label for the type is displayed`(@TestParameter type: LoadingScreenType) =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.setContent {
+                LoadingScreen(type = type, viewModel = viewModel)
+            }
 
-        composeTestRule
-            .onNodeWithText(resources.getString(type.labelRes))
-            .assertIsDisplayed()
-    }
+            composeTestRule
+                .onNodeWithText(resources.getString(type.labelRes))
+                .assertIsDisplayed()
+        }
 
     @Test
     fun `Getting details preview follows the same display as the screen`() =

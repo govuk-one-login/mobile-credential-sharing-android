@@ -17,10 +17,11 @@ import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluet
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoadingScreen
 import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
-import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
@@ -179,6 +180,7 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.ProcessingEstablishment -> {
             {
                 navController.navigateToLoadingScreen(LoadingScreenType.GettingDetails) {
+                    popUpTo<HolderPresentQrRoute> { inclusive = true }
                     launchSingleTop = true
                 }
             }
@@ -187,6 +189,7 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.ProcessingResponse -> {
             {
                 navController.navigateToLoadingScreen(LoadingScreenType.SharingDetails) {
+                    popUpTo<HolderConsentRoute> { inclusive = true }
                     launchSingleTop = true
                 }
             }

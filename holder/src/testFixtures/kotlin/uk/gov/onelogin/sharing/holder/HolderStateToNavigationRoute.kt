@@ -12,9 +12,9 @@ import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolut
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.loading.LoadingRoute
 import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
-import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute

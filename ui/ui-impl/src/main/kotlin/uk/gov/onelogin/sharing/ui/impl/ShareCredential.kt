@@ -33,8 +33,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
