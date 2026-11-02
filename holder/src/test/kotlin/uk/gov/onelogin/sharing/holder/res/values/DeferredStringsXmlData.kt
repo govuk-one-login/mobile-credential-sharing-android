@@ -65,7 +65,7 @@ enum class DeferredStringsXmlData(
         resourceId = R.string.holder_turn_on_bluetooth_body_2
     ),
     HOLDER_TURN_ON_BLUETOOTH_BUTTON(
-        defersTo = R.string.holder_turn_on_bluetooth_title,
+        defersTo = R.string.turn_on_bluetooth,
         resourceId = R.string.holder_turn_on_bluetooth_button
     )
 }

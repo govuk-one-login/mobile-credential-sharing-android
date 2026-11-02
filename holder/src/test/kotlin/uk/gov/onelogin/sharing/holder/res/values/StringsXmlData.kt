@@ -75,6 +75,6 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     ),
     TURN_ON_BLUETOOTH_BUTTON(
         expected = "Turn on Bluetooth",
-        resourceId = R.string.turn_on_bluetooth_button
+        resourceId = R.string.turn_on_bluetooth
     )
 }

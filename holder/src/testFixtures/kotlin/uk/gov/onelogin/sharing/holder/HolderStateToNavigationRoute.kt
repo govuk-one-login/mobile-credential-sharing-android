@@ -52,7 +52,7 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'Preflight' -> RetryHolderPrerequisitesRoute",
+                "'Preflight (Bluetooth on)' -> GetReadyToShareRoute",
                 HolderSessionStateStubs.preflightEmptyPermissions
             ) {
                 instanceOf<GetReadyToShareRoute>(

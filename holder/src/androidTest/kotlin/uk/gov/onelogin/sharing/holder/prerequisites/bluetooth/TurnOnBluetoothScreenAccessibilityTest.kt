@@ -70,9 +70,8 @@ class TurnOnBluetoothScreenAccessibilityTest {
     @Test
     fun passesAccessibilityChecks() {
         accessibilityRule.performAccessibilityCheck(
-            content = { Render() },
             validator = validator
-        )
+        ) { Render() }
     }
 
     @Composable

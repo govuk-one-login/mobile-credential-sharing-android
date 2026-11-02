@@ -5,12 +5,11 @@ import android.content.res.Resources
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -40,7 +39,8 @@ class TurnOnBluetoothScreenRule(
             and hasRole(Role.Button)
     )
 
-    fun onLoadingSpinner() = onNodeWithTag(LOADING_SPINNER_TEST_TAG)
+    private val loadingSpinner = hasTestTag(LOADING_SPINNER_TEST_TAG)
+    fun onLoadingSpinner() = onNode(loadingSpinner)
 
     // assertions
     fun assertTitleIsDisplayed() = onTitle().assertIsDisplayed()
@@ -50,7 +50,7 @@ class TurnOnBluetoothScreenRule(
     fun assertLoadingSpinnerIsDisplayed() = onLoadingSpinner().assertIsDisplayed()
 
     fun waitUntilLoadingSpinnerExists() = waitUntil {
-        onAllNodesWithTag(LOADING_SPINNER_TEST_TAG).fetchSemanticsNodes().isNotEmpty()
+        onAllNodes(loadingSpinner).fetchSemanticsNodes().isNotEmpty()
     }
 
     fun assertBodyIsDisplayed() {
