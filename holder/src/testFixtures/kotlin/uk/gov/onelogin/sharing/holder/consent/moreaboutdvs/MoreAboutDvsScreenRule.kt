@@ -16,25 +16,41 @@ class MoreAboutDvsScreenRule(
         .resources,
 ) : ComposeContentTestRule by composeTestRule {
 
+    fun assertValidBulletPoints(
+        organizationName: String,
+        useUnmergedTree: Boolean = false
+    ) {
+        mapOf(
+            "first" to R.string.more_about_dvs_bullet_1,
+            "second" to R.string.more_about_dvs_bullet_2,
+            "third" to R.string.more_about_dvs_bullet_3
+        ).forEach { (description, resourceId) ->
+            onNodeWithText(
+                resources.getString(
+                    resourceId,
+                    organizationName
+                ).removeDoubleFullStop(),
+                useUnmergedTree = useUnmergedTree
+            ).assertExists("Cannot find $description bullet point")
+        }
+    }
+
     fun assertValidBody(
         organizationName: String,
         useUnmergedTree: Boolean = false
     ) {
         mapOf(
-            "first paragraph" to R.string.more_about_dvs_body_1,
-            "second paragraph" to R.string.more_about_dvs_body_2,
-            "third paragraph" to R.string.more_about_dvs_body_3
+            "first" to R.string.more_about_dvs_body_1,
+            "second" to R.string.more_about_dvs_body_2,
+            "third" to R.string.more_about_dvs_body_3
         ).forEach { (description, resourceId) ->
             onNodeWithText(
-                resources.getString(resourceId, organizationName).let { text ->
-                    if (text.endsWith("..")) {
-                        text.dropLast(1)
-                    } else {
-                        text
-                    }
-                },
+                resources.getString(
+                    resourceId,
+                    organizationName
+                ).removeDoubleFullStop(),
                 useUnmergedTree = useUnmergedTree
-            ).assertExists("Cannot find $description")
+            ).assertExists("Cannot find $description paragraph")
         }
     }
 

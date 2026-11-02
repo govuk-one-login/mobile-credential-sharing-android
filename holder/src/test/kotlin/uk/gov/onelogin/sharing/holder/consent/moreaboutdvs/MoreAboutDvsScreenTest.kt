@@ -60,6 +60,7 @@ class MoreAboutDvsScreenTest {
 
             assertValidHeader(organizationName = expectedOrganization)
             assertValidBody(organizationName = expectedOrganization)
+            assertValidBulletPoints(organizationName = expectedOrganization)
         }
     }
 }

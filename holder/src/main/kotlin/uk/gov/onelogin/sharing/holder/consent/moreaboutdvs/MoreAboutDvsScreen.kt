@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import kotlinx.collections.immutable.immutableListOf
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import uk.gov.android.ui.componentsv2.list.ListItem
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
@@ -36,26 +37,41 @@ internal fun MoreAboutDvsContent(
 
     val organizationName = presentation.organizationName ?: "Unknown"
 
+    val bodyTexts = listOf(
+        R.string.more_about_dvs_body_1,
+        R.string.more_about_dvs_body_2,
+        R.string.more_about_dvs_body_3,
+    ).map { resourceId ->
+        stringResource(
+            resourceId,
+            organizationName
+        ).removeDoubleFullStop()
+    }.map(LeftAlignedScreenBodyV2::Text)
+
+    val bulletText = listOf(
+        R.string.more_about_dvs_bullet_1,
+        R.string.more_about_dvs_bullet_2,
+        R.string.more_about_dvs_bullet_3,
+    ).map { resourceId ->
+        stringResource(
+            resourceId,
+            organizationName
+        ).removeDoubleFullStop()
+    }.map { bulletText ->
+        ListItem(text = bulletText)
+    }.let { bulletItems ->
+        LeftAlignedScreenBodyV2.BulletList(
+            items = bulletItems.toPersistentList()
+        )
+    }
+
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(
             R.string.more_about_dvs_title,
             organizationName
         ),
-        body = listOf(
-            R.string.more_about_dvs_body_1,
-            R.string.more_about_dvs_body_2,
-            R.string.more_about_dvs_body_3,
-        ).map { resourceId ->
-            stringResource(resourceId, organizationName).let { text ->
-                if (text.endsWith("..")) {
-                    text.dropLast(1)
-                } else {
-                    text
-                }
-            }
-        }
-            .map(LeftAlignedScreenBodyV2::Text)
+        body = (bodyTexts + bulletText)
             .toPersistentList(),
         forceScroll = true,
     )
@@ -74,6 +90,14 @@ internal fun MoreAboutDvsPreview(
                 modifier = Modifier.fillMaxSize()
             )
         }
+    }
+}
+
+internal fun String.removeDoubleFullStop(): String = let { text ->
+    if (text.endsWith("..")) {
+        text.dropLast(1)
+    } else {
+        text
     }
 }
 
