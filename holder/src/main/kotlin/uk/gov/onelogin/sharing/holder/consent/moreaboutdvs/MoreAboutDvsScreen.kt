@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -10,10 +11,15 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import kotlinx.collections.immutable.immutableListOf
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import uk.gov.android.ui.componentsv2.heading.GdsHeading
+import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
+import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
@@ -65,13 +71,23 @@ internal fun MoreAboutDvsContent(
         )
     }
 
+    val privacyNoticeSubheading = LeftAlignedScreenBodyV2.Title(
+        text = stringResource(
+            R.string.more_about_dvs_privacy_subheading,
+            organizationName
+        ),
+        modifier = Modifier.padding(top = spacingDouble),
+        style = GdsHeadingStyle.Title2,
+        textAlign = GdsHeadingAlignment.LeftAligned
+    )
+
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(
             R.string.more_about_dvs_title,
             organizationName
         ),
-        body = (bodyTexts + bulletText)
+        body = (bodyTexts + bulletText + privacyNoticeSubheading)
             .toPersistentList(),
         forceScroll = true,
     )

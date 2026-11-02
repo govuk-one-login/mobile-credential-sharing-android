@@ -54,13 +54,12 @@ class MoreAboutDvsScreenTest {
     ) = runTest {
 
         composeTestRule.run {
-            setContent {
-                GdsTheme { content() }
-            }
+            setContent { GdsTheme { content() } }
 
             assertValidHeader(organizationName = expectedOrganization)
             assertValidBody(organizationName = expectedOrganization)
             assertValidBulletPoints(organizationName = expectedOrganization)
+            assertValidPrivacyPolicySubheading(organizationName = expectedOrganization)
         }
     }
 }

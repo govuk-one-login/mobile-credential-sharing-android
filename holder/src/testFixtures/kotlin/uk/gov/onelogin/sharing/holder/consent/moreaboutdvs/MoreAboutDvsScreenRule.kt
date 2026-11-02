@@ -16,25 +16,6 @@ class MoreAboutDvsScreenRule(
         .resources,
 ) : ComposeContentTestRule by composeTestRule {
 
-    fun assertValidBulletPoints(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) {
-        mapOf(
-            "first" to R.string.more_about_dvs_bullet_1,
-            "second" to R.string.more_about_dvs_bullet_2,
-            "third" to R.string.more_about_dvs_bullet_3
-        ).forEach { (description, resourceId) ->
-            onNodeWithText(
-                resources.getString(
-                    resourceId,
-                    organizationName
-                ).removeDoubleFullStop(),
-                useUnmergedTree = useUnmergedTree
-            ).assertExists("Cannot find $description bullet point")
-        }
-    }
-
     fun assertValidBody(
         organizationName: String,
         useUnmergedTree: Boolean = false
@@ -54,6 +35,25 @@ class MoreAboutDvsScreenRule(
         }
     }
 
+    fun assertValidBulletPoints(
+        organizationName: String,
+        useUnmergedTree: Boolean = false
+    ) {
+        mapOf(
+            "first" to R.string.more_about_dvs_bullet_1,
+            "second" to R.string.more_about_dvs_bullet_2,
+            "third" to R.string.more_about_dvs_bullet_3
+        ).forEach { (description, resourceId) ->
+            onNodeWithText(
+                resources.getString(
+                    resourceId,
+                    organizationName
+                ).removeDoubleFullStop(),
+                useUnmergedTree = useUnmergedTree
+            ).assertExists("Cannot find $description bullet point")
+        }
+    }
+
     fun assertValidHeader(
         organizationName: String,
         useUnmergedTree: Boolean = false
@@ -62,6 +62,26 @@ class MoreAboutDvsScreenRule(
         useUnmergedTree = useUnmergedTree
     ).assertExists("Cannot find the main header!")
         .assert(isHeading())
+
+    fun assertValidPrivacyPolicySubheading(
+        organizationName: String,
+        useUnmergedTree: Boolean = false
+    ) = onPrivacyPolicySubheading(
+        organizationName = organizationName,
+        useUnmergedTree = useUnmergedTree
+    ).assertExists("Cannot find the main privacy policy subheading!")
+        .assert(isHeading())
+
+    fun onPrivacyPolicySubheading(
+        organizationName: String,
+        useUnmergedTree: Boolean = false
+    ) = onNodeWithText(
+        resources.getString(
+            R.string.more_about_dvs_privacy_subheading,
+            organizationName
+        ),
+        useUnmergedTree = useUnmergedTree
+    )
 
     fun onHeader(
         organizationName: String,
