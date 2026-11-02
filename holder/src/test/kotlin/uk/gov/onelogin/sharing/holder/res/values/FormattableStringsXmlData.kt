@@ -50,9 +50,9 @@ enum class FormattableStringsXmlData(
     ),
     THE_PERSON_CHECKING_IS_USING_AN_APP_POWERED_BY_DVS(
         translations = mapOf(
-            "en" to "The person doing the check is using an app powered by <Argument 1>",
+            "en" to "The person doing the check is using an app powered by <Argument 1>.",
             "cy" to "Mae’r person sy’n gwneud y gwiriad yn defnyddio ap sy’n cael ei bweru gan " +
-                    "<Argument 1>"
+                    "<Argument 1>."
         ),
         resourceId = R.string.the_person_checking_is_using_an_app_powered_by_dvs,
         *(1..1).toPlaceholderStrings()

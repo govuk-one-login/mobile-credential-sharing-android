@@ -12,7 +12,7 @@
     <string name="keep_your_details_only_as_long_as_needed" translatable="true">cadw eich manylion ond cyhyd ag y mae angen</string>
     <string name="more_about_dvs">Mwy am %1$s</string>
     <string name="never_use_your_details_for_marketing_purposes" translatable="true">peidio byth â defnyddio’ch manylion at ddibenion marchnata</string>
-    <string name="the_person_checking_is_using_an_app_powered_by_dvs">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap sy’n cael ei bweru gan %1$s</string>
+    <string name="the_person_checking_is_using_an_app_powered_by_dvs">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap sy’n cael ei bweru gan %1$s.</string>
     <string name="use_encryption_when_storing_your_details" translatable="true">ddefnyddio amgryptio wrth storio’ch manylion</string>
     <string name="you_will_connect_via_qr_later">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny yn nes ymlaen.</string>
     <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>

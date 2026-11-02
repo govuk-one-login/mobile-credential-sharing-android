@@ -7,6 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import kotlinx.collections.immutable.immutableListOf
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
+import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
@@ -38,6 +42,21 @@ internal fun MoreAboutDvsContent(
             R.string.more_about_dvs_title,
             organizationName
         ),
+        body = listOf(
+            R.string.more_about_dvs_body_1,
+            R.string.more_about_dvs_body_2,
+            R.string.more_about_dvs_body_3,
+        ).map { resourceId ->
+            stringResource(resourceId, organizationName).let { text ->
+                if (text.endsWith("..")) {
+                    text.dropLast(1)
+                } else {
+                    text
+                }
+            }
+        }
+            .map(LeftAlignedScreenBodyV2::Text)
+            .toPersistentList(),
         forceScroll = true,
     )
 }

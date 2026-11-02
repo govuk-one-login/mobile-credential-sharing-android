@@ -16,6 +16,28 @@ class MoreAboutDvsScreenRule(
         .resources,
 ) : ComposeContentTestRule by composeTestRule {
 
+    fun assertValidBody(
+        organizationName: String,
+        useUnmergedTree: Boolean = false
+    ) {
+        mapOf(
+            "first paragraph" to R.string.more_about_dvs_body_1,
+            "second paragraph" to R.string.more_about_dvs_body_2,
+            "third paragraph" to R.string.more_about_dvs_body_3
+        ).forEach { (description, resourceId) ->
+            onNodeWithText(
+                resources.getString(resourceId, organizationName).let { text ->
+                    if (text.endsWith("..")) {
+                        text.dropLast(1)
+                    } else {
+                        text
+                    }
+                },
+                useUnmergedTree = useUnmergedTree
+            ).assertExists("Cannot find $description")
+        }
+    }
+
     fun assertValidHeader(
         organizationName: String,
         useUnmergedTree: Boolean = false
