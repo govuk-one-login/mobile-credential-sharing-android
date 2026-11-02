@@ -37,6 +37,20 @@ enum class TranslatableStringsData(
             "cy" to "Paratoi i rannu"
         )
     ),
+    HOW_LONG_THEY_WILL_KEEP_YOUR_DETAILS(
+        resourceId = R.string.how_long_they_will_keep_your_details,
+        translations = mapOf(
+            "en" to "how long they will keep your details",
+            "cy" to "am faint o amser y byddant yn cadw eich manylion"
+        ),
+    ),
+    HOW_YOUR_DETAILS_CAN_BE_USED(
+        resourceId = R.string.how_your_details_can_be_used,
+        translations = mapOf(
+            "en" to "how your details can be used",
+            "cy" to "sut y gall eich manylion gael ei ddefnyddio"
+        )
+    ),
     KEEP_YOUR_DETAILS_ONLY_AS_LONG_AS_NEEDED(
         resourceId = R.string.keep_your_details_only_as_long_as_needed,
         translations = mapOf(

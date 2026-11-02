@@ -4,8 +4,11 @@
     <string name="allow_bluetooth_before_sharing_details">Cyn y gallwch rannu manylion o’ch trwydded yrru’r DU, mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth.</string>
     <string name="dvs_is_certified_under_uk_digital_verification_services_meaning_that">Mae %1$s wedi’i ardystio o dan Fframwaith Ymddiriedaeth Gwasanaethau Gwirio Digidol y DU. Mae hyn yn golygu bod yn rhaid iddynt:</string>
     <string name="dvs_is_trusted_to_receive_and_store_details">Mae llywodraeth y DU yn ymddiried yn %1$s i dderbyn a storio eich manylion yn ddiogel.</string>
+    <string name="dvs_s_privacy_notice">Hysbysiad preifatrwydd %1$s</string>
     <string name="find_out_how_sharing_works">Darganfyddwch sut mae rhannu yn gweithio</string>
     <string name="get_ready_to_share">Paratoi i rannu</string>
+    <string name="how_long_they_will_keep_your_details" translatable="true">am faint o amser y byddant yn cadw eich manylion</string>
+    <string name="how_your_details_can_be_used" translatable="true">sut y gall eich manylion gael ei ddefnyddio</string>
     <string name="keep_your_details_only_as_long_as_needed" translatable="true">cadw eich manylion ond cyhyd ag y mae angen</string>
     <string name="more_about_dvs">Mwy am %1$s</string>
     <string name="never_use_your_details_for_marketing_purposes" translatable="true">peidio byth â defnyddio’ch manylion at ddibenion marchnata</string>

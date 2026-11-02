@@ -11,12 +11,15 @@
     <string name="creating_qr_code">Creating QR code...</string>
     <string name="dvs_is_certified_under_uk_digital_verification_services_meaning_that">%1$s is certified under the UK Digital Verification Services Trust Framework. This means they must:</string>
     <string name="dvs_is_trusted_to_receive_and_store_details">%1$s is trusted by the UK government to receive and store your details securely.</string>
+    <string name="dvs_s_privacy_notice">%1$s’s privacy notice</string>
     <string name="enable_bluetooth_permission">Please enable bluetooth permissions to continue</string>
     <string name="find_out_how_sharing_works" translatable="true">Find out how sharing works</string>
     <string name="generating_qr_code_data">Generating QR code data...</string>
     <string name="get_ready_to_share" translatable="true">Get ready to share</string>
     <string name="have_not_met_requirements">Haven’t met requirements...</string>
     <string name="holder_consent_organization_sentence">The person doing the check is using an approved app powered by %1$s</string>
+    <string name="how_long_they_will_keep_your_details" translatable="true">how long they will keep your details</string>
+    <string name="how_your_details_can_be_used" translatable="true">how your details can be used</string>
     <string name="keep_your_details_only_as_long_as_needed" translatable="true">keep your details only as long as they need to</string>
     <string name="more_about_dvs">More about %1$s</string>
     <string name="never_use_your_details_for_marketing_purposes" translatable="true">never use your details for marketing purposes</string>
@@ -25,4 +28,5 @@
     <string name="use_encryption_when_storing_your_details" translatable="true">use encryption when storing your details</string>
     <string name="you_will_connect_via_qr_later" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that later.</string>
     <string name="you_will_need_to_turn_on_bluetooth" translatable="true">If Bluetooth is turned off on your phone, you’ll need to turn it on too.</string>
+
 </resources>

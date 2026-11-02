@@ -32,6 +32,14 @@ enum class FormattableStringsXmlData(
         resourceId = R.string.dvs_is_trusted_to_receive_and_store_details,
         *(1..1).toPlaceholderStrings()
     ),
+    DVS_S_PRIVACY_NOTICE(
+        translations = mapOf(
+            "en" to "<Argument 1>’s privacy notice",
+            "cy" to "Hysbysiad preifatrwydd <Argument 1>"
+        ),
+        resourceId = R.string.dvs_s_privacy_notice,
+        *(1..1).toPlaceholderStrings()
+    ),
     MORE_ABOUT_DVS(
         translations = mapOf(
             "en" to "More about <Argument 1>",
