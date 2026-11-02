@@ -46,8 +46,6 @@ internal fun LoadingContent(type: LoadingScreenType) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // These screens show a single fixed label, so the same text is used for every wait phase
-        // of the GDS progress indicator.
         GdsProgressIndicator(
             labels = GdsProgressIndicatorDefaults.labels(
                 short = label,
