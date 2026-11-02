@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="more_about_dvs_title" translatable="false">@string/more_about_dvs</string>
+    <string name="more_about_dvs_body_1" translatable="false">@string/the_person_checking_is_using_an_app_powered_by_dvs</string>
+    <string name="more_about_dvs_body_2" translatable="false">@string/dvs_is_trusted_to_receive_and_store_details</string>
+    <string name="more_about_dvs_body_3" translatable="false">@string/dvs_is_certified_under_uk_digital_verification_services_meaning_that</string>
 </resources>

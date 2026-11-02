@@ -51,5 +51,21 @@ enum class DeferredStringsXmlData(
     HOLDER_PREREQUISITES_READY_TO_PRESENT(
         defersTo = R.string.generating_qr_code_data,
         resourceId = R.string.holder_prerequisites_ready_to_present
-    )
+    ),
+    MORE_ABOUT_DVS_TITLE(
+        defersTo = R.string.more_about_dvs,
+        resourceId = R.string.more_about_dvs_title
+    ),
+    MORE_ABOUT_DVS_BODY_1(
+        defersTo = R.string.the_person_checking_is_using_an_app_powered_by_dvs,
+        resourceId = R.string.more_about_dvs_body_1
+    ),
+    MORE_ABOUT_DVS_BODY_2(
+        defersTo = R.string.dvs_is_trusted_to_receive_and_store_details,
+        resourceId = R.string.more_about_dvs_body_2
+    ),
+    MORE_ABOUT_DVS_BODY_3(
+        defersTo = R.string.dvs_is_certified_under_uk_digital_verification_services_meaning_that,
+        resourceId = R.string.more_about_dvs_body_3
+    ),
 }
