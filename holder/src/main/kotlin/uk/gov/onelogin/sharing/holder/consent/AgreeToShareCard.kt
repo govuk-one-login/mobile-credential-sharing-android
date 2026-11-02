@@ -86,9 +86,10 @@ private fun CardHeading(count: Int) {
         fontFamily = ExtraTypography.bodyLargeBold.fontFamily,
         fontWeight = ExtraTypography.bodyLargeBold.fontWeight
     )
+    val countPhrase = pluralStringResource(R.plurals.consent_card_heading_emphasis, count, count)
     val headingText = buildAnnotatedString {
         append(headingTemplate)
-        emphasise(headingTemplate, count.toString(), bold)
+        emphasise(headingTemplate, countPhrase, bold)
         emphasise(headingTemplate, documentName, bold)
     }
 
