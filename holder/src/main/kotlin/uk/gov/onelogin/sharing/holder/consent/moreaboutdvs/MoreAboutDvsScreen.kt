@@ -29,11 +29,14 @@ internal fun MoreAboutDvsContent(
     presentation: ConsentPresentation,
     modifier: Modifier = Modifier
 ) {
+
+    val organizationName = presentation.organizationName ?: "Unknown"
+
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(
             R.string.more_about_dvs_title,
-            presentation.organizationName ?: "Unknown"
+            organizationName
         ),
         forceScroll = true,
     )
