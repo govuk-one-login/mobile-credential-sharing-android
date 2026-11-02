@@ -1,10 +1,17 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.printToString
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import kotlin.test.Ignore
@@ -49,33 +56,21 @@ class MoreAboutDvsScreenTest {
         )
     }
 
-    @Ignore("Compose hierarchy doesn't load the privacy policy bullet points")
-    @Test
-    fun `Privacy policy bullet points exist within the UI`() = runTest {
-        composeTestRule.run {
-            setContent {
-                MoreAboutDvsScreen(
-                    presentation = presentation
-                )
-            }
-
-            assertValidPrivacyPolicyBulletPoints()
-        }
-    }
-
     private fun verifyUiElements(
         expectedOrganization: String = presentation.organizationName!!,
-        content: @Composable () -> Unit
+        content: @Composable () -> Unit,
     ) = runTest {
-
         composeTestRule.run {
             setContent { GdsTheme { content() } }
+            waitForIdle()
 
             assertValidHeader(organizationName = expectedOrganization)
             assertValidBody(organizationName = expectedOrganization)
             assertValidBulletPoints(organizationName = expectedOrganization)
             assertValidPrivacyPolicySubheading(organizationName = expectedOrganization)
             assertValidPrivacyPolicyBody(organizationName = expectedOrganization)
+            assertValidPrivacyPolicyBulletPoints(useUnmergedTree = true)
+            assertValidPrivacyPolicyButton(useUnmergedTree = true)
         }
     }
 }

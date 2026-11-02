@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
@@ -36,6 +38,7 @@ internal fun MoreAboutDvsContent(
     presentation: ConsentPresentation,
     modifier: Modifier = Modifier
 ) {
+    val scope = rememberCoroutineScope()
 
     val organizationName = presentation.organizationName ?: "Unknown"
 
@@ -100,6 +103,19 @@ internal fun MoreAboutDvsContent(
         )
     }
 
+    val privacyNoticeLink = LeftAlignedScreenBodyV2.SecondaryButton(
+        text = stringResource(
+            R.string.more_about_dvs_privacy_policy_link,
+            organizationName
+        ),
+        onClick = {
+            scope.launch {
+                // button currently does nothing
+            }
+        },
+        showIcon = true
+    )
+
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(
@@ -111,7 +127,8 @@ internal fun MoreAboutDvsContent(
                         bodyBullets +
                         privacyNoticeSubheading +
                         privacyNoticeBody +
-                        privacyNoticeBullets
+                        privacyNoticeBullets +
+                        privacyNoticeLink
                 )
             .toPersistentList(),
         forceScroll = true,
@@ -122,13 +139,14 @@ internal fun MoreAboutDvsContent(
 @Composable
 internal fun MoreAboutDvsPreview(
     @PreviewParameter(provider = MoreAboutDvsPreviewParameters::class)
-    presentation: ConsentPresentation
+    presentation: ConsentPresentation,
+    modifier: Modifier = Modifier,
 ) {
     GdsTheme {
         Surface {
             MoreAboutDvsContent(
                 presentation = presentation,
-                modifier = Modifier.fillMaxSize()
+                modifier = modifier.fillMaxSize()
             )
         }
     }

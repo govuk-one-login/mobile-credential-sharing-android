@@ -94,7 +94,7 @@ enum class DeferredStringsXmlData(
     ),
     MORE_ABOUT_DVS_PRIVACY_NOTICE_LINK(
         defersTo = R.string.dvs_s_privacy_notice,
-        resourceId = R.string.more_about_dvs_privacy_notice_link
+        resourceId = R.string.more_about_dvs_privacy_policy_link
     ),
     MORE_ABOUT_DVS_PRIVACY_BODY(
         defersTo = R.string.read_dvs_s_privacy_policy_to_find_out,

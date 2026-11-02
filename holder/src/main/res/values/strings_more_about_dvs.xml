@@ -11,5 +11,5 @@
     <string name="more_about_dvs_privacy_body" translatable="false">@string/read_dvs_s_privacy_policy_to_find_out</string>
     <string name="more_about_dvs_privacy_bullet_1" translatable="false">@string/how_long_they_will_keep_your_details</string>
     <string name="more_about_dvs_privacy_bullet_2" translatable="false">@string/how_your_details_can_be_used</string>
-    <string name="more_about_dvs_privacy_notice_link" translatable="false">@string/dvs_s_privacy_notice</string>
+    <string name="more_about_dvs_privacy_policy_link" translatable="false">@string/dvs_s_privacy_notice</string>
 </resources>
