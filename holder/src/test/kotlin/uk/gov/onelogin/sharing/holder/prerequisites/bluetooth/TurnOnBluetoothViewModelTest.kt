@@ -17,6 +17,9 @@ import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothViewModelTestData.BUTTON_TEXT
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothViewModelTestData.SCREEN_ID
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothViewModelTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -97,6 +100,26 @@ class TurnOnBluetoothViewModelTest {
             analyticsLogger,
             hasSentEvents(contains(TurnOnBluetoothViewModelTestData.expectedTurnOnBluetoothEvent))
         )
+    }
+
+    @Test
+    fun `Screen view event sets screen class, name, and id`() = runTest {
+        viewModel.sendScreenEvent().join()
+
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals("screen_view", event.eventType)
+        assertEquals(SCREEN_NAME.lowercase(), event.parameters["screen_name"])
+        assertEquals(SCREEN_ID, event.parameters["screen_id"])
+    }
+
+    @Test
+    fun `Turn on Bluetooth button event sets text and type`() = runTest {
+        viewModel.sendTurnOnBluetoothEvent().join()
+
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals("navigation", event.eventType)
+        assertEquals(BUTTON_TEXT.lowercase(), event.parameters["text"])
+        assertEquals("submit form", event.parameters["type"])
     }
 
     @Test
