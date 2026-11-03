@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -300,9 +299,6 @@ class HolderOrchestrator(
             }
 
             safeTransitionTo(HolderSessionState.ProcessingResponse)
-            // TEMPORARY TEST HOOK: hold the "Sharing your details" loading screen visible for 15s
-            // to record TalkBack. Remove before merging.
-            delay(15.seconds)
             sendDeviceResponse(document = document, skDevice = submission.skDevice)
         } catch (e: CredentialSigningException.Recoverable) {
             // Neutral outcome: keep the session active on the consent screen.
@@ -732,9 +728,6 @@ class HolderOrchestrator(
             )
 
             logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)
-            // TEMPORARY TEST HOOK: hold the "Getting list of details" loading screen visible for
-            // 15s to record TalkBack. Remove before merging.
-            delay(15.seconds)
             safeTransitionTo(
                 HolderSessionState.AwaitingUserConsent(
                     request = deviceRequest,

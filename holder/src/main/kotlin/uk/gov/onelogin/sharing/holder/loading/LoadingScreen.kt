@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicator
 import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicatorDefaults
+import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicatorState
+import uk.gov.android.ui.componentsv2.progress.ProgressWaitLength
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -37,7 +39,10 @@ internal fun LoadingScreen(
 }
 
 @Composable
-internal fun LoadingContent(type: LoadingScreenType) {
+internal fun LoadingContent(
+    type: LoadingScreenType,
+    state: GdsProgressIndicatorState = GdsProgressIndicatorState()
+) {
     val label = stringResource(type.labelRes)
     Column(
         modifier = Modifier
@@ -51,7 +56,8 @@ internal fun LoadingContent(type: LoadingScreenType) {
                 short = label,
                 long = label,
                 longer = label
-            )
+            ),
+            state = state
         )
     }
 }
@@ -61,7 +67,10 @@ internal fun LoadingContent(type: LoadingScreenType) {
 internal fun LoadingScreenGettingDetailsPreview() {
     GdsTheme {
         Surface {
-            LoadingContent(type = LoadingScreenType.GettingDetails)
+            LoadingContent(
+                type = LoadingScreenType.GettingDetails,
+                state = previewProgressState()
+            )
         }
     }
 }
@@ -71,7 +80,13 @@ internal fun LoadingScreenGettingDetailsPreview() {
 internal fun LoadingScreenSharingDetailsPreview() {
     GdsTheme {
         Surface {
-            LoadingContent(type = LoadingScreenType.SharingDetails)
+            LoadingContent(
+                type = LoadingScreenType.SharingDetails,
+                state = previewProgressState()
+            )
         }
     }
 }
+
+private fun previewProgressState() =
+    GdsProgressIndicatorState(initialWaitedFor = ProgressWaitLength.Short)
