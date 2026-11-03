@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.consent
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -25,6 +27,7 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeading
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
@@ -36,16 +39,20 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 @Composable
 internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
     val presentation by viewModel.presentation.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val titleRes = R.string.holder_consent_screen_title
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderConsentScreen")
-        viewModel.sendScreenEvent()
+
+        viewModel.sendScreenEvent(context.getEnglishString(titleRes))
     }
 
     presentation?.let {
         HolderConsentContent(
             state = it,
+            titleRes = titleRes,
             onAgree = viewModel::onAccept,
             onReadPrivacyNotice = viewModel::onReadPrivacyNotice,
             onCancel = viewModel::onCancelAndGoBack
@@ -56,6 +63,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
 @Composable
 internal fun HolderConsentContent(
     state: HolderConsentUiState,
+    @StringRes titleRes: Int,
     onAgree: () -> Unit = {},
     onReadPrivacyNotice: () -> Unit = {},
     onCancel: () -> Unit = {}
@@ -66,7 +74,7 @@ internal fun HolderConsentContent(
         modifier = Modifier.fillMaxSize(),
         title = { horizontalPadding ->
             GdsHeading(
-                text = stringResource(R.string.holder_consent_screen_title),
+                text = stringResource(titleRes),
                 modifier = Modifier.padding(horizontal = horizontalPadding),
                 textAlign = GdsHeadingAlignment.LeftAligned
             )
@@ -161,7 +169,8 @@ internal fun HolderConsentScreenPreview() {
                     privacyPolicyUrl = "https://verifier.example/privacy",
                     normalisedOrganizationName = "Organisation Ltd.",
                     organizationName = "Organisation Ltd"
-                )
+                ),
+                titleRes = R.string.holder_consent_screen_title
             )
         }
     }

@@ -61,12 +61,14 @@ class HolderConsentViewModel(
             null
         )
 
-    fun sendScreenEvent() = viewModelScope.launch {
-        analyticsLogger.consentScreen()
+    fun sendScreenEvent(screenName: String) = viewModelScope.launch {
+        analyticsLogger.consentScreen(screenName)
     }
 
     fun onReadPrivacyNotice() = viewModelScope.launch {
-        analyticsLogger.readPrivacyNoticeButton()
+        presentation.value?.let {
+            analyticsLogger.readPrivacyNoticeButton(it.organizationName)
+        }
     }
 
     fun onAccept() = viewModelScope.launch {

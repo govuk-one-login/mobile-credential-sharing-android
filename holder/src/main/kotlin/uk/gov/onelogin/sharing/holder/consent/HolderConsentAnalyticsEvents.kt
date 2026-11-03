@@ -10,14 +10,14 @@ internal object HolderConsentAnalyticsEvents {
 
     private const val SCREEN_ID = "ac1f2e03-2b4e-4804-8c16-2d18c37b0f9e"
 
-    internal fun AnalyticsLogger.consentScreen() = Screen(
-        name = "Review what you'll share",
+    internal fun AnalyticsLogger.consentScreen(screenName: String) = Screen(
+        name = screenName,
         id = SCREEN_ID,
         params = walletSharingRequiredParameters
     ).let(this::logEventV3Dot1)
 
-    internal fun AnalyticsLogger.readPrivacyNoticeButton() = Button(
-        text = "Read about and their privacy notice",
+    internal fun AnalyticsLogger.readPrivacyNoticeButton(organisationName: String) = Button(
+        text = "Read about $organisationName and their privacy notice",
         params = walletSharingRequiredParameters
     ).let(this::logEventV3Dot1)
 
