@@ -8,6 +8,8 @@ import androidx.compose.ui.test.performClick
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValuesIn
 import com.google.testing.junit.testparameterinjector.TestParameter
+import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
@@ -20,7 +22,9 @@ import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import kotlin.test.Test
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -39,9 +43,23 @@ class MoreAboutDvsScreenTest {
         )
     }
 
+    private val initialHolderState by lazy {
+        HolderSessionState.AwaitingUserConsent(
+            request = mockk(relaxed = true),
+            presentation = presentation
+        )
+    }
+
+    private val orchestrator by lazy {
+        FakeOrchestrator(
+            initialHolderState = MutableStateFlow(initialHolderState)
+        )
+    }
+
     private val viewModel by lazy {
         MoreAboutDvsViewModel(
-            analyticsLogger = analyticsLogger
+            analyticsLogger = analyticsLogger,
+            orchestrator = orchestrator,
         )
     }
 
@@ -97,7 +115,6 @@ class MoreAboutDvsScreenTest {
     private fun Render() {
         GdsTheme {
             MoreAboutDvsScreen(
-                presentation = presentation,
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel,
             )

@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
@@ -27,11 +29,12 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 
 @Composable
 internal fun MoreAboutDvsScreen(
-    presentation: ConsentPresentation,
     modifier: Modifier = Modifier,
     viewModel: MoreAboutDvsViewModel = metroViewModel()
 ) {
-    val organizationName = presentation.organizationName ?: "Unknown"
+    val organizationName by viewModel.organizationName
+        .collectAsStateWithLifecycle()
+
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
