@@ -40,14 +40,18 @@ internal fun MoreAboutDvsScreen(
 
     MoreAboutDvsContent(
         organizationName = organizationName,
-        modifier = modifier
+        modifier = modifier,
+        onPrivacyPolicyLinkClick = {
+            viewModel.sendButtonEvent(context)
+        }
     )
 }
 
 @Composable
 internal fun MoreAboutDvsContent(
     organizationName: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onPrivacyPolicyLinkClick: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
 
@@ -120,6 +124,7 @@ internal fun MoreAboutDvsContent(
         onClick = {
             scope.launch {
                 // button currently does nothing
+                onPrivacyPolicyLinkClick()
             }
         },
         showIcon = true

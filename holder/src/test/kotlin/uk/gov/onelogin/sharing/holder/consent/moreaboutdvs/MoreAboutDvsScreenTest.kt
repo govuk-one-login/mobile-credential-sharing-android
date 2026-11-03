@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.performClick
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValuesIn
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -69,13 +70,25 @@ class MoreAboutDvsScreenTest {
     }
 
     @Test
-    fun `Launching the screen sends an analytics event`(
-    ) = runTest {
+    fun `Launching the screen sends an analytics event`() = runTest {
         composeTestRule.run {
             setContent { Render() }
 
             waitUntil("Doesn't contain expected event!: $analyticsLogger") {
                 analyticsLogger.contains(MoreAboutDvsTestData.expectedScreenEvent)
+            }
+        }
+    }
+
+    @Test
+    fun `Reading the DVS privacy policy sends an analytics event`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+
+            onPrivacyPolicyButton(true).performClick()
+
+            waitUntil("Doesn't contain expected event!: $analyticsLogger") {
+                analyticsLogger.contains(MoreAboutDvsTestData.expectedButtonEvent)
             }
         }
     }

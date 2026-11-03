@@ -10,6 +10,7 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsAnalyticsEvents.moreAboutDvsPrivacyPolicyButton
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsAnalyticsEvents.moreAboutDvsScreen
 
 @Inject
@@ -21,5 +22,9 @@ class MoreAboutDvsViewModel(
 
     fun sendScreenEvent(context: Context) = viewModelScope.launch {
         analyticsLogger.moreAboutDvsScreen(context, "DVS")
+    }
+
+    fun sendButtonEvent(context: Context) = viewModelScope.launch {
+        analyticsLogger.moreAboutDvsPrivacyPolicyButton(context, "DVS")
     }
 }

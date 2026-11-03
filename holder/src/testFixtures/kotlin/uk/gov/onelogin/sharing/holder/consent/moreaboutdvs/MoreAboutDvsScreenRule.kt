@@ -6,17 +6,23 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
+import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
 
 class MoreAboutDvsScreenRule(
@@ -107,6 +113,10 @@ class MoreAboutDvsScreenRule(
         onPrivacyPolicyButton(useUnmergedTree)
             .assertExists()
             .assertHasClickAction()
+            .assertIsEnabled()
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(minimumTouchTarget)
+            .assertHeightIsAtLeast(minimumTouchTarget)
     }
 
     fun assertValidPrivacyPolicySubheading(
