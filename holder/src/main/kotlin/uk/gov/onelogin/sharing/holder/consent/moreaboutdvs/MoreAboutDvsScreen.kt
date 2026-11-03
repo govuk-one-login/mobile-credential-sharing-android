@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
@@ -26,21 +29,27 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 internal fun MoreAboutDvsScreen(
     presentation: ConsentPresentation,
     modifier: Modifier = Modifier,
+    viewModel: MoreAboutDvsViewModel = metroViewModel()
 ) {
+    val organizationName = presentation.organizationName ?: "Unknown"
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.sendScreenEvent(context)
+    }
+
     MoreAboutDvsContent(
-        presentation = presentation,
+        organizationName = organizationName,
         modifier = modifier
     )
 }
 
 @Composable
 internal fun MoreAboutDvsContent(
-    presentation: ConsentPresentation,
+    organizationName: String,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
-
-    val organizationName = presentation.organizationName ?: "Unknown"
 
     val bodyTexts = listOf(
         R.string.more_about_dvs_body_1,
@@ -145,7 +154,7 @@ internal fun MoreAboutDvsPreview(
     GdsTheme {
         Surface {
             MoreAboutDvsContent(
-                presentation = presentation,
+                organizationName = presentation.organizationName ?: "Unknown",
                 modifier = modifier.fillMaxSize()
             )
         }

@@ -118,6 +118,16 @@ class MoreAboutDvsScreenRule(
     ).assertExists("Cannot find the main privacy policy subheading!")
         .assert(isHeading())
 
+    fun assertValidUi(expectedOrganization: String, useUnmergedTree: Boolean = false) {
+        assertValidHeader(organizationName = expectedOrganization, useUnmergedTree)
+        assertValidBody(organizationName = expectedOrganization, useUnmergedTree)
+        assertValidBulletPoints(organizationName = expectedOrganization, useUnmergedTree)
+        assertValidPrivacyPolicySubheading(organizationName = expectedOrganization, useUnmergedTree)
+        assertValidPrivacyPolicyBody(organizationName = expectedOrganization, useUnmergedTree)
+        assertValidPrivacyPolicyBulletPoints(useUnmergedTree = true)
+        assertValidPrivacyPolicyButton(useUnmergedTree = true)
+    }
+
     fun onContainer() = onNode(hasScrollAction())
 
     fun onPrivacyPolicyBody(
