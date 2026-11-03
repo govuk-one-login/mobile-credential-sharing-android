@@ -79,11 +79,6 @@ class ShareCredentialTest {
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to
-                HolderSessionState.AwaitingUserConsent(
-                    mockk(relaxed = true),
-                    mockk(relaxed = true)
-                ),
             "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
@@ -104,13 +99,30 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
+    fun `Close button is hidden while awaiting user consent`() = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(
+                    HolderSessionState.AwaitingUserConsent(
+                        mockk(relaxed = true),
+                        mockk(relaxed = true)
+                    )
+                )
+            )
+        )
+
+        composeTestRule.run {
+            setContent { ShareCredential(component = presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    @UiThreadTest
     fun `Close button navigates to confirmation dialog for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Awaiting consent" to
-                HolderSessionState.AwaitingUserConsent(
-                    mockk(relaxed = true),
-                    mockk(relaxed = true)
-                ),
             "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
         )
     ) = runTest {
@@ -190,9 +202,7 @@ class ShareCredentialTest {
     fun `Close button sends a button analytics event`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Preflight" to HolderSessionState.Preflight(emptyList()),
-            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to
-                HolderSessionState.AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true))
+            "Presenting QR code" to HolderSessionState.PresentingEngagement("")
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(

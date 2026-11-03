@@ -168,7 +168,6 @@ sealed class HolderSessionState :
     companion object {
         @JvmStatic
         private val cancelConfirmationRequired = listOf(
-            AwaitingUserConsent::class,
             AwaitingVerifierResolution::class,
             ProcessingEstablishment::class,
             ProcessingResponse::class
