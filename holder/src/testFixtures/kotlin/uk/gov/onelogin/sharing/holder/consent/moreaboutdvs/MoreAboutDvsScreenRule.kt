@@ -34,15 +34,6 @@ class MoreAboutDvsScreenRule(
             "second" to R.string.more_about_dvs_body_2,
             "third" to R.string.more_about_dvs_body_3
         ).forEach { (description, resourceId) ->
-//            onContainer().performScrollToNode(
-//                hasText(
-//                    resources.getString(
-//                        resourceId,
-//                        organizationName
-//                    ),
-//                )
-//            )
-
             onNodeWithText(
                 resources.getString(
                     resourceId,
@@ -62,15 +53,6 @@ class MoreAboutDvsScreenRule(
             "second" to R.string.more_about_dvs_bullet_2,
             "third" to R.string.more_about_dvs_bullet_3
         ).forEach { (description, resourceId) ->
-//            onContainer().performScrollToNode(
-//                hasText(
-//                    resources.getString(
-//                        resourceId,
-//                        organizationName
-//                    ).removeDoubleFullStop(),
-//                )
-//            )
-//
             onNodeWithText(
                 resources.getString(
                     resourceId,
@@ -191,9 +173,6 @@ class MoreAboutDvsScreenRule(
         useUnmergedTree: Boolean = false
     ): SemanticsNodeInteraction {
         val heading = resources.getString(R.string.more_about_dvs_title, organizationName)
-//        onContainer().performScrollToNode(
-//            hasText(heading)
-//        )
 
         return onNodeWithText(
             heading,
