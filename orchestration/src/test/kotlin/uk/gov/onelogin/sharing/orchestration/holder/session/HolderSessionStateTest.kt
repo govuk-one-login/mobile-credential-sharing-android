@@ -27,6 +27,7 @@ class HolderSessionStateTest {
     @Test
     fun `Certain states are cancellable by the User`(
         @TestParameter state: HolderSessionState = testValues(
+            AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true)),
             AwaitingVerifierResolution,
             ProcessingEstablishment,
             Preflight(listOf()),
@@ -52,6 +53,37 @@ class HolderSessionStateTest {
     ) {
         assertFalse {
             state.userCanCancel()
+        }
+    }
+
+    @Test
+    fun `AwaitingUserConsent requires cancellation confirmation`() {
+        assertTrue {
+            AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true))
+                .shouldConfirmCancellation()
+        }
+    }
+
+    @Test
+    fun `AwaitingUserConsent is cancellable but hides the close button`() {
+        val state = AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true))
+
+        assertTrue { state.userCanCancel() }
+        assertTrue { state.hideCloseButton() }
+    }
+
+    @Test
+    fun `Cancellable states other than AwaitingUserConsent do not hide the close button`(
+        @TestParameter state: HolderSessionState = testValues(
+            AwaitingVerifierResolution,
+            ProcessingEstablishment,
+            Preflight(listOf()),
+            PresentingEngagement("unit test"),
+            ProcessingResponse
+        )
+    ) {
+        assertFalse {
+            state.hideCloseButton()
         }
     }
 

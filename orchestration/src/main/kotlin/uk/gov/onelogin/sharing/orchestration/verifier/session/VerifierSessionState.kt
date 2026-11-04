@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.verifier.session
 
+import kotlin.reflect.KClass
 import uk.gov.onelogin.sharing.core.Completable
 import uk.gov.onelogin.sharing.core.UserCancellable
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
@@ -29,6 +30,9 @@ sealed class VerifierSessionState :
         Connecting::class,
         Verifying::class
     )
+
+    override fun hideCloseButton(): Boolean =
+        this::class in emptyList<KClass<out VerifierSessionState>>()
 
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification

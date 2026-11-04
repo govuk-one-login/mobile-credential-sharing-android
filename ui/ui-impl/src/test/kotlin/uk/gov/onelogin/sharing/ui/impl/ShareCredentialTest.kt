@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -358,6 +359,42 @@ class ShareCredentialTest {
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progressIndicator").assertDoesNotExist()
         assertEquals(0, orchestrator.startCount)
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Test
+    @UiThreadTest
+    fun `CloseButtonAppBar shows the close icon when showClose is true`() = runTest {
+        composeTestRule.run {
+            setContent { CloseButtonAppBar(showClose = true) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertExists()
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Test
+    @UiThreadTest
+    fun `CloseButtonAppBar hides the close icon when showClose is false`() = runTest {
+        composeTestRule.run {
+            setContent { CloseButtonAppBar(showClose = false) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Test
+    @UiThreadTest
+    fun `CloseButtonAppBar invokes onCancel when the close icon is tapped`() = runTest {
+        var cancelled = false
+        composeTestRule.run {
+            setContent { CloseButtonAppBar(showClose = true, onCancel = { cancelled = true }) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").performClick()
+            waitForIdle()
+        }
+        assertEquals(true, cancelled)
     }
 
     private fun performCloseJourneyViaButton(presenter: FakeCredentialPresenter) {
