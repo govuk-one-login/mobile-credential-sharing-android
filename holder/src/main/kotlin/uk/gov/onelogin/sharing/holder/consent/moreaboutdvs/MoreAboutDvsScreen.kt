@@ -58,23 +58,6 @@ internal fun MoreAboutDvsContent(
 ) {
     val scope = rememberCoroutineScope()
 
-    val bodyBullets = listOf(
-        R.string.more_about_dvs_bullet_1,
-        R.string.more_about_dvs_bullet_2,
-        R.string.more_about_dvs_bullet_3,
-    ).map { resourceId ->
-        stringResource(
-            resourceId,
-            organizationName
-        ).removeDoubleFullStop()
-    }.map { bulletText ->
-        ListItem(text = bulletText)
-    }.let { bulletItems ->
-        LeftAlignedScreenBodyV2.BulletList(
-            items = bulletItems.toPersistentList()
-        )
-    }
-
     val privacyNoticeSubheading = LeftAlignedScreenBodyV2.Title(
         text = stringResource(
             R.string.more_about_dvs_privacy_subheading,
@@ -130,7 +113,7 @@ internal fun MoreAboutDvsContent(
         ),
         body = (
                 organizationName.moreAboutDvsIntroductionTexts() +
-                        bodyBullets +
+                        organizationName.moreABoutDvsIntroductionBullets() +
                         privacyNoticeSubheading +
                         privacyNoticeBody +
                         privacyNoticeBullets +
@@ -140,6 +123,8 @@ internal fun MoreAboutDvsContent(
         forceScroll = true,
     )
 }
+
+
 
 @Composable
 private fun String.moreAboutDvsIntroductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
@@ -152,6 +137,24 @@ private fun String.moreAboutDvsIntroductionTexts(): List<LeftAlignedScreenBodyV2
         this
     ).removeDoubleFullStop()
 }.map(LeftAlignedScreenBodyV2::Text)
+
+@Composable
+private fun String.moreABoutDvsIntroductionBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
+    R.string.more_about_dvs_bullet_1,
+    R.string.more_about_dvs_bullet_2,
+    R.string.more_about_dvs_bullet_3,
+).map { resourceId ->
+    stringResource(
+        resourceId,
+        this
+    ).removeDoubleFullStop()
+}.map { bulletText ->
+    ListItem(text = bulletText)
+}.let { bulletItems ->
+    LeftAlignedScreenBodyV2.BulletList(
+        items = bulletItems.toPersistentList()
+    )
+}
 
 @PreviewContent
 @Composable
