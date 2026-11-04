@@ -1,0 +1,86 @@
+name: On Push (Maestro Spike)
+on:
+  push:
+    branches:
+      - spike/maestro
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: 21
+  MAX_GRADLE_WORKERS: 3
+  REPORT_RETENTION_DAYS: 1
+
+jobs:
+  maestro-tests:
+    runs-on: ubuntu-latest-8core-x64
+    timeout-minutes: 45
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: 'true'
+          submodules: 'true'
+          fetch-depth: 0
+
+      - name: Install DeviceLab:Maestro
+        run: curl -fsSL https://open.devicelab.dev/install/maestro-runner | bash
+        shell: bash
+
+      - name: Set up git runner
+        uses: ./config/actions/setup-runner
+        with:
+          jdk-version: ${{ env.JAVA_VERSION }}
+
+      - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      - name: Android Emulator
+        run: android emulator create
+
+      - name: Start Android emulator
+        shell: bash
+        run: |
+          "$ANDROID_HOME/emulator/emulator" \
+            -avd medium_phone \
+            -no-window \
+            -no-audio \
+            -no-boot-anim \
+            -gpu swiftshader_indirect \
+            -no-snapshot \
+            -verbose > /tmp/emulator.log 2>&1 &
+
+          echo "Waiting for emulator..."
+
+          adb wait-for-device
+
+          timeout 300 bash -c '
+            until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" = "1" ]; do
+              sleep 5
+            done
+          ' || {
+            echo "Emulator failed to boot"
+            tail -100 /tmp/emulator.log
+            exit 1
+          }
+
+          echo "Emulator booted successfully"
+
+      - name: Run Maestro
+        env:
+          ENV MAESTRO_RUNNER_NO_TELEMETRY: 1
+          ENV DO_NOT_TRACK: 1
+        run: $HOME/.maestro-runner/bin/maestro-runner --artifacts always test ./flow.yml
+        shell: bash
+
+
+      - name: Upload Maestro reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-test-reports
+          path: reports/
+          retention-days: 1
+  
