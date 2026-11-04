@@ -58,16 +58,6 @@ internal fun MoreAboutDvsContent(
 ) {
     val scope = rememberCoroutineScope()
 
-    val privacyNoticeSubheading = LeftAlignedScreenBodyV2.Title(
-        text = stringResource(
-            R.string.more_about_dvs_privacy_subheading,
-            organizationName
-        ),
-        modifier = Modifier.padding(top = spacingDouble),
-        style = GdsHeadingStyle.Title2,
-        textAlign = GdsHeadingAlignment.LeftAligned
-    )
-
     val privacyNoticeBody = LeftAlignedScreenBodyV2.Text(
         text = stringResource(
             R.string.more_about_dvs_privacy_body,
@@ -114,7 +104,7 @@ internal fun MoreAboutDvsContent(
         body = (
                 organizationName.moreAboutDvsIntroductionTexts() +
                         organizationName.moreABoutDvsIntroductionBullets() +
-                        privacyNoticeSubheading +
+                        organizationName.moreAboutDvsPrivacyNoticeSubheading() +
                         privacyNoticeBody +
                         privacyNoticeBullets +
                         privacyNoticeLink
@@ -123,8 +113,6 @@ internal fun MoreAboutDvsContent(
         forceScroll = true,
     )
 }
-
-
 
 @Composable
 private fun String.moreAboutDvsIntroductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
@@ -155,6 +143,18 @@ private fun String.moreABoutDvsIntroductionBullets(): LeftAlignedScreenBodyV2.Bu
         items = bulletItems.toPersistentList()
     )
 }
+
+@Composable
+private fun String.moreAboutDvsPrivacyNoticeSubheading(): LeftAlignedScreenBodyV2.Title =
+    LeftAlignedScreenBodyV2.Title(
+        text = stringResource(
+            R.string.more_about_dvs_privacy_subheading,
+            this
+        ),
+        modifier = Modifier.padding(top = spacingDouble),
+        style = GdsHeadingStyle.Title2,
+        textAlign = GdsHeadingAlignment.LeftAligned
+    )
 
 @PreviewContent
 @Composable
