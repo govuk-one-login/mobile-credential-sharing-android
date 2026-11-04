@@ -53,13 +53,9 @@ private const val LARGE_FONT_SCALE_THRESHOLD = 1.5f
  * @param organizationName The verified Verifier (DVS) organisation name.
  */
 @Composable
-internal fun AgreeToShareCard(
-    card: ConsentCard,
-    organizationName: String?,
-    modifier: Modifier = Modifier
-) {
+internal fun AgreeToShareCard(card: ConsentCard, organizationName: String?) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(CARD_CORNER_RADIUS))
             .border(
@@ -277,11 +273,12 @@ internal fun AgreeToShareCardPreview(
         )
     )
     AgreeToShareCardTheme {
-        AgreeToShareCard(
-            card = card,
-            organizationName = "Example Organisation.",
-            modifier = Modifier.padding(spacingDouble)
-        )
+        Column(modifier = Modifier.padding(spacingDouble)) {
+            AgreeToShareCard(
+                card = card,
+                organizationName = "Example Organisation."
+            )
+        }
     }
 }
 
