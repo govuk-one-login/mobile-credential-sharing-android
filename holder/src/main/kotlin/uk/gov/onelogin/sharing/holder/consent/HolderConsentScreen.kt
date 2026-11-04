@@ -111,8 +111,7 @@ internal fun HolderConsentContent(
             AgreeToShareCardTheme {
                 AgreeToShareCard(
                     card = card,
-                    organizationName = state.normalisedOrganizationName,
-                    modifier = Modifier.fillMaxWidth()
+                    organizationName = state.normalisedOrganizationName
                 )
             }
         }
