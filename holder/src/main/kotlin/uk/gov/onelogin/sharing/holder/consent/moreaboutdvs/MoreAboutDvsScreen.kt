@@ -58,20 +58,6 @@ internal fun MoreAboutDvsContent(
 ) {
     val scope = rememberCoroutineScope()
 
-    val privacyNoticeLink = LeftAlignedScreenBodyV2.SecondaryButton(
-        text = stringResource(
-            R.string.more_about_dvs_privacy_policy_link,
-            organizationName
-        ),
-        onClick = {
-            scope.launch {
-                // button currently does nothing
-                onPrivacyPolicyLinkClick()
-            }
-        },
-        showIcon = true
-    )
-
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(
@@ -84,7 +70,12 @@ internal fun MoreAboutDvsContent(
                         organizationName.privacyNoticeSubheading() +
                         organizationName.privacyNoticeBody() +
                         organizationName.privacyNoticeBullets() +
-                        privacyNoticeLink
+                        organizationName.privacyNoticeButton {
+                            scope.launch {
+                                // button currently does nothing
+                                onPrivacyPolicyLinkClick()
+                            }
+                        }
                 )
             .toPersistentList(),
         forceScroll = true,
@@ -159,6 +150,26 @@ private fun String.privacyNoticeBullets(): LeftAlignedScreenBodyV2.BulletList = 
     )
 }
 
+@Composable
+private fun String.privacyNoticeButton(
+    onClick: () -> Unit
+): LeftAlignedScreenBodyV2.SecondaryButton = LeftAlignedScreenBodyV2.SecondaryButton(
+    text = stringResource(
+        R.string.more_about_dvs_privacy_policy_link,
+        this
+    ),
+    onClick = onClick,
+    showIcon = true
+)
+
+internal fun String.removeDoubleFullStop(): String = let { text ->
+    if (text.endsWith("..")) {
+        text.dropLast(1)
+    } else {
+        text
+    }
+}
+
 @PreviewContent
 @Composable
 internal fun MoreAboutDvsPreview(
@@ -173,14 +184,6 @@ internal fun MoreAboutDvsPreview(
                 modifier = modifier.fillMaxSize()
             )
         }
-    }
-}
-
-internal fun String.removeDoubleFullStop(): String = let { text ->
-    if (text.endsWith("..")) {
-        text.dropLast(1)
-    } else {
-        text
     }
 }
 
