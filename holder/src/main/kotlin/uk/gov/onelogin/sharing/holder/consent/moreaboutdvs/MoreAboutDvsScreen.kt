@@ -58,17 +58,6 @@ internal fun MoreAboutDvsContent(
 ) {
     val scope = rememberCoroutineScope()
 
-    val bodyTexts = listOf(
-        R.string.more_about_dvs_body_1,
-        R.string.more_about_dvs_body_2,
-        R.string.more_about_dvs_body_3,
-    ).map { resourceId ->
-        stringResource(
-            resourceId,
-            organizationName
-        ).removeDoubleFullStop()
-    }.map(LeftAlignedScreenBodyV2::Text)
-
     val bodyBullets = listOf(
         R.string.more_about_dvs_bullet_1,
         R.string.more_about_dvs_bullet_2,
@@ -140,7 +129,7 @@ internal fun MoreAboutDvsContent(
             organizationName
         ),
         body = (
-                bodyTexts +
+                organizationName.moreAboutDvsIntroductionTexts() +
                         bodyBullets +
                         privacyNoticeSubheading +
                         privacyNoticeBody +
@@ -151,6 +140,18 @@ internal fun MoreAboutDvsContent(
         forceScroll = true,
     )
 }
+
+@Composable
+private fun String.moreAboutDvsIntroductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
+    R.string.more_about_dvs_body_1,
+    R.string.more_about_dvs_body_2,
+    R.string.more_about_dvs_body_3,
+).map { resourceId ->
+    stringResource(
+        resourceId,
+        this
+    ).removeDoubleFullStop()
+}.map(LeftAlignedScreenBodyV2::Text)
 
 @PreviewContent
 @Composable
