@@ -9,14 +9,16 @@ object TurnOnBluetoothViewModelTestData {
     const val SCREEN_NAME = "Turn on Bluetooth"
     const val SCREEN_ID = "d64962b9-def5-4b13-9c3c-128d51353fe7"
     const val BUTTON_TEXT = "Turn on Bluetooth"
-    val expectedScreenEvent = Screen(
-        name = SCREEN_NAME,
-        id = SCREEN_ID,
-        params = walletSharingRequiredParameters
-    ).asLegacyEvent()
+    val expectedScreenEvent
+        get() = Screen(
+            name = SCREEN_NAME,
+            id = SCREEN_ID,
+            params = walletSharingRequiredParameters
+        ).asLegacyEvent()
 
-    val expectedTurnOnBluetoothEvent = Button(
-        text = BUTTON_TEXT,
-        params = walletSharingRequiredParameters
-    ).asLegacyEvent()
+    val expectedTurnOnBluetoothEvent
+        get() = Button(
+            text = BUTTON_TEXT,
+            params = walletSharingRequiredParameters
+        ).asLegacyEvent()
 }

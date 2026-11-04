@@ -26,6 +26,7 @@ import org.hamcrest.Matchers.contains
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -176,6 +177,30 @@ class TurnOnBluetoothScreenTest {
         assertThat(
             analyticsLogger,
             contains(TurnOnBluetoothViewModelTestData.expectedScreenEvent)
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "cy")
+    fun `Displaying the screen in Welsh sends analytics events in English`() = runTest {
+        composeTestRule.run {
+            setContent {
+                ProvideActivityResultRegistry(testRegistry) {
+                    TurnOnBluetoothScreen(viewModel = viewModel)
+                }
+            }
+
+            assertWelshTitleIsDisplayed()
+
+            performTurnOnBluetoothClick()
+            waitUntil { analyticsLogger.size >= 2 }
+        }
+        assertThat(
+            analyticsLogger,
+            contains(
+                TurnOnBluetoothViewModelTestData.expectedScreenEvent,
+                TurnOnBluetoothViewModelTestData.expectedTurnOnBluetoothEvent
+            )
         )
     }
 

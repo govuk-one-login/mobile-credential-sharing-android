@@ -45,6 +45,9 @@ class TurnOnBluetoothScreenRule(
     // assertions
     fun assertTitleIsDisplayed() = onTitle().assertIsDisplayed()
 
+    fun assertWelshTitleIsDisplayed() =
+        onNode(hasText("Troi Bluetooth ymlaen") and isHeading()).assertIsDisplayed()
+
     fun assertTitleDoesNotExist() = onTitle().assertDoesNotExist()
 
     fun assertLoadingSpinnerIsDisplayed() = onLoadingSpinner().assertIsDisplayed()

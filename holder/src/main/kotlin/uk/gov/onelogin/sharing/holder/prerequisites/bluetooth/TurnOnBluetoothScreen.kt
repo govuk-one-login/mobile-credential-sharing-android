@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
@@ -43,6 +44,7 @@ internal fun TurnOnBluetoothScreen(
     ) { viewModel.recheckPrerequisites() }
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
 
     val hasPreviouslyRecheckedPrerequisites: Boolean by viewModel
         .hasRecheckedPrerequisites
@@ -53,7 +55,7 @@ internal fun TurnOnBluetoothScreen(
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("TurnOnBluetoothScreen")
-        viewModel.sendScreenEvent()
+        viewModel.sendScreenEvent(context)
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -72,7 +74,10 @@ internal fun TurnOnBluetoothScreen(
     } else {
         TurnOnBluetoothContent(
             modifier = modifier,
-            onTurnOnBluetooth = { viewModel.turnOnBluetooth(launcher) }
+            onTurnOnBluetooth = {
+                viewModel.sendTurnOnBluetoothEvent(context)
+                viewModel.turnOnBluetooth(launcher)
+            }
         )
     }
 }

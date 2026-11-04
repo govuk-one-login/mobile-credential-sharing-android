@@ -1,8 +1,11 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
 
+import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -13,6 +16,8 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.junit.Rule
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
@@ -29,11 +34,13 @@ import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
 
+@RunWith(AndroidJUnit4::class)
 class TurnOnBluetoothViewModelTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
+    private val context: Context by lazy { ApplicationProvider.getApplicationContext() }
     private val analyticsLogger = StoredAnalyticsLogger()
     private val logger = MemorisedLogger()
     private var recheckCount = 0
@@ -63,7 +70,7 @@ class TurnOnBluetoothViewModelTest {
 
     @Test
     fun `Logs screen view event`() = runTest {
-        viewModel.sendScreenEvent().join()
+        viewModel.sendScreenEvent(context).join()
         assertThat(
             analyticsLogger,
             hasSentEvents(contains(TurnOnBluetoothViewModelTestData.expectedScreenEvent))
@@ -72,7 +79,7 @@ class TurnOnBluetoothViewModelTest {
 
     @Test
     fun `Logs Turn on Bluetooth button event`() = runTest {
-        viewModel.sendTurnOnBluetoothEvent().join()
+        viewModel.sendTurnOnBluetoothEvent(context).join()
         assertThat(
             analyticsLogger,
             hasSentEvents(contains(TurnOnBluetoothViewModelTestData.expectedTurnOnBluetoothEvent))
@@ -80,7 +87,27 @@ class TurnOnBluetoothViewModelTest {
     }
 
     @Test
-    fun `Turning on Bluetooth logs the button event and requests Bluetooth is enabled`() {
+    @Config(qualifiers = "cy")
+    fun `Screen view event is in English when the device is in Welsh`() = runTest {
+        viewModel.sendScreenEvent(context).join()
+
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals(SCREEN_NAME.lowercase(), event.parameters["screen_name"])
+        assertEquals("cy", event.parameters["language"])
+    }
+
+    @Test
+    @Config(qualifiers = "cy")
+    fun `Turn on Bluetooth button event is in English when device is in Welsh`() = runTest {
+        viewModel.sendTurnOnBluetoothEvent(context).join()
+
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals(BUTTON_TEXT.lowercase(), event.parameters["text"])
+        assertEquals("cy", event.parameters["language"])
+    }
+
+    @Test
+    fun `Turning on Bluetooth requests Bluetooth is enabled`() {
         var launchedAction: PrerequisiteAction? = null
 
         val launcher = object : ActivityResultLauncher<PrerequisiteAction>() {
@@ -96,15 +123,11 @@ class TurnOnBluetoothViewModelTest {
 
         viewModel.turnOnBluetooth(launcher)
         assertEquals(PrerequisiteAction.EnableBluetooth, launchedAction)
-        assertThat(
-            analyticsLogger,
-            hasSentEvents(contains(TurnOnBluetoothViewModelTestData.expectedTurnOnBluetoothEvent))
-        )
     }
 
     @Test
     fun `Screen view event sets screen class, name, and id`() = runTest {
-        viewModel.sendScreenEvent().join()
+        viewModel.sendScreenEvent(context).join()
 
         val event = analyticsLogger.sentAnalyticsEvents.single()
         assertEquals("screen_view", event.eventType)
@@ -114,7 +137,7 @@ class TurnOnBluetoothViewModelTest {
 
     @Test
     fun `Turn on Bluetooth button event sets text and type`() = runTest {
-        viewModel.sendTurnOnBluetoothEvent().join()
+        viewModel.sendTurnOnBluetoothEvent(context).join()
 
         val event = analyticsLogger.sentAnalyticsEvents.single()
         assertEquals("navigation", event.eventType)

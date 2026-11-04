@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
 
+import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -61,15 +62,14 @@ class TurnOnBluetoothViewModel(
     }
 
     fun turnOnBluetooth(launcher: ActivityResultLauncher<PrerequisiteAction>) {
-        sendTurnOnBluetoothEvent()
         resolve(launcher)
     }
 
-    fun sendScreenEvent() = viewModelScope.launch(dispatcher) {
-        analyticsLogger.turnOnBluetoothScreen()
+    fun sendScreenEvent(context: Context) = viewModelScope.launch(dispatcher) {
+        analyticsLogger.turnOnBluetoothScreen(context = context)
     }
 
-    fun sendTurnOnBluetoothEvent() = viewModelScope.launch(dispatcher) {
-        analyticsLogger.turnOnBluetoothButton()
+    fun sendTurnOnBluetoothEvent(context: Context) = viewModelScope.launch(dispatcher) {
+        analyticsLogger.turnOnBluetoothButton(context = context)
     }
 }
