@@ -58,22 +58,6 @@ internal fun MoreAboutDvsContent(
 ) {
     val scope = rememberCoroutineScope()
 
-    val privacyNoticeBullets = listOf(
-        R.string.more_about_dvs_privacy_bullet_1,
-        R.string.more_about_dvs_privacy_bullet_2,
-    ).map { resourceId ->
-        stringResource(
-            resourceId,
-            organizationName
-        ).removeDoubleFullStop()
-    }.map { bulletText ->
-        ListItem(text = bulletText)
-    }.let { bulletItems ->
-        LeftAlignedScreenBodyV2.BulletList(
-            items = bulletItems.toPersistentList()
-        )
-    }
-
     val privacyNoticeLink = LeftAlignedScreenBodyV2.SecondaryButton(
         text = stringResource(
             R.string.more_about_dvs_privacy_policy_link,
@@ -95,11 +79,11 @@ internal fun MoreAboutDvsContent(
             organizationName
         ),
         body = (
-                organizationName.moreAboutDvsIntroductionTexts() +
-                        organizationName.moreABoutDvsIntroductionBullets() +
-                        organizationName.moreAboutDvsPrivacyNoticeSubheading() +
+                organizationName.introductionTexts() +
+                        organizationName.introductionBullets() +
+                        organizationName.privacyNoticeSubheading() +
                         organizationName.privacyNoticeBody() +
-                        privacyNoticeBullets +
+                        organizationName.privacyNoticeBullets() +
                         privacyNoticeLink
                 )
             .toPersistentList(),
@@ -108,7 +92,7 @@ internal fun MoreAboutDvsContent(
 }
 
 @Composable
-private fun String.moreAboutDvsIntroductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
+private fun String.introductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
     R.string.more_about_dvs_body_1,
     R.string.more_about_dvs_body_2,
     R.string.more_about_dvs_body_3,
@@ -120,7 +104,7 @@ private fun String.moreAboutDvsIntroductionTexts(): List<LeftAlignedScreenBodyV2
 }.map(LeftAlignedScreenBodyV2::Text)
 
 @Composable
-private fun String.moreABoutDvsIntroductionBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
+private fun String.introductionBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
     R.string.more_about_dvs_bullet_1,
     R.string.more_about_dvs_bullet_2,
     R.string.more_about_dvs_bullet_3,
@@ -138,7 +122,7 @@ private fun String.moreABoutDvsIntroductionBullets(): LeftAlignedScreenBodyV2.Bu
 }
 
 @Composable
-private fun String.moreAboutDvsPrivacyNoticeSubheading(): LeftAlignedScreenBodyV2.Title =
+private fun String.privacyNoticeSubheading(): LeftAlignedScreenBodyV2.Title =
     LeftAlignedScreenBodyV2.Title(
         text = stringResource(
             R.string.more_about_dvs_privacy_subheading,
@@ -157,6 +141,23 @@ private fun String.privacyNoticeBody(): LeftAlignedScreenBodyV2.Text =
             this
         )
     )
+
+@Composable
+private fun String.privacyNoticeBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
+    R.string.more_about_dvs_privacy_bullet_1,
+    R.string.more_about_dvs_privacy_bullet_2,
+).map { resourceId ->
+    stringResource(
+        resourceId,
+        this
+    ).removeDoubleFullStop()
+}.map { bulletText ->
+    ListItem(text = bulletText)
+}.let { bulletItems ->
+    LeftAlignedScreenBodyV2.BulletList(
+        items = bulletItems.toPersistentList()
+    )
+}
 
 @PreviewContent
 @Composable
