@@ -32,6 +32,7 @@ data object HolderRoutes {
             configureGetReadyToShare()
             configureHolderPresentQrScreen()
             configureHolderConsentScreen()
+            // DCMAW-24466: Remove this after the preceding screen is updated
             configureMoreAboutDvsScreen()
             configureBluetoothConnectionErrorRoute()
             configureAwaitingVerifierResolutionScreen()
