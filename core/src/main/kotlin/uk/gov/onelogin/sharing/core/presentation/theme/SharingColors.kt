@@ -11,7 +11,7 @@ object SharingColors {
     val grey3 = Color(0xFFB1B4B6)
     val grey4 = Color(0xFFF3F2F1)
     val white = Color(0xFFFFFFFF)
-    val charcoal1 = Color(0xFF0B0C0C)
+    val charcoal1 = Color(0xFF262626)
     val charcoal2 = Color(0xFF3C3C3C)
 }
 
