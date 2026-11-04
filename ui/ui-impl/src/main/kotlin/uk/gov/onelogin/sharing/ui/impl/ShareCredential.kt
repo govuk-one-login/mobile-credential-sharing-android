@@ -69,7 +69,6 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
         analyticsLogger = uiGraph.appGraph().analyticsLogger(),
         orchestrator = orchestrator,
         holderSessionState = orchestrator.holderSessionState,
-        analyticsLogger = uiGraph.appGraph().analyticsLogger(),
         modifier = modifier,
         navController = navController,
         viewModelFactory = uiGraph.metroViewModelFactory
@@ -87,7 +86,6 @@ internal fun ShareCredential(
     analyticsLogger: AnalyticsLogger,
     orchestrator: Orchestrator.Holder,
     holderSessionState: StateFlow<HolderSessionState>,
-    analyticsLogger: AnalyticsLogger,
     viewModelFactory: MetroViewModelFactory,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),

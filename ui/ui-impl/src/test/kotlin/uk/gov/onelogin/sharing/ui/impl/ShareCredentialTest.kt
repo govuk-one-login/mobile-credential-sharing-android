@@ -286,7 +286,6 @@ class ShareCredentialTest {
                 analyticsLogger = analyticsLogger,
                 orchestrator = orchestrator,
                 holderSessionState = orchestrator.holderSessionState,
-                analyticsLogger = uiGraph.appGraph().analyticsLogger(),
                 viewModelFactory = uiGraph.metroViewModelFactory,
                 navController = controller
             )
@@ -324,7 +323,6 @@ class ShareCredentialTest {
                 analyticsLogger = analyticsLogger,
                 orchestrator = orchestrator,
                 holderSessionState = orchestrator.holderSessionState,
-                analyticsLogger = uiGraph.appGraph().analyticsLogger(),
                 viewModelFactory = uiGraph.metroViewModelFactory,
                 navController = controller
             )
@@ -369,7 +367,6 @@ class ShareCredentialTest {
             analyticsLogger = presenter.appGraph.analyticsLogger(),
             orchestrator = orchestrator,
             holderSessionState = presenter.orchestrator.holderSessionState,
-            analyticsLogger = uiGraph.appGraph().analyticsLogger(),
             navController = controller,
             viewModelFactory = uiGraph.metroViewModelFactory
         )
