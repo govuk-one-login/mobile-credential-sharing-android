@@ -58,13 +58,6 @@ internal fun MoreAboutDvsContent(
 ) {
     val scope = rememberCoroutineScope()
 
-    val privacyNoticeBody = LeftAlignedScreenBodyV2.Text(
-        text = stringResource(
-            R.string.more_about_dvs_privacy_body,
-            organizationName
-        )
-    )
-
     val privacyNoticeBullets = listOf(
         R.string.more_about_dvs_privacy_bullet_1,
         R.string.more_about_dvs_privacy_bullet_2,
@@ -105,7 +98,7 @@ internal fun MoreAboutDvsContent(
                 organizationName.moreAboutDvsIntroductionTexts() +
                         organizationName.moreABoutDvsIntroductionBullets() +
                         organizationName.moreAboutDvsPrivacyNoticeSubheading() +
-                        privacyNoticeBody +
+                        organizationName.privacyNoticeBody() +
                         privacyNoticeBullets +
                         privacyNoticeLink
                 )
@@ -154,6 +147,15 @@ private fun String.moreAboutDvsPrivacyNoticeSubheading(): LeftAlignedScreenBodyV
         modifier = Modifier.padding(top = spacingDouble),
         style = GdsHeadingStyle.Title2,
         textAlign = GdsHeadingAlignment.LeftAligned
+    )
+
+@Composable
+private fun String.privacyNoticeBody(): LeftAlignedScreenBodyV2.Text =
+    LeftAlignedScreenBodyV2.Text(
+        text = stringResource(
+            R.string.more_about_dvs_privacy_body,
+            this
+        )
     )
 
 @PreviewContent
