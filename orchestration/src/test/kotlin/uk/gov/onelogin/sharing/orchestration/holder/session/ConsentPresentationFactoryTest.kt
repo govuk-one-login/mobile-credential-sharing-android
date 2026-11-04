@@ -42,8 +42,8 @@ class ConsentPresentationFactoryTest {
         assertEquals(docType, document.docType)
         assertEquals(
             listOf(
-                ConsentAttribute("family_name", true),
-                ConsentAttribute("given_name", false)
+                ConsentAttribute("family_name", true, nameSpace = namespace),
+                ConsentAttribute("given_name", false, nameSpace = namespace)
             ),
             document.namespaces.single().attributes
         )
@@ -60,7 +60,7 @@ class ConsentPresentationFactoryTest {
         )
 
         assertEquals(
-            listOf(ConsentAttribute("family_name", true)),
+            listOf(ConsentAttribute("family_name", true, nameSpace = namespace)),
             presentation.documents.single().namespaces.single().attributes
         )
     }
@@ -75,7 +75,7 @@ class ConsentPresentationFactoryTest {
         )
 
         assertEquals(
-            listOf(ConsentAttribute("age_over_21", true)),
+            listOf(ConsentAttribute("age_over_21", true, nameSpace = namespace)),
             presentation.documents.single().namespaces.single().attributes
         )
     }
