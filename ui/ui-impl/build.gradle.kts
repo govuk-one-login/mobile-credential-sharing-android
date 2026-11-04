@@ -50,6 +50,7 @@ dependencies {
 
     listOf(
         projects.prerequisiteGateImpl,
+        testFixtures(projects.analytics),
         testFixtures(projects.core),
         testFixtures(projects.orchestration),
         testFixtures(projects.holder),

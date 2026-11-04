@@ -43,6 +43,7 @@ import uk.gov.onelogin.sharing.holder.loading.LoadingAnalytics
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.ui.impl.ShareCredentialAnalytics.closeButton
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 import uk.gov.onelogin.sharing.uiimpl.R
 
@@ -65,6 +66,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     val orchestrator = uiGraph.holderOrchestrator()
 
     ShareCredential(
+        analyticsLogger = uiGraph.appGraph().analyticsLogger(),
         orchestrator = orchestrator,
         holderSessionState = orchestrator.holderSessionState,
         analyticsLogger = uiGraph.appGraph().analyticsLogger(),
@@ -74,10 +76,15 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     )
 }
 
+private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) {
+    analyticsLogger.closeButton()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("LongMethod")
 internal fun ShareCredential(
+    analyticsLogger: AnalyticsLogger,
     orchestrator: Orchestrator.Holder,
     holderSessionState: StateFlow<HolderSessionState>,
     analyticsLogger: AnalyticsLogger,
@@ -128,7 +135,12 @@ internal fun ShareCredential(
                     .systemBarsPadding()
             ) {
                 if (state.userCanCancel()) {
-                    CloseButtonAppBar(onCancel = onCancel)
+                    CloseButtonAppBar(
+                        onCancel = {
+                            scope.launch { logCloseButtonEvent(analyticsLogger) }
+                            onCancel()
+                        }
+                    )
                 }
 
                 NavHost(

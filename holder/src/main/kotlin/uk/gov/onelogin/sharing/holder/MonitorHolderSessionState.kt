@@ -23,6 +23,7 @@ import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationE
 import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoadingScreen
 import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.navigateToTurnOnBluetooth
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
@@ -101,9 +102,17 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Preflight -> {
-            {
-                navController.navigateToGetReadyToShare {
-                    exitJourneyOptions()
+            if (state.requiresBluetoothEnabled()) {
+                {
+                    navController.navigateToTurnOnBluetooth {
+                        exitJourneyOptions()
+                    }
+                }
+            } else {
+                {
+                    navController.navigateToGetReadyToShare {
+                        exitJourneyOptions()
+                    }
                 }
             }
         }
@@ -141,32 +150,7 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Complete.Success -> {
-            when (state.successReason) {
-                SuccessReason.UnfulfillableRequest -> {
-                    {
-                        navController.navigateToHolderSuccessScreen {
-                            exitJourneyOptions()
-                        }
-                    }
-                }
-
-                SuccessReason.Denied -> {
-                    {
-                        navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
-                            exitJourneyOptions()
-                        }
-                    }
-                }
-
-                SuccessReason.Approved -> {
-                    {
-                        navController.navigateToAwaitingVerifierResolutionScreen {
-                            exitJourneyOptions()
-                            launchSingleTop = true
-                        }
-                    }
-                }
-            }
+            convertSuccessStateToNavigation(state, navController, exitJourneyOptions)
         }
 
         HolderSessionState.Complete.Cancelled -> {
@@ -199,6 +183,7 @@ internal suspend fun convertSessionStateToNavigation(
         HolderSessionState.ReadyToPresent,
         HolderSessionState.SendingTermination
         -> {
+            // Do nothing with UI-less states
             {}
         }
     }
@@ -222,6 +207,37 @@ private fun handleHolderSessionFailure(
         navController.navigateToUnrecoverableHolderError {
             popUpTo<HolderRoutes> {
                 inclusive = true
+            }
+        }
+    }
+}
+
+private fun convertSuccessStateToNavigation(
+    state: HolderSessionState.Complete.Success,
+    navController: NavHostController,
+    exitJourneyOptions: NavOptionsBuilder.() -> Unit
+): () -> Unit = when (state.successReason) {
+    SuccessReason.UnfulfillableRequest -> {
+        {
+            navController.navigateToHolderSuccessScreen {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    SuccessReason.Denied -> {
+        {
+            navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    SuccessReason.Approved -> {
+        {
+            navController.navigateToAwaitingVerifierResolutionScreen {
+                exitJourneyOptions()
+                launchSingleTop = true
             }
         }
     }

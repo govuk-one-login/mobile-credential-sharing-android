@@ -16,6 +16,7 @@ import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationE
 import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.configureLoadingScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.configureTurnOnBluetooth
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.configureHolderSuccessScreen
 
@@ -30,6 +31,7 @@ data object HolderRoutes {
             configureHolderPrerequisitesScreen()
             configureUnrecoverableHolderError()
             configureGetReadyToShare()
+            configureTurnOnBluetooth()
             configureHolderPresentQrScreen()
             configureHolderConsentScreen()
             configureLoadingScreen()
