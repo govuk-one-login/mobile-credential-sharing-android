@@ -61,6 +61,18 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Unfulfillable request",
         resourceId = R.string.holder_success_unfulfillable_request_title
     ),
+    TURN_ON_BLUETOOTH(
+        expected = "Turn on Bluetooth",
+        resourceId = R.string.turn_on_bluetooth
+    ),
+    TURN_ON_BLUETOOTH_BEFORE_SHARING(
+        expected = "Before you can share, you need to turn on Bluetooth.",
+        resourceId = R.string.turn_on_bluetooth_before_sharing
+    ),
+    USE_QR_CODE_TO_CONNECT_NEXT(
+        expected = "You will not connect with a device yet. You’ll use a QR code to do that next.",
+        resourceId = R.string.use_qr_code_to_connect_next
+    ),
     HOLDER_CONSENT_CARD_WILL_KEEP(
         expected = "%1\$s will keep these details as a record of this check:",
         resourceId = R.string.holder_consent_card_will_keep
