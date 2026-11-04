@@ -34,8 +34,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import uk.gov.android.ui.theme.m3.ExtraTypography
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
+import uk.gov.android.ui.theme.m3.toMappedColors
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.core.presentation.theme.Borders
 import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
@@ -61,7 +63,7 @@ internal fun AgreeToShareCard(card: ConsentCard, organizationName: String?) {
             .clip(RoundedCornerShape(CARD_CORNER_RADIUS))
             .border(
                 width = DIVIDER_THICKNESS,
-                color = GdsLocalColorScheme.current.dividerCard,
+                color = Borders.sharingCard.toMappedColors(),
                 shape = RoundedCornerShape(CARD_CORNER_RADIUS)
             )
     ) {
