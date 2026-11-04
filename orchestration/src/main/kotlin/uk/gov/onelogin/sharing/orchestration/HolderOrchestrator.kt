@@ -401,8 +401,6 @@ class HolderOrchestrator(
             signingJob?.cancel()
             consentInFlight.set(false)
 
-            safeTransitionTo(HolderSessionState.ProcessingResponse)
-
             val skDevice = checkNotNull(context.skDevice) {
                 "Missing skDevice"
             }
