@@ -36,6 +36,7 @@ import uk.gov.android.ui.theme.m3.ExtraTypography
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
@@ -272,7 +273,7 @@ internal fun AgreeToShareCardPreview(
             }
         )
     )
-    AgreeToShareCardTheme {
+    SharingTheme {
         Column(modifier = Modifier.padding(spacingDouble)) {
             AgreeToShareCard(
                 card = card,

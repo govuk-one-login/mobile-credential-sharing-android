@@ -37,6 +37,7 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.cryptoService.verifier.DocRequestBuilderImpl.Companion.NAMESPACE_ISO
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
@@ -108,7 +109,7 @@ internal fun HolderConsentContent(
 
         state.card?.let { card ->
             Spacer(modifier = Modifier.height(16.dp))
-            AgreeToShareCardTheme {
+            SharingTheme {
                 AgreeToShareCard(
                     card = card,
                     organizationName = state.normalisedOrganizationName

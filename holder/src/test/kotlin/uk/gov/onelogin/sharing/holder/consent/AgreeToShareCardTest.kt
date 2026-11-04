@@ -5,6 +5,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.ORGANIZATION_NAME
 import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.card
@@ -21,7 +22,7 @@ class AgreeToShareCardTest {
 
     @Composable
     private fun Render(card: ConsentCard) {
-        AgreeToShareCardTheme {
+        SharingTheme {
             AgreeToShareCard(card = card, organizationName = ORGANIZATION_NAME)
         }
     }
