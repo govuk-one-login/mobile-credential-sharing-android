@@ -26,6 +26,6 @@ object MoreAboutDvsTestData {
      */
     val expectedButtonEvent = Button(
         text = "DVS’s privacy notice",
-        params = walletSharingRequiredParameters,
+        params = walletSharingRequiredParameters
     ).asLegacyEvent()
 }

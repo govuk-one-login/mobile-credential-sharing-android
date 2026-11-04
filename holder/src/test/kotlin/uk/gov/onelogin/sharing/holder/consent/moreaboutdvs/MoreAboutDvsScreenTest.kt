@@ -9,6 +9,7 @@ import com.google.testing.junit.testparameterinjector.KotlinTestParameters.named
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValuesIn
 import com.google.testing.junit.testparameterinjector.TestParameter
 import io.mockk.mockk
+import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
@@ -25,7 +26,6 @@ import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import kotlin.test.Test
 
 @RunWith(RobolectricTestParameterInjector::class)
 class MoreAboutDvsScreenTest {
@@ -59,7 +59,7 @@ class MoreAboutDvsScreenTest {
     private val viewModel by lazy {
         MoreAboutDvsViewModel(
             analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
 
@@ -116,21 +116,19 @@ class MoreAboutDvsScreenTest {
         GdsTheme {
             MoreAboutDvsScreen(
                 modifier = Modifier.fillMaxSize(),
-                viewModel = viewModel,
+                viewModel = viewModel
             )
         }
     }
 
-    private fun verifyUiElements(
-        expectedOrganization: String,
-        content: @Composable () -> Unit,
-    ) = runTest {
-        composeTestRule.run {
-            organizationName = expectedOrganization
-            setContent { GdsTheme { content() } }
-            waitForIdle()
+    private fun verifyUiElements(expectedOrganization: String, content: @Composable () -> Unit) =
+        runTest {
+            composeTestRule.run {
+                organizationName = expectedOrganization
+                setContent { GdsTheme { content() } }
+                waitForIdle()
 
-            assertValidUi(expectedOrganization = expectedOrganization)
+                assertValidUi(expectedOrganization = expectedOrganization)
+            }
         }
-    }
 }

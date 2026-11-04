@@ -86,11 +86,11 @@ enum class DeferredStringsXmlData(
     ),
     MORE_ABOUT_DVS_PRIVACY_BULLET_1(
         defersTo = R.string.how_long_they_will_keep_your_details,
-        resourceId = R.string.more_about_dvs_privacy_bullet_1,
+        resourceId = R.string.more_about_dvs_privacy_bullet_1
     ),
     MORE_ABOUT_DVS_PRIVACY_BULLET_2(
         defersTo = R.string.how_your_details_can_be_used,
-        resourceId = R.string.more_about_dvs_privacy_bullet_2,
+        resourceId = R.string.more_about_dvs_privacy_bullet_2
     ),
     MORE_ABOUT_DVS_PRIVACY_NOTICE_LINK(
         defersTo = R.string.dvs_s_privacy_notice,

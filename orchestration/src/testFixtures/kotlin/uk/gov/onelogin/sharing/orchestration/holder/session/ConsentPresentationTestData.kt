@@ -15,14 +15,12 @@ object ConsentPresentationTestData {
     ).withIntentToRetain()
 
     val noRetainedAttributes = listOf(
-        MdlAttribute.AgeOver(18),
+        MdlAttribute.AgeOver(18)
     ).withoutIntentToRetain()
 
     val partiallyRetainedAttributes = fullyRetainedAttributes + noRetainedAttributes
 
-    fun createConsentNamespaces(
-        elements: Map<MdlAttribute, Boolean>
-    ) = listOf(
+    fun createConsentNamespaces(elements: Map<MdlAttribute, Boolean>) = listOf(
         ConsentNamespace(
             nameSpace = "org.iso.18013.5.1",
             attributes = elements.toConsentAttributes()

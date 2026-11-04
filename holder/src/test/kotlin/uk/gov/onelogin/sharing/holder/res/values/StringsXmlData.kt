@@ -60,5 +60,5 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
     HOLDER_SUCCESS_UNFULFILLABLE_REQUEST_TITLE(
         expected = "Unfulfillable request",
         resourceId = R.string.holder_success_unfulfillable_request_title
-    ),
+    )
 }

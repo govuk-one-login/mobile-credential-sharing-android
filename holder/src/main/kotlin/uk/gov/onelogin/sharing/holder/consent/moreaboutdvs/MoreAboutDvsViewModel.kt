@@ -27,7 +27,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ViewModelKey
 class MoreAboutDvsViewModel(
     private val analyticsLogger: AnalyticsLogger,
-    orchestrator: Orchestrator.Holder,
+    orchestrator: Orchestrator.Holder
 ) : ViewModel() {
 
     val organizationName: StateFlow<String> = orchestrator.holderSessionState

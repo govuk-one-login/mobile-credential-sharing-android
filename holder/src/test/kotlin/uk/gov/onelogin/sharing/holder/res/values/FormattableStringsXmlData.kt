@@ -10,15 +10,15 @@ import uk.gov.onelogin.sharing.holder.res.values.IntRangeHelper.toPlaceholderStr
 enum class FormattableStringsXmlData(
     val translations: Map<String, String>,
     @param:StringRes val resourceId: Int,
-    @Size(min = 1) vararg val arguments: Any,
+    @Size(min = 1) vararg val arguments: Any
 ) {
     DVS_IS_CERTIFIED_UNDER_UK_DIGITAL_VERIFICATION_SERVICES_MEANING_THAT(
         translations = mapOf(
             "en" to "<Argument 1> is certified under the " +
-                    "UK Digital Verification Services Trust Framework. This means they must:",
+                "UK Digital Verification Services Trust Framework. This means they must:",
             "cy" to "Mae <Argument 1> wedi’i ardystio o dan " +
-                    "Fframwaith Ymddiriedaeth Gwasanaethau Gwirio Digidol y DU. " +
-                    "Mae hyn yn golygu bod yn rhaid iddynt:",
+                "Fframwaith Ymddiriedaeth Gwasanaethau Gwirio Digidol y DU. " +
+                "Mae hyn yn golygu bod yn rhaid iddynt:"
         ),
         resourceId = R.string.dvs_is_certified_under_uk_digital_verification_services_meaning_that,
         *(1..1).toPlaceholderStrings()
@@ -26,8 +26,9 @@ enum class FormattableStringsXmlData(
     DVS_IS_TRUSTED_TO_RECEIVE_AND_STORE_DETAILS(
         translations = mapOf(
             "en" to "<Argument 1> is trusted by the UK government to receive and store your " +
-                    "details securely.",
-            "cy" to "Mae llywodraeth y DU yn ymddiried yn <Argument 1> i dderbyn a storio eich manylion yn ddiogel."
+                "details securely.",
+            "cy" to
+                "Mae llywodraeth y DU yn ymddiried yn <Argument 1> i dderbyn a storio eich manylion yn ddiogel."
         ),
         resourceId = R.string.dvs_is_trusted_to_receive_and_store_details,
         *(1..1).toPlaceholderStrings()
@@ -60,7 +61,7 @@ enum class FormattableStringsXmlData(
         translations = mapOf(
             "en" to "The person doing the check is using an app powered by <Argument 1>.",
             "cy" to "Mae’r person sy’n gwneud y gwiriad yn defnyddio ap sy’n cael ei bweru gan " +
-                    "<Argument 1>."
+                "<Argument 1>."
         ),
         resourceId = R.string.the_person_checking_is_using_an_app_powered_by_dvs,
         *(1..1).toPlaceholderStrings()

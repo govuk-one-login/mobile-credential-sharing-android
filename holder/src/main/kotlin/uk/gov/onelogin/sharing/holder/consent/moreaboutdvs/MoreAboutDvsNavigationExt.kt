@@ -8,9 +8,7 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 
 object MoreAboutDvsNavigationExt {
-    fun NavController.navigateToMoreAboutDvs(
-        options: NavOptionsBuilder.() -> Unit
-    ) = navigate(
+    fun NavController.navigateToMoreAboutDvs(options: NavOptionsBuilder.() -> Unit) = navigate(
         MoreAboutDvsRoute,
         options
     )

@@ -42,7 +42,7 @@ enum class TranslatableStringsData(
         translations = mapOf(
             "en" to "how long they will keep your details",
             "cy" to "am faint o amser y byddant yn cadw eich manylion"
-        ),
+        )
     ),
     HOW_YOUR_DETAILS_CAN_BE_USED(
         resourceId = R.string.how_your_details_can_be_used,
@@ -89,7 +89,7 @@ enum class TranslatableStringsData(
             "cy" to "Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, " +
                 "bydd angen i chi ei droi ymlaen hefyd."
         )
-    ),
+    )
     ;
 
     operator fun get(localeCode: String): String? = translations[localeCode]

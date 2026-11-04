@@ -28,13 +28,10 @@ import uk.gov.onelogin.sharing.holder.R
 class MoreAboutDvsScreenRule(
     composeTestRule: ComposeContentTestRule = createComposeRule(),
     private val resources: Resources = ApplicationProvider.getApplicationContext<Context>()
-        .resources,
+        .resources
 ) : ComposeContentTestRule by composeTestRule {
 
-    fun assertValidBody(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) {
+    fun assertValidBody(organizationName: String, useUnmergedTree: Boolean = false) {
         mapOf(
             "first" to R.string.more_about_dvs_body_1,
             "second" to R.string.more_about_dvs_body_2,
@@ -50,10 +47,7 @@ class MoreAboutDvsScreenRule(
         }
     }
 
-    fun assertValidBulletPoints(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) {
+    fun assertValidBulletPoints(organizationName: String, useUnmergedTree: Boolean = false) {
         mapOf(
             "first" to R.string.more_about_dvs_bullet_1,
             "second" to R.string.more_about_dvs_bullet_2,
@@ -69,10 +63,7 @@ class MoreAboutDvsScreenRule(
         }
     }
 
-    fun assertValidHeader(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) {
+    fun assertValidHeader(organizationName: String, useUnmergedTree: Boolean = false) {
         onHeader(
             organizationName = organizationName,
             useUnmergedTree = useUnmergedTree
@@ -80,36 +71,30 @@ class MoreAboutDvsScreenRule(
             .assert(isHeading())
     }
 
-    fun assertValidPrivacyPolicyBody(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) = onPrivacyPolicyBody(
-        organizationName = organizationName,
-        useUnmergedTree = useUnmergedTree
-    ).assertExists("Cannot find the main privacy policy body!")
+    fun assertValidPrivacyPolicyBody(organizationName: String, useUnmergedTree: Boolean = false) =
+        onPrivacyPolicyBody(
+            organizationName = organizationName,
+            useUnmergedTree = useUnmergedTree
+        ).assertExists("Cannot find the main privacy policy body!")
 
-    fun assertValidPrivacyPolicyBulletPoints(
-        useUnmergedTree: Boolean = false
-    ) {
+    fun assertValidPrivacyPolicyBulletPoints(useUnmergedTree: Boolean = false) {
         mapOf(
             "first" to R.string.more_about_dvs_privacy_bullet_1,
-            "second" to R.string.more_about_dvs_privacy_bullet_2,
+            "second" to R.string.more_about_dvs_privacy_bullet_2
         ).forEach { (description, resourceId) ->
             onContainer().performScrollToNode(
                 hasText(
-                    resources.getString(resourceId),
+                    resources.getString(resourceId)
                 )
             )
             onNodeWithText(
                 resources.getString(resourceId),
-                useUnmergedTree = useUnmergedTree,
+                useUnmergedTree = useUnmergedTree
             ).assertExists("Cannot find $description privacy policy bullet point")
         }
     }
 
-    fun assertValidPrivacyPolicyButton(
-        useUnmergedTree: Boolean = false
-    ) {
+    fun assertValidPrivacyPolicyButton(useUnmergedTree: Boolean = false) {
         onPrivacyPolicyButton(useUnmergedTree)
             .assertExists()
             .assertHasClickAction()
@@ -177,9 +162,7 @@ class MoreAboutDvsScreenRule(
         )
     }
 
-    fun onPrivacyPolicyButton(
-        useUnmergedTree: Boolean = false
-    ): SemanticsNodeInteraction {
+    fun onPrivacyPolicyButton(useUnmergedTree: Boolean = false): SemanticsNodeInteraction {
         onContainer().performScrollToNode(hasClickAction())
 
         return onNode(
