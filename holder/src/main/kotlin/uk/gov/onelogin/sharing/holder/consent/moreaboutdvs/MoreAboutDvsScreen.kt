@@ -14,7 +14,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
@@ -32,9 +34,8 @@ internal fun MoreAboutDvsScreen(
     modifier: Modifier = Modifier,
     viewModel: MoreAboutDvsViewModel = metroViewModel()
 ) {
-    val organizationName by viewModel.organizationName
-        .collectAsStateWithLifecycle()
-
+    val organizationName by viewModel.organizationName.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -43,11 +44,12 @@ internal fun MoreAboutDvsScreen(
 
     MoreAboutDvsContent(
         organizationName = organizationName,
-        modifier = modifier,
-        onPrivacyPolicyLinkClick = {
+        modifier = modifier
+    ) {
+        scope.launch {
             viewModel.sendButtonEvent(context)
         }
-    )
+    }
 }
 
 @Composable
@@ -56,54 +58,46 @@ internal fun MoreAboutDvsContent(
     modifier: Modifier = Modifier,
     onPrivacyPolicyLinkClick: () -> Unit = {}
 ) {
-    val scope = rememberCoroutineScope()
-
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(
             R.string.more_about_dvs_title,
             organizationName
         ),
-        body = (
-                organizationName.introductionTexts() +
-                        organizationName.introductionBullets() +
-                        organizationName.privacyNoticeSubheading() +
-                        organizationName.privacyNoticeBody() +
-                        organizationName.privacyNoticeBullets() +
-                        organizationName.privacyNoticeButton {
-                            scope.launch {
-                                // button currently does nothing
-                                onPrivacyPolicyLinkClick()
-                            }
-                        }
-                )
-            .toPersistentList(),
-        forceScroll = true,
+        body = organizationName.moreAboutDvsBodyContent(
+            onPrivacyPolicyLinkClick = onPrivacyPolicyLinkClick
+        ),
+        forceScroll = true
     )
 }
+
+@Composable
+private fun String.moreAboutDvsBodyContent(
+    onPrivacyPolicyLinkClick: () -> Unit
+): PersistentList<LeftAlignedScreenBodyV2> = (
+    introductionTexts() + introductionBullets() + privacyNoticeSubheading() + privacyNoticeBody() +
+        privacyNoticeBullets() +
+        privacyNoticeButton(
+            onClick = onPrivacyPolicyLinkClick
+        )
+    ).toPersistentList()
 
 @Composable
 private fun String.introductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
     R.string.more_about_dvs_body_1,
     R.string.more_about_dvs_body_2,
-    R.string.more_about_dvs_body_3,
+    R.string.more_about_dvs_body_3
 ).map { resourceId ->
-    stringResource(
-        resourceId,
-        this
-    ).removeDoubleFullStop()
+    stringResource(resourceId, this).removeDoubleFullStop()
 }.map(LeftAlignedScreenBodyV2::Text)
 
 @Composable
 private fun String.introductionBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
     R.string.more_about_dvs_bullet_1,
     R.string.more_about_dvs_bullet_2,
-    R.string.more_about_dvs_bullet_3,
+    R.string.more_about_dvs_bullet_3
 ).map { resourceId ->
-    stringResource(
-        resourceId,
-        this
-    ).removeDoubleFullStop()
+    stringResource(resourceId, this).removeDoubleFullStop()
 }.map { bulletText ->
     ListItem(text = bulletText)
 }.let { bulletItems ->
@@ -115,49 +109,34 @@ private fun String.introductionBullets(): LeftAlignedScreenBodyV2.BulletList = l
 @Composable
 private fun String.privacyNoticeSubheading(): LeftAlignedScreenBodyV2.Title =
     LeftAlignedScreenBodyV2.Title(
-        text = stringResource(
-            R.string.more_about_dvs_privacy_subheading,
-            this
-        ),
+        text = stringResource(R.string.more_about_dvs_privacy_subheading, this),
         modifier = Modifier.padding(top = spacingDouble),
         style = GdsHeadingStyle.Title2,
         textAlign = GdsHeadingAlignment.LeftAligned
     )
 
 @Composable
-private fun String.privacyNoticeBody(): LeftAlignedScreenBodyV2.Text =
-    LeftAlignedScreenBodyV2.Text(
-        text = stringResource(
-            R.string.more_about_dvs_privacy_body,
-            this
-        )
-    )
+private fun String.privacyNoticeBody(): LeftAlignedScreenBodyV2.Text = LeftAlignedScreenBodyV2.Text(
+    text = stringResource(R.string.more_about_dvs_privacy_body, this)
+)
 
 @Composable
 private fun String.privacyNoticeBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
     R.string.more_about_dvs_privacy_bullet_1,
-    R.string.more_about_dvs_privacy_bullet_2,
+    R.string.more_about_dvs_privacy_bullet_2
 ).map { resourceId ->
-    stringResource(
-        resourceId,
-        this
-    ).removeDoubleFullStop()
+    stringResource(resourceId, this).removeDoubleFullStop()
 }.map { bulletText ->
     ListItem(text = bulletText)
 }.let { bulletItems ->
-    LeftAlignedScreenBodyV2.BulletList(
-        items = bulletItems.toPersistentList()
-    )
+    LeftAlignedScreenBodyV2.BulletList(items = bulletItems.toPersistentList())
 }
 
 @Composable
 private fun String.privacyNoticeButton(
     onClick: () -> Unit
 ): LeftAlignedScreenBodyV2.SecondaryButton = LeftAlignedScreenBodyV2.SecondaryButton(
-    text = stringResource(
-        R.string.more_about_dvs_privacy_policy_link,
-        this
-    ),
+    text = stringResource(R.string.more_about_dvs_privacy_policy_link, this),
     onClick = onClick,
     showIcon = true
 )
@@ -174,14 +153,13 @@ internal fun String.removeDoubleFullStop(): String = let { text ->
 @Composable
 internal fun MoreAboutDvsPreview(
     @PreviewParameter(provider = MoreAboutDvsPreviewParameters::class)
-    presentation: ConsentPresentation,
-    modifier: Modifier = Modifier,
+    presentation: ConsentPresentation
 ) {
     GdsTheme {
         Surface {
             MoreAboutDvsContent(
                 organizationName = presentation.organizationName ?: "Unknown",
-                modifier = modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -189,9 +167,6 @@ internal fun MoreAboutDvsPreview(
 
 internal class MoreAboutDvsPreviewParameters(
     override val values: Sequence<ConsentPresentation> = sequenceOf(
-        ConsentPresentation(
-            documents = emptyList(),
-            organizationName = "Stub-DVS Ltd."
-        )
+        ConsentPresentation(documents = emptyList(), organizationName = "Stub-DVS Ltd.")
     )
 ) : PreviewParameterProvider<ConsentPresentation>
