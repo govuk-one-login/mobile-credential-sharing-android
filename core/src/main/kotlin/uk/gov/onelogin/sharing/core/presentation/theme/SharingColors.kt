@@ -17,9 +17,14 @@ object SharingColors {
 
 object Backgrounds {
     val sharingCard = ColorPair(light = SharingColors.grey4, dark = SharingColors.charcoal2)
-    val sharingCardRow = ColorPair(light = SharingColors.white, dark = SharingColors.charcoal1)
+    val sharingAttributeList =
+        ColorPair(light = SharingColors.white, dark = SharingColors.charcoal1)
 }
 
 object Dividers {
+    val sharingCard = ColorPair(light = SharingColors.grey3, dark = SharingColors.grey3)
+}
+
+object Borders {
     val sharingCard = ColorPair(light = SharingColors.grey3, dark = SharingColors.grey3)
 }

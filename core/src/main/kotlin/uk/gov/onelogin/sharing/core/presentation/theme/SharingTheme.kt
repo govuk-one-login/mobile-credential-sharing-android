@@ -13,7 +13,7 @@ fun SharingTheme(content: @Composable () -> Unit) {
     GdsTheme(
         extendedColorScheme = GdsThemeDefaults.extendedColorScheme(
             cardBackground = Backgrounds.sharingCard.toMappedColors(),
-            rowBackground = Backgrounds.sharingCardRow.toMappedColors(),
+            rowBackground = Backgrounds.sharingAttributeList.toMappedColors(),
             dividerCard = Dividers.sharingCard.toMappedColors()
         ),
         content = content
