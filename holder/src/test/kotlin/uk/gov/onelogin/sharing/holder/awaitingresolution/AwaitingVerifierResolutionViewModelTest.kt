@@ -1,5 +1,9 @@
 package uk.gov.onelogin.sharing.holder.awaitingresolution
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -9,22 +13,29 @@ import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.analytics.FakeAnalyticsLogger
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionTestData.BUTTON_TEXT
+import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionTestData.SCREEN_ID
+import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class AwaitingVerifierResolutionViewModelTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
+    private val context: Context by lazy { ApplicationProvider.getApplicationContext() }
     private val orchestrator = FakeOrchestrator(
         initialHolderState = MutableStateFlow(HolderSessionState.Complete.Success()),
         startCount = 1
     )
-    private val analyticsLogger = FakeAnalyticsLogger()
+    private val analyticsLogger = StoredAnalyticsLogger()
 
     private val viewModel = AwaitingVerifierResolutionViewModel(analyticsLogger, orchestrator)
 
@@ -37,7 +48,7 @@ class AwaitingVerifierResolutionViewModelTest {
 
     @Test
     fun `Logs the screen view event`() {
-        viewModel.logScreenView()
+        viewModel.sendScreenEvent(context)
         assertThat(
             analyticsLogger,
             contains(AwaitingVerifierResolutionTestData.expectedScreenEvent)
@@ -47,11 +58,53 @@ class AwaitingVerifierResolutionViewModelTest {
 
     @Test
     fun `Logs the go back to documents button event`() {
-        viewModel.logGoBackToDocuments()
+        viewModel.sendGoBackToDocumentsEvent(context)
         assertThat(
             analyticsLogger,
             contains(AwaitingVerifierResolutionTestData.expectedGoBackToDocumentsEvent)
 
         )
+    }
+
+    @Test
+    fun `Screen view event sets name and id`() {
+        viewModel.sendScreenEvent(context)
+
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals("screen_view", event.eventType)
+        assertEquals(SCREEN_NAME.lowercase(), event.parameters["screen_name"])
+        assertEquals(SCREEN_ID, event.parameters["screen_id"])
+    }
+
+    @Test
+    fun `Go back to documents button event sets text and type`() {
+        viewModel.sendGoBackToDocumentsEvent(context)
+
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals("navigation", event.eventType)
+        assertEquals(BUTTON_TEXT.lowercase(), event.parameters["text"])
+        assertEquals("submit form", event.parameters["type"])
+    }
+
+    @Test
+    @Config(qualifiers = "cy")
+    fun `Screen view event is in English when device is in Welsh`() {
+        viewModel.sendScreenEvent(context)
+
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals("screen_view", event.eventType)
+        assertEquals(SCREEN_NAME.lowercase(), event.parameters["screen_name"])
+        assertEquals("cy", event.parameters["language"])
+    }
+
+    @Test
+    @Config(qualifiers = "cy")
+    fun `Go back to documents button event is in English when device is in Welsh`() {
+        viewModel.sendGoBackToDocumentsEvent(context)
+
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals("navigation", event.eventType)
+        assertEquals(BUTTON_TEXT.lowercase(), event.parameters["text"])
+        assertEquals("cy", event.parameters["language"])
     }
 }

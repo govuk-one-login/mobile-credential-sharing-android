@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -27,7 +28,6 @@ class AwaitingVerifierResolutionScreenRule(
     }
 
     // node finders
-
     fun onSuccessIcon() = onNodeWithContentDescription("Success")
     fun onHeading() = onNodeWithText(resources.getString(R.string.details_shared))
     fun onFirstParagraph() =
@@ -49,6 +49,9 @@ class AwaitingVerifierResolutionScreenRule(
                 Unit
             )
         )
+
+    fun assertWelshTitleIsDisplayed() =
+        onNode(hasText("Manylion wedi’u rhannu") and isHeading()).assertIsDisplayed()
 
     fun assertBodyIsDisplayed() {
         onFirstParagraph().assertIsDisplayed()

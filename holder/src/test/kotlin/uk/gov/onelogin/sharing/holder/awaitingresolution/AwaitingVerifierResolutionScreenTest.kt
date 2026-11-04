@@ -8,11 +8,15 @@ import com.google.testing.junit.testparameterinjector.KotlinTestParameters.named
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import org.robolectric.annotation.Config
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
@@ -83,6 +87,27 @@ class AwaitingVerifierResolutionScreenTest {
                 assertEquals(1, orchestrator.resetCount, "Journey was not reset")
                 assertEquals(1, hostBackPresses, "Host app did not press back")
             }
+        }
+
+    @Test
+    @Config(qualifiers = "cy")
+    fun `Displaying the screen in Welsh sends analytics events in English`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertWelshTitleIsDisplayed()
+                performGoBackToDocumentsClick()
+                waitUntil { analyticsLogger.size >= 2 }
+            }
+            assertThat(
+                analyticsLogger,
+                hasSentEvents(
+                    contains(
+                        AwaitingVerifierResolutionTestData.expectedScreenEvent,
+                        AwaitingVerifierResolutionTestData.expectedGoBackToDocumentsEvent
+                    )
+                )
+            )
         }
 
     @Composable

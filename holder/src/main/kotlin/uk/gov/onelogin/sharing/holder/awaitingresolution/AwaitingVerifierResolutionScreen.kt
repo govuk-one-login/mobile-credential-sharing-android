@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ internal fun AwaitingVerifierResolutionScreen(
     viewModel: AwaitingVerifierResolutionViewModel = metroViewModel(),
     onExitJourney: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val currentOnExitJourney by rememberUpdatedState(onExitJourney)
 
     /**
@@ -73,13 +75,13 @@ internal fun AwaitingVerifierResolutionScreen(
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("AwaitingVerifierResolutionScreen")
-        viewModel.logScreenView()
+        viewModel.sendScreenEvent(context)
     }
 
     AwaitingVerifierResolutionContent(
         modifier = modifier,
         onGoBackToDocuments = {
-            viewModel.logGoBackToDocuments()
+            viewModel.sendGoBackToDocumentsEvent(context)
             exitCallback.handleOnBackPressed()
         }
     )
