@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.MatchedAttribute
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
@@ -18,7 +17,7 @@ class ConsentPresentationFactoryTest {
 
     private fun readerRequest(
         privacyPolicyUrl: Uri = mockk(relaxed = true),
-        readerOrganizationName: String? = null
+        readerOrganizationName: String = "Organisation Ltd"
     ) = AuthenticatedReaderRequest(
         docRequest = DocRequest(ItemsRequest(docType = docType, nameSpaces = emptyMap())),
         privacyPolicyUrl = privacyPolicyUrl,
@@ -91,18 +90,6 @@ class ConsentPresentationFactoryTest {
     }
 
     @Test
-    fun `no documents when the authenticated reader request is null`() {
-        val presentation = ConsentPresentationFactory.create(
-            matchedAttributes = mapOf(
-                namespace to listOf(MatchedAttribute("family_name", true))
-            ),
-            authenticatedReaderRequest = null
-        )
-
-        assertEquals(emptyList(), presentation.documents)
-    }
-
-    @Test
     fun `privacy policy and organisation name come from the reader request`() {
         val uri = mockk<Uri>()
         every { uri.toString() } returns "https://verifier.example/privacy"
@@ -123,19 +110,5 @@ class ConsentPresentationFactoryTest {
             "Organisation Ltd.",
             presentation.normalisedOrganizationName
         )
-    }
-
-    @Test
-    fun `privacy policy and organisation name are null when reader request is null`() {
-        val presentation = ConsentPresentationFactory.create(
-            matchedAttributes = mapOf(
-                namespace to listOf(MatchedAttribute("family_name", true))
-            ),
-            authenticatedReaderRequest = null
-        )
-
-        assertNull(presentation.privacyPolicyUrl)
-        assertNull(presentation.organizationName)
-        assertNull(presentation.normalisedOrganizationName)
     }
 }
