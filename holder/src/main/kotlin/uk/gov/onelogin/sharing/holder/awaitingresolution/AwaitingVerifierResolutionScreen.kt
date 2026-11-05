@@ -130,8 +130,8 @@ internal fun AwaitingVerifierResolutionContent(
                 Text(
                     text = stringResource(R.string.holder_awaiting_verifier_resolution_body_1),
                     textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 17.sp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = padding)
@@ -141,8 +141,8 @@ internal fun AwaitingVerifierResolutionContent(
                 Text(
                     text = stringResource(R.string.holder_awaiting_verifier_resolution_body_2),
                     textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 17.sp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = padding)
