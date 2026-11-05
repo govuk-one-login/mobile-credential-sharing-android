@@ -182,6 +182,10 @@ internal fun MoreAboutDvsPreview(
 
 internal class MoreAboutDvsPreviewParameters(
     override val values: Sequence<ConsentPresentation> = sequenceOf(
-        ConsentPresentation(documents = emptyList(), organizationName = "Stub-DVS Ltd.")
+        ConsentPresentation(
+            documents = emptyList(),
+            organizationName = "Stub-DVS Ltd.",
+            privacyPolicyUrl = "https://www.more.about.dvs/preview"
+        )
     )
 ) : PreviewParameterProvider<ConsentPresentation>
