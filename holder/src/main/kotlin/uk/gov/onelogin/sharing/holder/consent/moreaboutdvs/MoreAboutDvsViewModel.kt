@@ -20,6 +20,7 @@ import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsAnalyticsEvents.moreAboutDvsPrivacyPolicyButton
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsAnalyticsEvents.moreAboutDvsScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -30,14 +31,24 @@ class MoreAboutDvsViewModel(
     orchestrator: Orchestrator.Holder
 ) : ViewModel() {
 
-    val organizationName: StateFlow<String> = orchestrator.holderSessionState
+    private val presentation: Flow<ConsentPresentation> = orchestrator.holderSessionState
         .filterIsInstance<HolderSessionState.AwaitingUserConsent>()
         .map { it.presentation }
+
+    val organizationName: StateFlow<String> = presentation
         .mapNotNull { it.normalisedOrganizationName }
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
             "Unknown"
+        )
+
+    val privacyPolicyUrl: StateFlow<String?> = presentation
+        .map { it.privacyPolicyUrl }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            null
         )
 
     fun sendScreenEvent(context: Context) = viewModelScope.launch {

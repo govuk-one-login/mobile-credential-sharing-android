@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
@@ -35,6 +37,8 @@ internal fun MoreAboutDvsScreen(
     viewModel: MoreAboutDvsViewModel = metroViewModel()
 ) {
     val organizationName by viewModel.organizationName.collectAsStateWithLifecycle()
+    val privacyPolicyUrl by viewModel.privacyPolicyUrl.collectAsStateWithLifecycle()
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -48,6 +52,17 @@ internal fun MoreAboutDvsScreen(
     ) {
         scope.launch {
             viewModel.sendButtonEvent(context)
+            val intent = CustomTabsIntent.Builder()
+                .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                .setDownloadButtonEnabled(false)
+                .build()
+
+            privacyPolicyUrl
+                ?.let(Uri::parse)
+                ?.let { uri ->
+                    intent.launchUrl(context, uri)
+                }
         }
     }
 }

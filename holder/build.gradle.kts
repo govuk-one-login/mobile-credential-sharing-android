@@ -50,6 +50,7 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.androidx.browser,
         libs.androidx.lifecycle.viewmodel.compose,
         libs.metro.viewmodel.compose,
         libs.zxing.core,

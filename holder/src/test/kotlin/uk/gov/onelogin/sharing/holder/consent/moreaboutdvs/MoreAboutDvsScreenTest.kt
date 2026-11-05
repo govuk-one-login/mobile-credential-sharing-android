@@ -1,10 +1,17 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
+import android.content.Intent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.performClick
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.matcher.IntentMatchers
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValuesIn
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -13,6 +20,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.allOf
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
@@ -109,6 +117,26 @@ class MoreAboutDvsScreenTest {
                 analyticsLogger.contains(MoreAboutDvsTestData.expectedButtonEvent)
             }
         }
+    }
+
+    @Test
+    fun `Opens a CustomTabsIntent when tapping the privacy policy button`() = runTest {
+        Intents.init()
+
+        composeTestRule.run {
+            setContent { Render() }
+            onPrivacyPolicyButton(true).performClick()
+            waitForIdle()
+        }
+
+        intended(
+            allOf(
+                hasAction(Intent.ACTION_VIEW),
+                hasData(presentation.privacyPolicyUrl),
+            )
+        )
+
+        Intents.release()
     }
 
     @Composable
