@@ -71,6 +71,14 @@ android {
     packaging {
         licenseFilters.forEach(resources.excludes::plusAssign)
     }
+
+    testOptions {
+        unitTests.all {
+            it.jvmArgs(
+                "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED"
+            )
+        }
+    }
 }
 
 dependencies {
