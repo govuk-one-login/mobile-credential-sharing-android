@@ -37,6 +37,13 @@ jobs:
 
       - uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
 
+      - name: Prepare Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd
+        with:
+          cmdline-tools-version: '15859902'
+          packages: 'platform-tools emulator'
+          log-accepted-android-sdk-licenses: 'false'
+
       - name: Android Emulator
         run: android emulator create
 
