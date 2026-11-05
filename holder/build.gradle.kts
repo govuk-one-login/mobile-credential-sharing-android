@@ -45,6 +45,12 @@ mavenPublishingConfig {
 
 dependencies {
     listOf(
+        testFixtures(projects.core),
+        projects.prerequisiteGateImpl,
+        testFixtures(projects.orchestration)
+    ).forEach(::androidTestImplementation)
+
+    listOf(
         projects.core,
         projects.exchangeFormat
     ).forEach(::api)
@@ -78,6 +84,11 @@ dependencies {
     listOf(
         projects.analytics,
         projects.bluetooth,
-        projects.cryptoService
+        projects.cryptoService,
+        testFixtures(projects.analytics),
+        testFixtures(projects.bluetooth),
+        testFixtures(projects.cryptoService),
+        testFixtures(projects.core),
+        testFixtures(projects.orchestration)
     ).forEach(::testFixturesImplementation)
 }
