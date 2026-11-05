@@ -26,7 +26,6 @@ class ValidatePrivacyPolicyUseCaseImpl(
             ?: throw ReaderAuthenticationFailure(PRIVACY_POLICY_URL_INVALID)
 
         val organizationName = subjectNameParser.extractOrganizationName(leafCert)
-            ?.takeIf { it.isNotBlank() }
             ?: throw ReaderAuthenticationFailure(ORGANIZATION_NAME_MISSING)
 
         return AuthenticatedReaderRequest(

@@ -269,6 +269,28 @@ class ValidatePrivacyPolicyUseCaseImplTest {
         assertEquals(expectedOrg, authenticatedRequest.readerOrganizationName)
     }
 
+    @Test
+    fun `escaped-space organizationName throws ORGANIZATION_NAME_MISSING`() {
+        val validUrl = "https://example.gov.uk/privacy"
+        val siaBytes = buildSiaExtensionValue(SIA_PRIVACY_OID, validUrl)
+
+        val leafCertEscapedSpaceOrg = TestCertificateGenerator(
+            subject = "CN=Reader Leaf,O=\\ \\ ,C=GB",
+            keyPair = keyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root CA"
+        ).leaf().withExtension(OID_SIA, false, siaBytes).build()
+
+        val failure = assertThrows(ReaderAuthenticationFailure::class.java) {
+            useCase.validate(VerifiedReaderRequest(sampleDocRequest, leafCertEscapedSpaceOrg))
+        }
+
+        assertEquals(
+            ReaderAuthenticationReason.ORGANIZATION_NAME_MISSING,
+            failure.reason
+        )
+    }
+
     private fun buildSiaExtensionValue(accessMethodOid: String, uriString: String): ByteArray {
         val accessMethod = ASN1ObjectIdentifier(accessMethodOid)
         val location = GeneralName(GeneralName.uniformResourceIdentifier, uriString)
