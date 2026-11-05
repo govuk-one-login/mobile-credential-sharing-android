@@ -6,6 +6,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicator
@@ -14,6 +15,7 @@ import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicatorState
 import uk.gov.android.ui.componentsv2.progress.ProgressWaitLength
 import uk.gov.android.ui.patterns.centrealignedscreen.CentreAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
@@ -23,12 +25,14 @@ internal fun LoadingScreen(
     type: LoadingScreenType,
     viewModel: LoadingViewModel = metroViewModel()
 ) {
+    val context = LocalContext.current
+    val titleRes = type.labelRes
     BackHandler(enabled = type.blocksBackNavigation) { }
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(type) {
         metrics.putScreenState(type.name)
-        viewModel.logScreenView(type)
+        viewModel.logScreenView(type, context.getEnglishString(titleRes))
     }
 
     LoadingContent(type = type)

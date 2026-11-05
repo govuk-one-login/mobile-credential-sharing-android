@@ -32,14 +32,16 @@ class LoadingViewModelTest {
     @Test
     fun `Logs the screen view event for the given type`(@TestParameter type: LoadingScreenType) =
         runTest(mainDispatcherRule.testDispatcher) {
-            viewModel.logScreenView(type).join()
+            val screenName = type.screenName
+
+            viewModel.logScreenView(type, screenName).join()
 
             assertThat(
                 analyticsLogger,
                 hasSentEvents(
                     contains(
                         ViewEvent.Screen(
-                            name = type.screenName,
+                            name = screenName,
                             id = type.firebaseScreenId,
                             params = walletSharingRequiredParameters
                         ).asLegacyEvent()

@@ -9,8 +9,12 @@ import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharin
 object LoadingAnalytics {
     private const val CLOSE_BUTTON_TEXT = "Close"
 
-    fun logScreenView(analyticsLogger: AnalyticsLogger, type: LoadingScreenType) = ViewEvent.Screen(
-        name = type.screenName,
+    fun logScreenView(
+        analyticsLogger: AnalyticsLogger,
+        type: LoadingScreenType,
+        screenName: String
+    ) = ViewEvent.Screen(
+        name = screenName,
         id = type.firebaseScreenId,
         params = walletSharingRequiredParameters
     ).let(analyticsLogger::logEventV3Dot1)

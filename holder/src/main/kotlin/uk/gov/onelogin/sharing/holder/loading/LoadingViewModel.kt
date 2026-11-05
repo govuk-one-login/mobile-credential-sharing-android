@@ -20,7 +20,8 @@ class LoadingViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
-    fun logScreenView(type: LoadingScreenType) = viewModelScope.launch(dispatcher) {
-        LoadingAnalytics.logScreenView(analyticsLogger, type)
-    }
+    fun logScreenView(type: LoadingScreenType, screenName: String) =
+        viewModelScope.launch(dispatcher) {
+            LoadingAnalytics.logScreenView(analyticsLogger, type, screenName)
+        }
 }
