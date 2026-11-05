@@ -31,6 +31,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
+import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
+import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -44,9 +48,16 @@ class ShareCredentialTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val analyticsLogger = StoredAnalyticsLogger()
+
     private val appGraph by lazy {
-        createTestAppGraph()
+        createTestAppGraph(analyticsLogger = analyticsLogger)
     }
+
+    private val expectedCloseEvent = Button(
+        text = "Close",
+        params = walletSharingRequiredParameters
+    ).asLegacyEvent()
 
     private val holderGraph by lazy {
         createTestHolderGraph(appGraph)
@@ -74,7 +85,9 @@ class ShareCredentialTest {
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true))
+            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
+            "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -120,7 +133,8 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button cancels the journey for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Presenting QR code" to HolderSessionState.PresentingEngagement("")
+            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+            "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
         val orchestrator = FakeOrchestrator(
@@ -166,6 +180,27 @@ class ShareCredentialTest {
             setContent { ShareCredential(component = presenter) }
             waitForIdle()
             onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Close button sends a button analytics event`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Preflight" to HolderSessionState.Preflight(emptyList()),
+            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true))
+        )
+    ) = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(state)
+            )
+        )
+        performCloseJourneyViaButton(presenter)
+        composeTestRule.waitUntil {
+            expectedCloseEvent in analyticsLogger.sentAnalyticsEvents
         }
     }
 
@@ -254,6 +289,7 @@ class ShareCredentialTest {
             }
 
             ShareCredential(
+                analyticsLogger = analyticsLogger,
                 orchestrator = orchestrator,
                 holderSessionState = orchestrator.holderSessionState,
                 viewModelFactory = uiGraph.metroViewModelFactory,
@@ -290,6 +326,7 @@ class ShareCredentialTest {
             }
 
             ShareCredential(
+                analyticsLogger = analyticsLogger,
                 orchestrator = orchestrator,
                 holderSessionState = orchestrator.holderSessionState,
                 viewModelFactory = uiGraph.metroViewModelFactory,
@@ -386,6 +423,7 @@ class ShareCredentialTest {
         val orchestrator = uiGraph.holderOrchestrator()
 
         ShareCredential(
+            analyticsLogger = presenter.appGraph.analyticsLogger(),
             orchestrator = orchestrator,
             holderSessionState = presenter.orchestrator.holderSessionState,
             navController = controller,

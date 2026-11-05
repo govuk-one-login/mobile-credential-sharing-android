@@ -51,6 +51,28 @@ enum class TranslatableStringsData(
             "cy" to "Paratoi i rannu"
         )
     ),
+    TURN_ON_BLUETOOTH(
+        resourceId = R.string.turn_on_bluetooth,
+        translations = mapOf(
+            "en" to "Turn on Bluetooth",
+            "cy" to "Troi Bluetooth ymlaen"
+        )
+    ),
+    TURN_ON_BLUETOOTH_BEFORE_SHARING(
+        resourceId = R.string.turn_on_bluetooth_before_sharing,
+        translations = mapOf(
+            "en" to "Before you can share, you need to turn on Bluetooth.",
+            "cy" to "Cyn y gallwch rannu, mae angen i chi droi Bluetooth ymlaen."
+        )
+    ),
+    USE_QR_CODE_TO_CONNECT_NEXT(
+        resourceId = R.string.use_qr_code_to_connect_next,
+        translations = mapOf(
+            "en" to "You will not connect with a device yet. You’ll use a QR code to do that next.",
+            "cy" to
+                "Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf."
+        )
+    ),
     GO_BACK_TO_DOCUMENTS(
         resourceId = R.string.go_back_to_documents,
         translations = mapOf(
