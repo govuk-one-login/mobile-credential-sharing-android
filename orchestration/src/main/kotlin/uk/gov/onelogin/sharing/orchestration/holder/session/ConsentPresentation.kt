@@ -12,26 +12,16 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
  */
 data class ConsentPresentation(
     val documents: List<ConsentDocument>,
-    val privacyPolicyUrl: String? = null,
-    val organizationName: String? = null,
+    val organizationName: String,
+    val privacyPolicyUrl: String,
     val isBusy: Boolean = false
 ) {
     /**
      * The organisation name with punctuation normalised so that, once placed into a sentence, it
      * ends in exactly one full stop.
-     *
-     * Returns `null` when no [organizationName] is available.
      */
-    val normalisedOrganizationName: String?
-        get() {
-            val trimmed = organizationName?.trim().orEmpty()
-
-            return if (trimmed.isEmpty()) {
-                null
-            } else {
-                trimmed.trimEnd('.').trimEnd() + "."
-            }
-        }
+    val normalisedOrganizationName: String
+        get() = organizationName.trim().trimEnd('.').trimEnd() + "."
 }
 
 /**
@@ -50,5 +40,11 @@ data class ConsentNamespace(val nameSpace: String, val attributes: List<ConsentA
  * @param elementIdentifier The credential element identifier that will be included in the
  * DeviceResponse (for example `family_name`, or a resolved `age_over_18`).
  * @param intentToRetain Whether the Verifier declared an intent to retain this attribute.
+ * @param nameSpace The namespace the attribute belongs to (for example `org.iso.18013.5.1` or the
+ * custom `org.iso.18013.5.1.GB`). Used to resolve the display label.
  */
-data class ConsentAttribute(val elementIdentifier: String, val intentToRetain: Boolean)
+data class ConsentAttribute(
+    val elementIdentifier: String,
+    val intentToRetain: Boolean,
+    val nameSpace: String
+)

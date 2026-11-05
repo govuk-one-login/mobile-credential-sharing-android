@@ -51,6 +51,7 @@ fun BluetoothConnectionErrorScreen(
                 textAlign = GdsHeadingAlignment.CenterAligned
             )
         },
+        supportingText = null,
         primaryButton = {
             GdsButton(
                 text = stringResource(R.string.bluetooth_connection_error_try_again),
