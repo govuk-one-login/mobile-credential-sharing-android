@@ -72,6 +72,34 @@ class SubjectNameParserTest {
         assertNull(orgName)
     }
 
+    @Test
+    fun `returns null when Organization name is an escaped space`() {
+        val cert = TestCertificateGenerator(
+            subject = "CN=Reader Leaf,O=\\ \\ ,C=GB",
+            keyPair = keyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root CA"
+        ).leaf().build()
+
+        val orgName = parser.extractOrganizationName(cert)
+
+        assertNull(orgName)
+    }
+
+    @Test
+    fun `trims surrounding escaped spaces but keeps inner text`() {
+        val cert = TestCertificateGenerator(
+            subject = "CN=Reader Leaf,O=\\ Acme Reader\\ ,C=GB",
+            keyPair = keyPair,
+            issuerKeyPair = CertificateStubs.rootKeyPair,
+            issuer = "CN=Root CA"
+        ).leaf().build()
+
+        val orgName = parser.extractOrganizationName(cert)
+
+        assertEquals("Acme Reader", orgName)
+    }
+
     private fun generateKeyPair(): java.security.KeyPair {
         val gen = KeyPairGenerator.getInstance("EC")
         gen.initialize(ECGenParameterSpec("secp256r1"))

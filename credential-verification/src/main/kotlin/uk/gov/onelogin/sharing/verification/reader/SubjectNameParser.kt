@@ -15,8 +15,12 @@ class SubjectNameParser {
             val eqIndex = rdn.indexOf('=')
             if (eqIndex > 0) {
                 val key = rdn.substring(0, eqIndex).trim()
-                val value = rdn.substring(eqIndex + 1).trim()
-                if (key == "O" || key == "2.5.4.10") unescapeRdnValue(value) else null
+                val rawValue = rdn.substring(eqIndex + 1)
+                if (key == "O" || key == "2.5.4.10") {
+                    unescapeRdnValue(rawValue).trim().ifBlank { null }
+                } else {
+                    null
+                }
             } else {
                 null
             }
@@ -41,7 +45,7 @@ class SubjectNameParser {
                 }
 
                 ',' -> {
-                    rdns.add(current.toString().trim())
+                    rdns.add(current.toString())
                     current.clear()
                     i++
                 }
@@ -52,10 +56,9 @@ class SubjectNameParser {
                 }
             }
         }
-        if (current.isNotEmpty()) rdns.add(current.toString().trim())
+        if (current.isNotEmpty()) rdns.add(current.toString())
         return rdns
     }
 
-    private fun unescapeRdnValue(value: String): String =
-        value.replace("\\,", ",").replace("\\=", "=").replace("\\\\", "\\")
+    private fun unescapeRdnValue(value: String): String = value.replace(Regex("""\\(.)"""), "$1")
 }

@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorStubs
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
@@ -16,4 +17,15 @@ object HolderSessionStateStubs {
         BluetoothState.PoweredOff
     )
     val successStub: HolderSessionState = HolderSessionState.Complete.Success()
+
+    val consentPresentationStub: ConsentPresentation = ConsentPresentation(
+        documents = emptyList(),
+        organizationName = "Example Organisation",
+        privacyPolicyUrl = "https://gov.uk/"
+    )
+
+    val awaitingUserConsentStub: HolderSessionState = HolderSessionState.AwaitingUserConsent(
+        request = deviceRequestStub,
+        presentation = consentPresentationStub
+    )
 }
