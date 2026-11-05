@@ -11,7 +11,7 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothStateMatchers.hasAddress
@@ -28,7 +28,7 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 @RunWith(TestParameterInjector::class)
 class GattClientEventToCentralBluetoothStateTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val transformer = GattClientEventToCentralBluetoothState(logger)
 
     @Test

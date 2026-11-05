@@ -1,17 +1,16 @@
 package uk.gov.onelogin.sharing.cryptoService
 
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionSecurityTestStub.generateValidPublicKey
 import uk.gov.onelogin.sharing.cryptoService.cose.CoseKey
 import uk.gov.onelogin.sharing.cryptoService.cose.toDto
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.security.CoseKeyDto
 import uk.gov.onelogin.sharing.models.mdoc.security.SecurityDto
-import uk.gov.onelogin.sharing.models.mdoc.security.toDto
 
 object SecurityDeserializerStub {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val keyPair = generateValidPublicKey()
     val validCoseKey = CoseKey.generateCoseKey(keyPair, logger)
     val embeddedCoseKey = EmbeddedCbor(validCoseKey.toDto().toCbor())

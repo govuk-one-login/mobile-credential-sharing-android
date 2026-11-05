@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import dev.zacsweers.metro.createGraphFactory
 import java.security.cert.X509Certificate
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
-import uk.gov.logging.api.v2.Logger
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.Logger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.CredentialProvider
@@ -31,7 +31,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
  */
 fun createTestAppGraph(
     applicationContext: Context = ApplicationProvider.getApplicationContext(),
-    logger: Logger = SystemLogger(),
+    logger: Logger = MemorisedLogger(),
     analyticsLogger: AnalyticsLogger = SystemAnalyticsLogger(logger),
     checker: PermissionChecker = PermissionChecker { emptyList() }
 ): CredentialSharingAppGraph = createGraphFactory<CredentialSharingAppGraph.Factory>()

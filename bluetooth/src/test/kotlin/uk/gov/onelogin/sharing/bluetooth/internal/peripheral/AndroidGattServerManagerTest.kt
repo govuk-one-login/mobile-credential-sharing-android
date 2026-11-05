@@ -28,7 +28,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.SessionEndStateQueued
@@ -70,7 +70,7 @@ class AndroidGattServerManagerTest {
     private val permissionResponse = mutableListOf<PermissionChecker.PermissionCheckResult>()
     private val fakePermissionChecker = FakePermissionChecker { permissionResponse }
     private val fakeGattWriter = FakeGattWriter()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val reassemblerFactory = MessageReassembler.Factory { max ->
         MessageReassembler(max, logger)
     }

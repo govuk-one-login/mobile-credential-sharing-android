@@ -1,11 +1,13 @@
 package uk.gov.onelogin.sharing.cryptoService.cbor.deserializers
 
 import kotlin.test.assertFailsWith
+import org.hamcrest.CoreMatchers.containsString
+import org.hamcrest.Matchers
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecoderImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.cbor
@@ -19,7 +21,7 @@ class DeviceRequestDecoderImplMalformedCborTest(
     private val input: ByteArray,
     private val expectedMessage: String
 ) {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val deviceRequestDecoderImpl = DeviceRequestDecoderImpl(logger)
 
     @Test
@@ -28,9 +30,10 @@ class DeviceRequestDecoderImplMalformedCborTest(
             deviceRequestDecoderImpl.deviceRequestDecoder(input)
         }
 
-        logger.assertErrorLoggedWithThrowable(DeviceRequestDecodingException::class.java) {
-            it.contains(expectedMessage)
-        }
+        logger.assertErrorLoggedWithThrowable(
+            DeviceRequestDecodingException::class.java,
+            containsString(expectedMessage)
+        )
     }
 
     companion object {

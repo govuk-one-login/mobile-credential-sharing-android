@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.secureArea.session
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import java.security.GeneralSecurityException
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.generateSalt
 import uk.gov.onelogin.sharing.cryptoService.cryptography.java.hkdfKeyGeneration

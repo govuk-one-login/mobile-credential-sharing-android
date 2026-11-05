@@ -9,7 +9,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -37,7 +37,7 @@ class HolderWelcomeScreenTest {
     private val viewModel by lazy {
         HolderWelcomeViewModel(
             dispatcher = dispatcherRule.testDispatcher,
-            analyticsLogger = SystemAnalyticsLogger(SystemLogger()),
+            analyticsLogger = SystemAnalyticsLogger(MemorisedLogger()),
             orchestrator = orchestrator
         )
     }

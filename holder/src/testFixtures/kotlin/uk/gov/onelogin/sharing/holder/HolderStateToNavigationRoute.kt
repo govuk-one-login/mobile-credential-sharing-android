@@ -7,13 +7,13 @@ import com.google.testing.junit.testparameterinjector.TestParametersValuesProvid
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
-import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionRoute
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
+import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
-import uk.gov.onelogin.sharing.holder.prerequisites.retry.RetryHolderPrerequisitesRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
@@ -51,18 +51,28 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'Preflight' -> RetryHolderPrerequisitesRoute",
+                "'Preflight (Bluetooth on)' -> GetReadyToShareRoute",
                 HolderSessionStateStubs.preflightEmptyPermissions
             ) {
-                instanceOf<RetryHolderPrerequisitesRoute>(
-                    RetryHolderPrerequisitesRoute::class.java
+                instanceOf<GetReadyToShareRoute>(
+                    GetReadyToShareRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<RetryHolderPrerequisitesRoute>()
+                    currentBackStackEntry?.toRoute<GetReadyToShareRoute>()
+                )
+            },
+            Triple(
+                "'Preflight (Bluetooth off)' -> TurnOnBluetoothRoute",
+                HolderSessionStateStubs.preflightWithoutBluetooth
+            ) {
+                instanceOf<TurnOnBluetoothRoute>(
+                    TurnOnBluetoothRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<TurnOnBluetoothRoute>()
                 )
             },
             Triple(
                 "'AwaitingUserConsent' -> AwaitingUserConsent",
-                HolderSessionState.AwaitingUserConsent(DeviceRequestStub.deviceRequestStub)
+                HolderSessionStateStubs.awaitingUserConsentStub
             ) {
                 instanceOf<HolderConsentRoute>(
                     HolderConsentRoute::class.java

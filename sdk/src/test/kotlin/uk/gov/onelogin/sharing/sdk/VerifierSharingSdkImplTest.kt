@@ -6,7 +6,7 @@ import java.security.cert.X509Certificate
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ReaderAuthCredentialProvider
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.AttributeGroup
@@ -21,7 +21,7 @@ import uk.gov.onelogin.sharing.verification.CredentialVerificationGraph
 
 class VerifierSharingSdkImplTest {
     private val appGraph = mockk<CredentialSharingAppGraph>()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val verifierGraphFactory = mockk<VerifyCredentialGraph.Factory>()
     private val readerAuthCredentialProvider: ReaderAuthCredentialProvider = mockk(relaxed = true)
     private val credentialVerificationFactory = mockk<CredentialVerificationGraph.Factory>(

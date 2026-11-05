@@ -7,8 +7,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.api.v2.Logger
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.Logger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_ENCODED_DEVICE_ENGAGEMENT
 import uk.gov.onelogin.sharing.cryptoService.DecoderStub.VALID_TRANSCRIPT
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_E_READER_KEY
@@ -19,7 +19,7 @@ class SessionTranscriptDecoderTest
 constructor(
     private val decoder: (String, ByteArray, Logger) -> ByteArray
 ) {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     @Test
     fun `Derives session transcript array from device engagement and session establishment`() =

@@ -6,7 +6,7 @@ import java.security.InvalidKeyException
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import javax.crypto.KeyAgreement
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 @ContributesBinding(AppScope::class)
@@ -34,7 +34,11 @@ class EcdhSharedSecretGenerator(private val logger: Logger) : SharedSecretGenera
             keyAgreement.doPhase(otherDevicePublicKey, true)
             return keyAgreement.generateSecret()
         } catch (e: InvalidKeyException) {
-            logger.debug(logTag, "Unable to create shared secret (status 10): $e")
+            logger.error(
+                logTag,
+                "Unable to create shared secret (status 10): $e",
+                e
+            )
             throw InvalidKeyException("Unexpected Exception", e)
         }
     }

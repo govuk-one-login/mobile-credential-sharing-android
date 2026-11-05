@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.core.Transformer
 import uk.gov.onelogin.sharing.core.logger.LoggerException

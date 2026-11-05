@@ -14,9 +14,9 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.junit.Rule
 import org.junit.runner.RunWith
-import uk.gov.logging.api.v3dot1.logger.asLegacyEvent
+import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.TrackEvent
-import uk.gov.logging.testdouble.v2.SystemLogger
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasIgnoredEvents

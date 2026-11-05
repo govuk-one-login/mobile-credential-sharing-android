@@ -7,7 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.MDL_DOC_TYPE
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.SessionTranscriptStub.validSessionTranscript
@@ -24,7 +24,7 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 class HolderCryptoServiceImplTest {
 
     private val fakeSessionSecurity = FakeSessionSecurity()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val service = HolderCryptoServiceImpl(
         sessionSecurity = fakeSessionSecurity,
         logger = logger

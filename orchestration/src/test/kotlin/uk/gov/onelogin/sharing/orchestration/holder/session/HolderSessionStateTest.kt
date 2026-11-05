@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.P
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 
 @RunWith(TestParameterInjector::class)
 class HolderSessionStateTest {
@@ -26,9 +27,10 @@ class HolderSessionStateTest {
     @Test
     fun `Certain states are cancellable by the User`(
         @TestParameter state: HolderSessionState = testValues(
-            AwaitingUserConsent(mockk(relaxed = true)),
+            AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true)),
             AwaitingVerifierResolution,
             ProcessingEstablishment,
+            Preflight(listOf()),
             PresentingEngagement("unit test"),
             ProcessingResponse
         )
@@ -44,7 +46,6 @@ class HolderSessionStateTest {
             Cancelled,
             Failed(mockk(relaxed = true)),
             NotStarted,
-            Preflight(listOf()),
             ReadyToPresent,
             Success(),
             HolderSessionState.SendingTermination
@@ -52,6 +53,43 @@ class HolderSessionStateTest {
     ) {
         assertFalse {
             state.userCanCancel()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require cancellation confirmation`() {
+        assertFalse {
+            Preflight(listOf()).shouldConfirmCancellation()
+        }
+    }
+
+    @Test
+    fun `Preflight requires Bluetooth enabling when Bluetooth is powered off`() {
+        assertTrue {
+            HolderSessionStateStubs.preflightWithoutBluetooth.requiresBluetoothEnabled()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth enabling for missing prerequisites`() {
+        assertFalse { Preflight(listOf()).requiresBluetoothEnabled() }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth enabling when permission denied`() {
+        assertFalse {
+            HolderSessionStateStubs.preflightWithBluetooth(BluetoothState.PermissionNotGranted)
+                .requiresBluetoothEnabled()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth enabling when permission denied permanently`() {
+        assertFalse {
+            HolderSessionStateStubs.preflightWithBluetooth(
+                BluetoothState.PermissionDeniedPermanently
+            )
+                .requiresBluetoothEnabled()
         }
     }
 }

@@ -1,6 +1,6 @@
 package uk.gov.onelogin.sharing.bluetooth.internal.core
 
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.LoggerException
 
 private const val LOG_TAG = "MessageChunker"

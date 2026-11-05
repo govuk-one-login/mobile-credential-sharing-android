@@ -8,6 +8,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestParameterInjector::class)
 class StringsXmlTest {
@@ -22,6 +24,25 @@ class StringsXmlTest {
     }
 
     @Test
+    fun translatableStringsMatchEnglishValues(@TestParameter input: TranslatableStringsData) =
+        runTest {
+            assertEquals(
+                input["en"],
+                resources.getString(input.resourceId)
+            )
+        }
+
+    @Config(qualifiers = "cy")
+    @Test
+    fun translatableStringsMatchWelshValues(@TestParameter input: TranslatableStringsData) =
+        runTest {
+            assertEquals(
+                input["cy"],
+                resources.getString(input.resourceId)
+            )
+        }
+
+    @Test
     fun screenSpecificStringsDeferToBaseValues(@TestParameter input: DeferredStringsXmlData) =
         runTest {
             assertEquals(
@@ -29,4 +50,44 @@ class StringsXmlTest {
                 resources.getString(input.resourceId)
             )
         }
+
+    @Test
+    fun welshStringsHaveSetValues(@TestParameter input: WelshStringsXmlData) = runTest {
+        RuntimeEnvironment.setQualifiers("+cy")
+        val welshResources =
+            ApplicationProvider.getApplicationContext<Context>().resources
+        assertEquals(
+            input.expected,
+            welshResources.getString(input.resourceId)
+        )
+    }
+
+    @Test
+    fun basePluralsHaveSetValues(@TestParameter input: PluralsXmlData) = runTest {
+        assertEquals(
+            input.expected,
+            resources.getQuantityString(
+                input.resourceId,
+                input.quantity,
+                input.quantity,
+                input.documentName
+            )
+        )
+    }
+
+    @Test
+    fun welshPluralsHaveSetValues(@TestParameter input: WelshPluralsXmlData) = runTest {
+        RuntimeEnvironment.setQualifiers("+cy")
+        val welshResources =
+            ApplicationProvider.getApplicationContext<Context>().resources
+        assertEquals(
+            input.expected,
+            welshResources.getQuantityString(
+                input.resourceId,
+                input.quantity,
+                input.quantity,
+                input.documentName
+            )
+        )
+    }
 }

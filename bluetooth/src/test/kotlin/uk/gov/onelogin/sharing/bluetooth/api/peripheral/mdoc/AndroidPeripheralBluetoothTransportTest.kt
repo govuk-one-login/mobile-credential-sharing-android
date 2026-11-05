@@ -24,7 +24,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.StartAdvertisingException
@@ -55,7 +55,7 @@ class AndroidPeripheralBluetoothTransportTest {
     private val gattServerManager = FakeGattServerManager()
     private val bluetoothStateMonitor = FakeBluetoothStateMonitor()
     private val testScope = CoroutineScope(SupervisorJob() + dispatcherRule.testDispatcher)
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val transport = AndroidPeripheralBluetoothTransport(
         bleAdvertiser = advertiser,
         gattServerManager = gattServerManager,

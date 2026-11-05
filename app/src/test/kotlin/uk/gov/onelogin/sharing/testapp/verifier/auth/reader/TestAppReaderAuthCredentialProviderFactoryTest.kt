@@ -14,7 +14,7 @@ import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth.ECReaderAuthProvider
 import uk.gov.onelogin.sharing.testapp.credential.attribute.select.ReaderAuthOption
 
@@ -23,7 +23,7 @@ class TestAppReaderAuthCredentialProviderFactoryTest {
 
     private var initialState: ReaderAuthOption = ReaderAuthOption.VALID
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private fun factory() = TestAppReaderAuthCredentialProviderFactory(
         ApplicationProvider.getApplicationContext(),

@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.CBOR_TAG_24_BYTE_0
 import uk.gov.onelogin.sharing.cryptoService.cbor.ItemsRequestEncoderStub.CBOR_TAG_24_BYTE_1
@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 
 class DeviceRequestEncoderTest {
 
-    private val decoder = DeviceRequestDecoderImpl(SystemLogger())
+    private val decoder = DeviceRequestDecoderImpl(MemorisedLogger())
 
     @Test
     fun `DeviceRequest encodeCbor sets version to 1_0`() {

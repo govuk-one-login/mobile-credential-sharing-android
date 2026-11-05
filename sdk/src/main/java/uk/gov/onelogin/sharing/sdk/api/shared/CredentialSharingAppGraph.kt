@@ -3,8 +3,8 @@ import android.content.Context
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.prerequisites.api.permissions.PermissionChecker
 
 @DependencyGraph(AppScope::class)
