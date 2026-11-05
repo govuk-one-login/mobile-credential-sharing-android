@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
@@ -41,6 +42,7 @@ import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDial
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
+import uk.gov.onelogin.sharing.ui.impl.ShareCredentialAnalytics.closeButton
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 import uk.gov.onelogin.sharing.uiimpl.R
 
@@ -63,6 +65,7 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     val orchestrator = uiGraph.holderOrchestrator()
 
     ShareCredential(
+        analyticsLogger = uiGraph.appGraph().analyticsLogger(),
         orchestrator = orchestrator,
         holderSessionState = orchestrator.holderSessionState,
         modifier = modifier,
@@ -71,10 +74,15 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
     )
 }
 
+private fun logCloseButtonEvent(analyticsLogger: AnalyticsLogger) {
+    analyticsLogger.closeButton()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("LongMethod")
 internal fun ShareCredential(
+    analyticsLogger: AnalyticsLogger,
     orchestrator: Orchestrator.Holder,
     holderSessionState: StateFlow<HolderSessionState>,
     viewModelFactory: MetroViewModelFactory,
@@ -121,7 +129,12 @@ internal fun ShareCredential(
                     .systemBarsPadding()
             ) {
                 if (state.userCanCancel()) {
-                    CloseButtonAppBar(onCancel = onCancel)
+                    CloseButtonAppBar(
+                        onCancel = {
+                            scope.launch { logCloseButtonEvent(analyticsLogger) }
+                            onCancel()
+                        }
+                    )
                 }
 
                 NavHost(

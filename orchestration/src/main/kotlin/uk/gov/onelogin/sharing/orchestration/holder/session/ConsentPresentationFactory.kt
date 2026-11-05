@@ -14,9 +14,9 @@ object ConsentPresentationFactory {
 
     fun create(
         matchedAttributes: Map<String, List<MatchedAttribute>>,
-        authenticatedReaderRequest: AuthenticatedReaderRequest?
+        authenticatedReaderRequest: AuthenticatedReaderRequest
     ): ConsentPresentation {
-        val docType = authenticatedReaderRequest?.docRequest?.itemsRequest?.docType
+        val docType = authenticatedReaderRequest.docRequest.itemsRequest.docType
 
         val namespaces = matchedAttributes
             .filterValues { it.isNotEmpty() }
@@ -26,13 +26,14 @@ object ConsentPresentationFactory {
                     attributes = attributes.map {
                         ConsentAttribute(
                             elementIdentifier = it.elementIdentifier,
-                            intentToRetain = it.intentToRetain
+                            intentToRetain = it.intentToRetain,
+                            nameSpace = nameSpace
                         )
                     }
                 )
             }
 
-        val documents = if (namespaces.isEmpty() || docType == null) {
+        val documents = if (namespaces.isEmpty()) {
             emptyList()
         } else {
             listOf(ConsentDocument(docType = docType, namespaces = namespaces))
@@ -40,8 +41,8 @@ object ConsentPresentationFactory {
 
         return ConsentPresentation(
             documents = documents,
-            privacyPolicyUrl = authenticatedReaderRequest?.privacyPolicyUrl?.toString(),
-            organizationName = authenticatedReaderRequest?.readerOrganizationName
+            privacyPolicyUrl = authenticatedReaderRequest.privacyPolicyUrl.toString(),
+            organizationName = authenticatedReaderRequest.readerOrganizationName
         )
     }
 }
