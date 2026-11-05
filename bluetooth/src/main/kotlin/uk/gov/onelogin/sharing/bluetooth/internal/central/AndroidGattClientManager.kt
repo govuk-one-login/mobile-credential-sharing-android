@@ -97,6 +97,7 @@ class AndroidGattClientManager(
     private val reassembler: MessageReassembler =
         reassemblerFactory.create(maxReceiveBufferSize)
 
+    @Suppress("DEPRECATION")
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(
