@@ -6,7 +6,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import java.security.GeneralSecurityException
 import kotlinx.coroutines.CancellationException
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCase

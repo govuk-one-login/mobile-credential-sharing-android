@@ -13,4 +13,11 @@ interface HolderSession :
     val sessionContext: HolderSessionContext
 
     fun updateSessionContext(update: (HolderSessionContext) -> HolderSessionContext)
+
+    fun updateEngagementDisplay(showQr: Boolean) {
+        val current = currentState.value
+        if (current is HolderSessionState.PresentingEngagement && current.showQr != showQr) {
+            update(current.copy(showQr = showQr))
+        }
+    }
 }

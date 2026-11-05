@@ -9,7 +9,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.mdoc.CentralBluetoothTransport
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.cryptoService.verifier.VerifierCryptoService
@@ -48,7 +48,6 @@ class SessionTerminatorImpl(
 
                 val terminationBytes = verifierCryptoService.buildTerminationSessionData()
                 val sent = centralBluetoothTransport.sendMessage(
-                    serviceUuid = serviceUuid,
                     data = terminationBytes
                 )
 

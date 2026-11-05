@@ -15,7 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingError
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertisingFailureReason
@@ -35,7 +35,7 @@ internal class AndroidBleAdvertiserTest {
     private val permissionResponse = mutableListOf<PermissionChecker.PermissionCheckResult>()
 
     private val permissionChecker = FakePermissionChecker { permissionResponse }
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()

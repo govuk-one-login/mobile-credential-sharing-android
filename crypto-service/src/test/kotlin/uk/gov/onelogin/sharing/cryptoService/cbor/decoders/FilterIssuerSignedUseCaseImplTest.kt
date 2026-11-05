@@ -11,9 +11,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
-import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequest
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.FilterIssuerSignedUseCaseImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.MatchedAttribute
@@ -25,20 +24,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.It
 
 class FilterIssuerSignedUseCaseImplTest {
 
-    private val logger = object : Logger {
-        override fun debug(tag: String, message: String) = Unit
-        override fun info(tag: String, message: String) = Unit
-        override fun error(
-            tag: String,
-            message: String,
-            throwable: Throwable,
-            errorKeys: uk.gov.logging.api.v2.errorKeys.ErrorKeys
-        ) = Unit
-
-        override fun error(tag: String, message: String, throwable: Throwable) = Unit
-        override fun error(tag: String, message: String) = Unit
-        override fun warning(tag: String, message: String) = Unit
-    }
+    private val logger = MemorisedLogger()
 
     private val useCase = FilterIssuerSignedUseCaseImpl(logger)
     private val cborMapper = ObjectMapper(CBORFactory())

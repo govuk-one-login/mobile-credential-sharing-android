@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService.verifier.reader.auth
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import java.io.ByteArrayOutputStream
 import java.security.cert.Certificate
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 
 private const val INDEX_CONTEXT = 0

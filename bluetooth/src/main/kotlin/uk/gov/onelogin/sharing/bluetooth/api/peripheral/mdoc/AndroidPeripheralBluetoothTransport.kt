@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.AdvertiserState
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiseData
 import uk.gov.onelogin.sharing.bluetooth.api.advertising.BleAdvertiser
@@ -29,6 +29,7 @@ import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothStatus
 import uk.gov.onelogin.sharing.bluetooth.api.core.MessageSender
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerEvent
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerManager
+import uk.gov.onelogin.sharing.bluetooth.api.peripheral.SessionEndStateQueued
 import uk.gov.onelogin.sharing.bluetooth.internal.core.BLE_SEND_NOTIFICATION_DELAY
 import uk.gov.onelogin.sharing.core.coroutines.CoroutineNameExt.asCoroutineName
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
@@ -110,11 +111,11 @@ class AndroidPeripheralBluetoothTransport(
         }
     }
 
-    override suspend fun stop(serviceUuid: UUID, sendEndCommand: Boolean): Unit =
+    override suspend fun stop(sendEndCommand: Boolean): Unit =
         withContext(ioDispatcher + "$logTag.Stop".asCoroutineName()) {
             cancelCurrentJobs()
             if (sendEndCommand) {
-                notifySessionEnd(serviceUuid)
+                notifySessionEnd()
             }
             bluetoothStateMonitor.stop()
             stopAdvertising()
@@ -122,10 +123,10 @@ class AndroidPeripheralBluetoothTransport(
             _state.value = PeripheralBluetoothState.Idle
         }
 
-    override suspend fun notifySessionEnd(serviceUuid: UUID): Unit = withContext(
+    override suspend fun notifySessionEnd(): Unit = withContext(
         ioDispatcher + "$logTag.NotifySessionEnd".asCoroutineName()
     ) {
-        val result = gattServerManager.notifySessionEnd(serviceUuid)
+        val result = gattServerManager.notifySessionEnd()
         if (result == SessionEndStateQueued.Success) {
             // allow time for the END notification to be sent before closing the GATT server
             delay(BLE_SEND_NOTIFICATION_DELAY.milliseconds)

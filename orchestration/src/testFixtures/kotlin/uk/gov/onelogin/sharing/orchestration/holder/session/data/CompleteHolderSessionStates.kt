@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
 
 class CompleteHolderSessionStates : TestParameterValuesProvider() {
@@ -10,7 +11,8 @@ class CompleteHolderSessionStates : TestParameterValuesProvider() {
         val inputs = listOf(
             HolderSessionStateStubs.userCancellation,
             HolderSessionStateStubs.userJourneyFailure,
-            HolderSessionStateStubs.successStub
+            HolderSessionStateStubs.successStub,
+            HolderSessionState.Complete.Expired
         )
     }
 }

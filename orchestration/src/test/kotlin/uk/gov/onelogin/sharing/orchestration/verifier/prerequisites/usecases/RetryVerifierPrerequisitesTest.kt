@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.verifier.session.VerifierSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
@@ -17,7 +17,7 @@ class RetryVerifierPrerequisitesTest {
 
     private lateinit var initialState: VerifierSessionState
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val orchestrator by lazy {
         FakeOrchestrator(
             initialVerifierState = MutableStateFlow(initialState)

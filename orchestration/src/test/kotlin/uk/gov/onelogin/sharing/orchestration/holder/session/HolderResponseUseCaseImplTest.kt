@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureResult
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureUseCase
@@ -22,7 +22,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredenti
 
 class HolderResponseUseCaseImplTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val deviceSignatureService = mockk<DeviceSignatureUseCase> {
         every { buildCoseSignStructure(any()) } returns byteArrayOf(0x01)
     }

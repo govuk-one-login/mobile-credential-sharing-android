@@ -2,7 +2,7 @@ package uk.gov.onelogin.sharing.analytics
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import uk.gov.logging.api.analytics.AnalyticsEvent
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 
 class StoredAnalyticsLogger(
     private val subLogger: AnalyticsLogger? = null,
@@ -14,6 +14,8 @@ class StoredAnalyticsLogger(
 
     val sentAnalyticsEvents: List<AnalyticsEvent> get() = _sentAnalyticsEvents
     val ignoredAnalyticsEvents: List<AnalyticsEvent> get() = _ignoredAnalyticsEvents
+
+    val size: Int get() = _sentAnalyticsEvents.size
 
     init {
         setEnabled(isEnabledFlag.value)

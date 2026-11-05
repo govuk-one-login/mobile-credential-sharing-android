@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.plus
-import uk.gov.logging.api.analytics.logging.AnalyticsLogger
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -33,10 +33,16 @@ class HolderWelcomeViewModel(
     val uiState: StateFlow<HolderWelcomeUiState> = orchestrator
         .holderSessionState
         .map { sessionState ->
-            HolderWelcomeUiState(
-                qrData = (sessionState as? HolderSessionState.PresentingEngagement)?.qrData
-            )
-        }.distinctUntilChanged()
+            when (sessionState) {
+                is HolderSessionState.PresentingEngagement -> HolderWelcomeUiState(
+                    qrData = sessionState.qrData,
+                    showQr = sessionState.showQr
+                )
+
+                else -> HolderWelcomeUiState()
+            }
+        }
+        .distinctUntilChanged()
         .flowOn(dispatcher)
         .stateIn(
             viewModelScope.plus(dispatcher),
@@ -45,4 +51,9 @@ class HolderWelcomeViewModel(
         )
 }
 
-data class HolderWelcomeUiState(val qrData: String? = null)
+/**
+ * @param qrData The QR payload to render, or `null` when no engagement is being presented.
+ * @param showQr `true` to render the QR; `false` to show the loading spinner during the grace
+ * window while the session is about to be refreshed. Only meaningful when [qrData] is non-null.
+ */
+data class HolderWelcomeUiState(val qrData: String? = null, val showQr: Boolean = false)

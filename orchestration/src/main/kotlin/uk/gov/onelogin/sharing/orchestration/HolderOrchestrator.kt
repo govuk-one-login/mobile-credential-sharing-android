@@ -16,19 +16,22 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothState
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothStateException
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.di.ApplicationScope
+import uk.gov.onelogin.sharing.core.engagement.EngagementTimingPolicy
 import uk.gov.onelogin.sharing.core.logger.LoggerException
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
+import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimerImpl
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
@@ -94,7 +97,9 @@ class HolderOrchestrator(
     private val sessionTimer: SessionTimer,
     private val trustedReaderCertificates: List<X509Certificate>,
     private val authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory,
-    private val readerAuthentication: ReaderAuthentication
+    private val readerAuthentication: ReaderAuthentication,
+    private val engagementTimer: SessionTimer = SessionTimerImpl(appCoroutineScope, logger),
+    private val engagementTimingPolicy: EngagementTimingPolicy = EngagementTimingPolicy()
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val consentInFlight = AtomicBoolean(false)
@@ -105,11 +110,12 @@ class HolderOrchestrator(
     @OptIn(ExperimentalCoroutinesApi::class)
     override val holderSessionState: StateFlow<HolderSessionState> = sessionFlow.flatMapLatest {
         it.currentState
-    }.stateIn(
-        appCoroutineScope,
-        SharingStarted.Eagerly,
-        sessionFlow.value.currentState.value
-    )
+    }.filterNot { it is HolderSessionState.Complete.Expired }
+        .stateIn(
+            appCoroutineScope,
+            SharingStarted.Eagerly,
+            sessionFlow.value.currentState.value
+        )
 
     init {
         transportStateJob = appCoroutineScope.launch {
@@ -333,7 +339,6 @@ class HolderOrchestrator(
         )
 
         val sent = peripheralBluetoothTransport.sendMessage(
-            serviceUuid = context.sessionUuid,
             data = sessionDataBytes
         )
         sessionTimer.reset()
@@ -438,6 +443,7 @@ class HolderOrchestrator(
     }
 
     override fun reset() {
+        engagementTimer.stop()
         signingJob?.cancel()
         consentInFlight.set(false)
         sessionFlow.update {
@@ -450,10 +456,38 @@ class HolderOrchestrator(
         }
     }
 
+    private fun enterGraceWindow() {
+        sessionFlow.value.updateEngagementDisplay(showQr = false)
+        engagementTimer.start(engagementTimingPolicy.graceDelay) {
+            refreshEngagementSession()
+        }
+    }
+
+    private suspend fun refreshEngagementSession() {
+        if (sessionFlow.value.currentState.value !is HolderSessionState.PresentingEngagement) {
+            logger.debug(
+                logTag,
+                "Skipping engagement refresh: session is no longer presenting engagement"
+            )
+            return
+        }
+
+        val oldSession = sessionFlow.value
+
+        peripheralBluetoothTransport.stop(
+            sendEndCommand = false
+        )
+
+        sessionFlow.value = sessionFactory.create()
+
+        oldSession.transitionTo(HolderSessionState.Complete.Expired)
+
+        performPreflightChecks()
+    }
+
     private fun stopAdvertising(sendEndCommand: Boolean) {
         appCoroutineScope.launch {
             peripheralBluetoothTransport.stop(
-                serviceUuid = currentContext.sessionUuid,
                 sendEndCommand = sendEndCommand
             )
         }
@@ -590,13 +624,15 @@ class HolderOrchestrator(
 
                 sessionFlow.value.sessionContext.authenticatedReaderRequest?.let {
                     logger.debug(logTag, "privacy policy = ${it.privacyPolicyUrl}")
-                    it.readerOrganizationName?.let { orgName ->
-                        logger.debug(logTag, "organisation name = $orgName")
-                    }
+                    logger.debug(logTag, "organisation name = ${it.readerOrganizationName}")
                 }
 
                 if (!deviceRequestContainsPortrait(deviceRequest)) {
-                    logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
+                    logger.error(
+                        logTag,
+                        PORTRAIT_POLICY_VIOLATION,
+                        IllegalArgumentException(PORTRAIT_POLICY_VIOLATION)
+                    )
                     appCoroutineScope.launch {
                         handlePolicyViolation()
                     }
@@ -640,9 +676,11 @@ class HolderOrchestrator(
         val currentState = holderSessionState.value
 
         if (currentState !is HolderSessionState.ProcessingEstablishment) {
+            val message = "Sequencing violation: message received in state $currentState"
             logger.error(
                 logTag,
-                "Sequencing violation: message received in state $currentState"
+                message,
+                IllegalStateException(message)
             )
             appCoroutineScope.launch {
                 sendTerminationAndFail(
@@ -682,9 +720,14 @@ class HolderOrchestrator(
                 )
             }
 
+            val authenticatedReaderRequest = currentContext.authenticatedReaderRequest
+                ?: error(
+                    "AuthenticatedReaderRequest must be present before building the consent screen"
+                )
+
             val presentation = ConsentPresentationFactory.create(
                 matchedAttributes = result.matchedAttributes,
-                authenticatedReaderRequest = currentContext.authenticatedReaderRequest
+                authenticatedReaderRequest = authenticatedReaderRequest
             )
 
             logger.debug(logTag, CredentialRequestHandlerImpl.LOG_DOCTYPE_MATCH)
@@ -893,8 +936,14 @@ class HolderOrchestrator(
                             " Privacy Policy URL = ${authReq.privacyPolicyUrl}"
                     )
                     if (!docRequestContainsPortrait(authReq.docRequest)) {
-                        logger.error(logTag, PORTRAIT_POLICY_VIOLATION)
-                        return IllegalStateException(PORTRAIT_POLICY_VIOLATION)
+                        val exception = IllegalStateException(PORTRAIT_POLICY_VIOLATION)
+
+                        logger.error(
+                            logTag,
+                            PORTRAIT_POLICY_VIOLATION,
+                            exception
+                        )
+                        return exception
                     }
 
                     sessionFlow.value.updateSessionContext {
@@ -906,7 +955,11 @@ class HolderOrchestrator(
                         requestAndValidateCredential(requestedDocType, candidateDeviceRequest)
                         null
                     } catch (e: CredentialRequestException) {
-                        logger.error(logTag, "Candidate failed attribute matching: ${e.message}")
+                        logger.error(
+                            logTag,
+                            "Candidate failed attribute matching: ${e.message}",
+                            e
+                        )
                         e
                     }
                 }
@@ -935,7 +988,7 @@ class HolderOrchestrator(
     }
 
     private fun failWith(message: String, reason: SessionErrorReason) {
-        logger.error(logTag, message)
+        logger.warning(logTag, message)
         appCoroutineScope.launch {
             terminateSession(
                 finalState = HolderSessionState.Complete.Failed(
@@ -960,6 +1013,13 @@ class HolderOrchestrator(
 
         try {
             sessionFlow.value.transitionTo(state)
+            if (state is HolderSessionState.PresentingEngagement) {
+                engagementTimer.start(engagementTimingPolicy.qrVisibleDuration) {
+                    enterGraceWindow()
+                }
+            } else {
+                engagementTimer.stop()
+            }
             if (state.isComplete()) {
                 sessionTimer.stop()
             }
@@ -1090,14 +1150,13 @@ class HolderOrchestrator(
         var sent = sessionDataToSend == null
         if (sessionDataToSend != null) {
             sent = peripheralBluetoothTransport.sendMessage(
-                serviceUuid = context.sessionUuid,
                 data = sessionDataToSend
             )
             sessionTimer.reset()
         }
 
         if (sent && sessionDataToSend != null) {
-            holderSessionTerminator.terminate(context.sessionUuid)
+            holderSessionTerminator.terminate()
         } else {
             stopAdvertising(sendEndCommand = sendEndCommand)
         }

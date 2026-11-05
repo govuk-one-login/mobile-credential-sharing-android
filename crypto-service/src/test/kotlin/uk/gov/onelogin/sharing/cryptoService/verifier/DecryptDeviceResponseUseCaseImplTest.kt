@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceResponseDecoder
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceResponseDecodingException
@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 
 class DecryptDeviceResponseUseCaseImplTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val fakeSessionEncryption = FakeSessionSecurity()
     private val expectedResponse = DeviceResponse()
     private val fakeDecoder = DeviceResponseDecoder { expectedResponse }

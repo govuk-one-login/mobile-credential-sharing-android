@@ -82,14 +82,9 @@ internal class CertificateProfileValidator {
     private fun validateKeyUsage(cert: X509Certificate, isLeaf: Boolean) {
         val usage = cert.keyUsage
         val isValid = usage != null && if (isLeaf) {
-            usage[BIT_DIGITAL_SIGNATURE] &&
-                usage.indices.filter { it != BIT_DIGITAL_SIGNATURE }.none { usage[it] }
+            usage[BIT_DIGITAL_SIGNATURE]
         } else {
-            usage[BIT_KEY_CERT_SIGN] &&
-                usage[BIT_CRL_SIGN] &&
-                usage.indices.filter {
-                    it != BIT_KEY_CERT_SIGN && it != BIT_CRL_SIGN
-                }.none { usage[it] }
+            usage[BIT_KEY_CERT_SIGN] && usage[BIT_CRL_SIGN]
         }
 
         if (!isValid) {

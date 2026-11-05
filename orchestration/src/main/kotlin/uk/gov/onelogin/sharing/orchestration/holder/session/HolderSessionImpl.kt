@@ -4,7 +4,7 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.orchestration.session.StateContainer
 
@@ -33,6 +33,17 @@ class HolderSessionImpl(
 
     override fun updateSessionContext(update: (HolderSessionContext) -> HolderSessionContext) {
         _sessionContext = update(_sessionContext)
+    }
+
+    override fun updateEngagementDisplay(showQr: Boolean) {
+        val current = currentState.value
+        if (current is HolderSessionState.PresentingEngagement && current.showQr != showQr) {
+            logger.debug(
+                logTag,
+                "Updating engagement display in place (no transition): showQr=$showQr"
+            )
+            update(current.copy(showQr = showQr))
+        }
     }
 
     override val currentState: StateFlow<HolderSessionState> = internalState

@@ -13,7 +13,7 @@ import kotlin.test.assertNull
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.cbor.toDto
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingDeviceSigned
@@ -25,7 +25,7 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 @RunWith(TestParameterInjector::class)
 class DeviceResponseDecoderImplTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val decoder = DeviceResponseDecoderImpl(logger)
 
     private val namespace = "org.iso.18013.5.1"

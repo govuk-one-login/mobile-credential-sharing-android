@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.MatchedAttribute
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DocRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.ItemsRequest
@@ -18,7 +17,7 @@ class ConsentPresentationFactoryTest {
 
     private fun readerRequest(
         privacyPolicyUrl: Uri = mockk(relaxed = true),
-        readerOrganizationName: String? = null
+        readerOrganizationName: String = "Organisation Ltd"
     ) = AuthenticatedReaderRequest(
         docRequest = DocRequest(ItemsRequest(docType = docType, nameSpaces = emptyMap())),
         privacyPolicyUrl = privacyPolicyUrl,
@@ -42,8 +41,8 @@ class ConsentPresentationFactoryTest {
         assertEquals(docType, document.docType)
         assertEquals(
             listOf(
-                ConsentAttribute("family_name", true),
-                ConsentAttribute("given_name", false)
+                ConsentAttribute("family_name", true, nameSpace = namespace),
+                ConsentAttribute("given_name", false, nameSpace = namespace)
             ),
             document.namespaces.single().attributes
         )
@@ -60,7 +59,7 @@ class ConsentPresentationFactoryTest {
         )
 
         assertEquals(
-            listOf(ConsentAttribute("family_name", true)),
+            listOf(ConsentAttribute("family_name", true, nameSpace = namespace)),
             presentation.documents.single().namespaces.single().attributes
         )
     }
@@ -75,7 +74,7 @@ class ConsentPresentationFactoryTest {
         )
 
         assertEquals(
-            listOf(ConsentAttribute("age_over_21", true)),
+            listOf(ConsentAttribute("age_over_21", true, nameSpace = namespace)),
             presentation.documents.single().namespaces.single().attributes
         )
     }
@@ -85,18 +84,6 @@ class ConsentPresentationFactoryTest {
         val presentation = ConsentPresentationFactory.create(
             matchedAttributes = emptyMap(),
             authenticatedReaderRequest = readerRequest()
-        )
-
-        assertEquals(emptyList(), presentation.documents)
-    }
-
-    @Test
-    fun `no documents when the authenticated reader request is null`() {
-        val presentation = ConsentPresentationFactory.create(
-            matchedAttributes = mapOf(
-                namespace to listOf(MatchedAttribute("family_name", true))
-            ),
-            authenticatedReaderRequest = null
         )
 
         assertEquals(emptyList(), presentation.documents)
@@ -123,19 +110,5 @@ class ConsentPresentationFactoryTest {
             "Organisation Ltd.",
             presentation.normalisedOrganizationName
         )
-    }
-
-    @Test
-    fun `privacy policy and organisation name are null when reader request is null`() {
-        val presentation = ConsentPresentationFactory.create(
-            matchedAttributes = mapOf(
-                namespace to listOf(MatchedAttribute("family_name", true))
-            ),
-            authenticatedReaderRequest = null
-        )
-
-        assertNull(presentation.privacyPolicyUrl)
-        assertNull(presentation.organizationName)
-        assertNull(presentation.normalisedOrganizationName)
     }
 }

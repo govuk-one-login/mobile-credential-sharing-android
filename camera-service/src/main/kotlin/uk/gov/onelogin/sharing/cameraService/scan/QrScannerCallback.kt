@@ -25,12 +25,18 @@ class QrScannerCallback(private val onQrDetected: (String?) -> Unit) :
         }
         val qr = when (result) {
             is BarcodeScanResult.Success -> {
-                println("scanner callback ${result.first().url}")
+                Log.i(
+                    this::class.java.simpleName,
+                    "scanner callback ${result.first().url}"
+                )
                 result.first()
             }
 
             is BarcodeScanResult.Single -> {
-                println("scanner callback ${result.barcode.url}")
+                Log.i(
+                    this::class.java.simpleName,
+                    "scanner callback ${result.barcode.url}"
+                )
                 result.barcode
             }
 

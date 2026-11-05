@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.cryptoService
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_E_READER_KEY
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
 import uk.gov.onelogin.sharing.cryptoService.cbor.decodeSessionEstablishmentModel
@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablish
 
 class SessionEstablishmentMapperTest {
 
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private val eReaderKeyTagged = MOCK_E_READER_KEY.hexToByteArray()
     private val encryptedData = byteArrayOf(0x01, 0x02, 0x03)

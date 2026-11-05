@@ -1,15 +1,16 @@
 package uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc
 
+import uk.gov.onelogin.sharing.bluetooth.api.core.BluetoothTransportErrorMessages
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.GattServerError
 
 enum class PeripheralBluetoothTransportError(val message: String) {
-    BLUETOOTH_TURNED_OFF("Bluetooth is currently turned off"),
+    BLUETOOTH_TURNED_OFF(BluetoothTransportErrorMessages.BLUETOOTH_TURNED_OFF),
     ADVERTISING_FAILED("Advertising failed"),
-    GATT_NOT_AVAILABLE("GATT not available"),
-    BLUETOOTH_PERMISSION_MISSING("Bluetooth permission missing"),
+    GATT_NOT_AVAILABLE(BluetoothTransportErrorMessages.GATT_NOT_AVAILABLE),
+    BLUETOOTH_PERMISSION_MISSING(BluetoothTransportErrorMessages.BLUETOOTH_PERMISSION_MISSING),
     DESCRIPTOR_WRITE_REQUEST_FAILED("Descriptor write request failed"),
     SERVICE_REGISTRATION_FAILED("GATT service registration failed"),
-    EXCEEDED_MAX_BUFFER_SIZE("Received data exceeded maximum buffer size");
+    EXCEEDED_MAX_BUFFER_SIZE(BluetoothTransportErrorMessages.EXCEEDED_MAX_BUFFER_SIZE);
 
     companion object {
         fun fromGattError(gattServerError: GattServerError): PeripheralBluetoothTransportError =

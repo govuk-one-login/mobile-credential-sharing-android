@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
-import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -10,7 +9,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.FakePeripheralBluetoothTransport
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 
@@ -21,11 +20,9 @@ class HolderSessionTerminatorImplTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val fakeTransport = FakePeripheralBluetoothTransport()
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
 
     private lateinit var terminator: HolderSessionTerminatorImpl
-
-    private val serviceUuid: UUID = UUID.randomUUID()
 
     @Before
     fun setUp() {
@@ -34,15 +31,15 @@ class HolderSessionTerminatorImplTest {
 
     @Test
     fun `terminate notifies session end and stops peripheral`() = runTest {
-        terminator.terminate(serviceUuid)
+        terminator.terminate()
 
-        assertEquals(serviceUuid, fakeTransport.lastUuid)
+        assertEquals(1, fakeTransport.notifySessionEndCalls)
         assertEquals(1, fakeTransport.stopCalls)
     }
 
     @Test
     fun `GATT End is not sent before 500ms delay elapses`() = runTest {
-        val job = launch { terminator.terminate(serviceUuid) }
+        val job = launch { terminator.terminate() }
 
         advanceTimeBy((HolderSessionTerminatorImpl.TERMINATION_DELAY_MS - 1).milliseconds)
         assertEquals(0, fakeTransport.stopCalls)
@@ -55,7 +52,7 @@ class HolderSessionTerminatorImplTest {
 
     @Test
     fun `logs are emitted during termination`() = runTest {
-        terminator.terminate(serviceUuid)
+        terminator.terminate()
 
         assert(
             "Waiting ${HolderSessionTerminatorImpl.TERMINATION_DELAY_MS}ms " +

@@ -19,7 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientError
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientEvent
 import uk.gov.onelogin.sharing.bluetooth.api.central.GattClientManager
@@ -29,10 +29,9 @@ import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.CLIENT_CHARACTE
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.SERVER_2_CLIENT_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattUuids.STATE_UUID
 import uk.gov.onelogin.sharing.bluetooth.internal.core.GattWriter
-import uk.gov.onelogin.sharing.bluetooth.internal.core.LAST_PART
+import uk.gov.onelogin.sharing.bluetooth.internal.core.MessageReassembler
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues
 import uk.gov.onelogin.sharing.bluetooth.internal.core.MtuValues.MIN_MTU
-import uk.gov.onelogin.sharing.bluetooth.internal.core.NON_LAST_PART
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.bluetooth.internal.core.sendChunkedMessage
 import uk.gov.onelogin.sharing.bluetooth.internal.peripheral.MdocState
@@ -56,6 +55,7 @@ class AndroidGattClientManager(
     private val logger: Logger,
     private val writeQueue: GattWriteQueue,
     @param:ApplicationScope private val coroutineScope: CoroutineScope,
+    reassemblerFactory: MessageReassembler.Factory,
     private val maxReceiveBufferSize: Int = DEFAULT_MAX_RECEIVE_BUFFER_SIZE
 ) : GattClientManager {
     private val _events = MutableSharedFlow<GattClientEvent>(
@@ -94,7 +94,8 @@ class AndroidGattClientManager(
     @Volatile
     private var awaitingStartConfirmation = false
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
-    private val messages: MutableMap<UUID, ByteArray> = mutableMapOf()
+    private val reassembler: MessageReassembler =
+        reassemblerFactory.create(maxReceiveBufferSize)
 
     @Suppress("DEPRECATION")
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
@@ -109,7 +110,7 @@ class AndroidGattClientManager(
 
         this.serviceUuid = serviceUuid
         pendingDescriptorWrites.clear()
-        messages.clear()
+        reassembler.clear()
         isTerminating = false
         isSessionEnd = false
         cancelStartConfirmation()
@@ -203,9 +204,10 @@ class AndroidGattClientManager(
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun sendMessage(serviceUuid: UUID, data: ByteArray): Boolean {
+    override suspend fun sendMessage(data: ByteArray): Boolean {
         val gatt = bluetoothGatt ?: return false
-        val characteristic = gatt.getService(serviceUuid)
+        val uuid = serviceUuid ?: return false
+        val characteristic = gatt.getService(uuid)
             ?.getCharacteristic(CLIENT_2_SERVER_UUID) ?: return false
 
         return sendChunkedMessage(data, mtu, logger) { chunk ->
@@ -531,62 +533,38 @@ class AndroidGattClientManager(
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray,
         firstByte: Byte
-    ): GattClientEvent? {
-        val previousMessages = messages[characteristic.uuid] ?: byteArrayOf()
-        val messageBytes = value.drop(1).toByteArray()
+    ): GattClientEvent? = when (val result = reassembler.accept(characteristic.uuid, value)) {
+        is MessageReassembler.Result.Incomplete -> {
+            logger.debug(
+                logTag,
+                "Chunked 'Server2Client' characteristic update: " +
+                    "${value.drop(1).size} bytes received"
+            )
+            // don't emit a message event until the message is complete.
+            null
+        }
 
-        return when (firstByte) {
-            NON_LAST_PART -> {
-                val accumulated = previousMessages + messageBytes
-                if (accumulated.size > maxReceiveBufferSize) {
-                    messages.remove(characteristic.uuid)
-                    handleExceededMaxBufferSize(accumulated.size)
-                } else {
-                    messages[characteristic.uuid] = accumulated
-                    logger.debug(
-                        logTag,
-                        "Chunked 'Server2Client' characteristic update: " +
-                            messageBytes.toHexString()
-                    )
-                }
+        is MessageReassembler.Result.ExceededMaxBuffer -> {
+            handleExceededMaxBufferSize()
+            null
+        }
 
-                // don't emit a message event until the message is complete.
-                null
+        is MessageReassembler.Result.Complete -> {
+            GattClientEvent.Message(uuid = characteristic.uuid, value = result.message).also {
+                logger.debug(
+                    logTag,
+                    "Completed 'Server2Client' message transfer: ${it.value.size} bytes"
+                )
             }
+        }
 
-            LAST_PART -> {
-                val fullMessage = previousMessages + messageBytes
-                messages.remove(characteristic.uuid)
-
-                if (fullMessage.size > maxReceiveBufferSize) {
-                    handleExceededMaxBufferSize(fullMessage.size)
-                    return null
-                }
-
-                GattClientEvent.Message(uuid = characteristic.uuid, value = fullMessage).also {
-                    logger.debug(
-                        logTag,
-                        "Completed 'Server2Client' message transfer:"
-                    )
-                    it.value.toHexString()
-                        .chunked(THREE_KILOBYTE_CHAR_LENGTH)
-                        .forEach { chunkedMessage ->
-                            logger.debug(
-                                logTag,
-                                chunkedMessage
-                            )
-                        }
-                }
-            }
-
-            else -> {
-                GattClientEvent.Error(GattClientError.INVALID_MESSAGE_PREFIX).also {
-                    logger.debug(
-                        logTag,
-                        "Received invalid status byte: ${firstByte.toHexString()}"
-                    )
-                    messages[characteristic.uuid] = byteArrayOf()
-                }
+        is MessageReassembler.Result.InvalidPrefix -> {
+            GattClientEvent.Error(GattClientError.INVALID_MESSAGE_PREFIX).also {
+                logger.debug(
+                    logTag,
+                    "Received invalid status byte: ${firstByte.toHexString()}"
+                )
+                reassembler.reset(characteristic.uuid)
             }
         }
     }
@@ -597,10 +575,7 @@ class AndroidGattClientManager(
      * an error to trigger session failure and destruction.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private fun handleExceededMaxBufferSize(bufferSize: Int) {
-        val message =
-            "ExceededMaxBufferSize: $bufferSize bytes exceeds limit of $maxReceiveBufferSize bytes"
-        logger.error(logTag, message, LoggerException(message))
+    private fun handleExceededMaxBufferSize() {
         isTerminating = true
         coroutineScope.launch {
             notifySessionEnd()
@@ -614,12 +589,6 @@ class AndroidGattClientManager(
 
         /** Fallback (ms) for the START write confirmation so a missing callback cannot stall setup. */
         const val START_CONFIRMATION_TIMEOUT: Long = 200L
-
-        /**
-         * The [String] length for 3 kilobytes of data, as kotlin uses 16 bits per [Char].
-         * This is used for chunking long log messages due to android limitations of
-         */
-        const val THREE_KILOBYTE_CHAR_LENGTH = 192
 
         /**
          * Default maximum receive buffer size for the verifier role (2MB).

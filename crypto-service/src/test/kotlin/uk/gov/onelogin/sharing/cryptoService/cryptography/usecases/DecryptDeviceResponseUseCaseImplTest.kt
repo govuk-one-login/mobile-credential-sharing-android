@@ -5,7 +5,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.SessionEstablishmentStub.MOCK_SESSION_ESTABLISHMENT_DATA
@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.cryptoService.secureArea.session.SessionKeyGenera
 import uk.gov.onelogin.sharing.cryptoService.toSessionEstablishment
 
 class DecryptDeviceResponseUseCaseImplTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val sessionSecurity = FakeSessionSecurity()
     val fakeDecoder = FakeDeviceRequestDecoder(
         deviceRequestToReturn = deviceRequestStub

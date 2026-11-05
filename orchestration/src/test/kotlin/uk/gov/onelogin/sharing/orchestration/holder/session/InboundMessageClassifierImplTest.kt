@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uk.gov.logging.testdouble.v2.SystemLogger
+import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
 import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataDto
@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.models.mdoc.sessionData.SessionDataStatus
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.SessionEstablishmentDto
 
 class InboundMessageClassifierImplTest {
-    private val logger = SystemLogger()
+    private val logger = MemorisedLogger()
     private val classifier = InboundMessageClassifierImpl(logger)
 
     @Test

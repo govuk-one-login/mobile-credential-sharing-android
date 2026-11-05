@@ -11,7 +11,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import kotlin.collections.isNotEmpty
 import kotlin.collections.map
-import uk.gov.logging.api.v2.Logger
+import uk.gov.logging.api.v3.Logger
 import uk.gov.onelogin.sharing.core.logger.logTag
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceRequest.DeviceRequest
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
