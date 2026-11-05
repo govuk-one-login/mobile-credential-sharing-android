@@ -90,7 +90,6 @@ class ShareCredentialTest {
                     mockk(relaxed = true),
                     mockk(relaxed = true)
                 ),
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
@@ -116,8 +115,7 @@ class ShareCredentialTest {
                 HolderSessionState.AwaitingUserConsent(
                     mockk(relaxed = true),
                     mockk(relaxed = true)
-                ),
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
+                )
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(

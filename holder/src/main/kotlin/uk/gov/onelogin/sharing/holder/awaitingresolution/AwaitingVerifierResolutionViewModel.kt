@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.awaitingresolution
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.ContributesIntoMap
@@ -28,10 +27,10 @@ class AwaitingVerifierResolutionViewModel(
         viewModelScope.launch { orchestrator.reset() }
     }
 
-    fun sendScreenEvent(context: Context) {
-        analyticsLogger.detailsSharedScreen(context)
+    fun sendScreenEvent(screenName: String) {
+        analyticsLogger.detailsSharedScreen(screenName)
     }
-    fun sendGoBackToDocumentsEvent(context: Context) {
-        analyticsLogger.goBackToDocuments(context)
+    fun sendGoBackToDocumentsEvent() {
+        analyticsLogger.goBackToDocuments()
     }
 }

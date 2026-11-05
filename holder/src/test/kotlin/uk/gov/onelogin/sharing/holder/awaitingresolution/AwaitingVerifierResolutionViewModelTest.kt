@@ -1,8 +1,5 @@
 package uk.gov.onelogin.sharing.holder.awaitingresolution
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +10,6 @@ import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -24,13 +20,11 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
 class AwaitingVerifierResolutionViewModelTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
-    private val context: Context by lazy { ApplicationProvider.getApplicationContext() }
     private val orchestrator = FakeOrchestrator(
         initialHolderState = MutableStateFlow(HolderSessionState.Complete.Success()),
         startCount = 1
@@ -48,7 +42,7 @@ class AwaitingVerifierResolutionViewModelTest {
 
     @Test
     fun `Logs the screen view event`() {
-        viewModel.sendScreenEvent(context)
+        viewModel.sendScreenEvent(SCREEN_NAME)
         assertThat(
             analyticsLogger,
             contains(AwaitingVerifierResolutionTestData.expectedScreenEvent)
@@ -58,7 +52,7 @@ class AwaitingVerifierResolutionViewModelTest {
 
     @Test
     fun `Logs the go back to documents button event`() {
-        viewModel.sendGoBackToDocumentsEvent(context)
+        viewModel.sendGoBackToDocumentsEvent()
         assertThat(
             analyticsLogger,
             contains(AwaitingVerifierResolutionTestData.expectedGoBackToDocumentsEvent)
@@ -68,7 +62,7 @@ class AwaitingVerifierResolutionViewModelTest {
 
     @Test
     fun `Screen view event sets name and id`() {
-        viewModel.sendScreenEvent(context)
+        viewModel.sendScreenEvent(SCREEN_NAME)
 
         val event = analyticsLogger.sentAnalyticsEvents.single()
         assertEquals("screen_view", event.eventType)
@@ -78,33 +72,11 @@ class AwaitingVerifierResolutionViewModelTest {
 
     @Test
     fun `Go back to documents button event sets text and type`() {
-        viewModel.sendGoBackToDocumentsEvent(context)
+        viewModel.sendGoBackToDocumentsEvent()
 
         val event = analyticsLogger.sentAnalyticsEvents.single()
         assertEquals("navigation", event.eventType)
         assertEquals(BUTTON_TEXT.lowercase(), event.parameters["text"])
         assertEquals("submit form", event.parameters["type"])
-    }
-
-    @Test
-    @Config(qualifiers = "cy")
-    fun `Screen view event is in English when device is in Welsh`() {
-        viewModel.sendScreenEvent(context)
-
-        val event = analyticsLogger.sentAnalyticsEvents.single()
-        assertEquals("screen_view", event.eventType)
-        assertEquals(SCREEN_NAME.lowercase(), event.parameters["screen_name"])
-        assertEquals("cy", event.parameters["language"])
-    }
-
-    @Test
-    @Config(qualifiers = "cy")
-    fun `Go back to documents button event is in English when device is in Welsh`() {
-        viewModel.sendGoBackToDocumentsEvent(context)
-
-        val event = analyticsLogger.sentAnalyticsEvents.single()
-        assertEquals("navigation", event.eventType)
-        assertEquals(BUTTON_TEXT.lowercase(), event.parameters["text"])
-        assertEquals("cy", event.parameters["language"])
     }
 }

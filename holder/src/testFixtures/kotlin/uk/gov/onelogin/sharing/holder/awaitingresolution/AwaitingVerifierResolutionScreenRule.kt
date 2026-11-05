@@ -3,9 +3,6 @@ package uk.gov.onelogin.sharing.holder.awaitingresolution
 import android.content.Context
 import android.content.res.Resources
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
@@ -29,7 +26,10 @@ class AwaitingVerifierResolutionScreenRule(
 
     // node finders
     fun onSuccessIcon() = onNodeWithContentDescription("Success")
-    fun onHeading() = onNodeWithText(resources.getString(R.string.details_shared))
+    fun onTitle() = onNode(
+        hasText(resources.getString(R.string.holder_awaiting_verifier_resolution_title))
+            and isHeading()
+    )
     fun onFirstParagraph() =
         onNodeWithText(resources.getString(R.string.person_will_check_details_shared))
     fun onSecondParagraph() =
@@ -41,14 +41,7 @@ class AwaitingVerifierResolutionScreenRule(
     // assertions
     fun assertSuccessIconIsDisplayed() = onSuccessIcon().assertIsDisplayed()
 
-    fun assertTitleIsDisplayed() = onHeading()
-        .assertIsDisplayed()
-        .assert(
-            SemanticsMatcher.expectValue(
-                SemanticsProperties.Heading,
-                Unit
-            )
-        )
+    fun assertTitleIsDisplayed() = onTitle().assertIsDisplayed()
 
     fun assertWelshTitleIsDisplayed() =
         onNode(hasText("Manylion wedi’u rhannu") and isHeading()).assertIsDisplayed()
