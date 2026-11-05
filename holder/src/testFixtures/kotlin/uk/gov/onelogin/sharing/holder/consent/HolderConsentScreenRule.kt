@@ -24,6 +24,10 @@ class HolderConsentScreenRule(
         resources.getString(R.string.holder_consent_screen_title)
     ).assertIsDisplayed()
 
+    fun assertWhatYouShareHeadingIsDisplayed() = onNodeWithText(
+        resources.getString(R.string.holder_consent_screen_what_you_share_heading)
+    ).assertIsDisplayed()
+
     fun assertAgreeButtonIsEnabled() = onAgreeButton().assertIsEnabled()
     fun assertAgreeButtonIsNotEnabled() = onAgreeButton().assertIsNotEnabled()
 

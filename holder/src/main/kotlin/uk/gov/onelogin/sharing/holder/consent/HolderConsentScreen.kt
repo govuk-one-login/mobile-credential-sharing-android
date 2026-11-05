@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.holder.consent
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,7 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeading
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -113,31 +115,41 @@ private fun LazyListScope.consentBody(
     onReadPrivacyNotice: () -> Unit
 ) {
     item {
-        Text(
-            text = stringResource(
-                R.string.holder_consent_organization_sentence,
-                state.normalisedOrganizationName
-            ),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = horizontalPadding)
-        )
-    }
-    item {
-        GdsButton(
-            text = stringResource(
-                R.string.holder_consent_screen_privacy_notice_link,
-                state.organizationName
-            ),
-            buttonType = ButtonTypeV2.Secondary(),
-            onClick = onReadPrivacyNotice,
-            textAlign = TextAlign.Start,
-            contentPosition = Arrangement.Start,
+        Column(
             modifier = Modifier.padding(horizontal = horizontalPadding),
-            contentModifier = Modifier.fillMaxWidth()
-        )
+            verticalArrangement = Arrangement.spacedBy(spacingSingle)
+        ) {
+            Text(
+                text = stringResource(
+                    R.string.holder_consent_organization_sentence,
+                    state.normalisedOrganizationName
+                ),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            GdsButton(
+                text = stringResource(
+                    R.string.holder_consent_screen_privacy_notice_link,
+                    state.organizationName
+                ),
+                buttonType = ButtonTypeV2.Secondary(),
+                onClick = onReadPrivacyNotice,
+                textAlign = TextAlign.Start,
+                contentPosition = Arrangement.Start,
+                contentModifier = Modifier.fillMaxWidth()
+            )
+        }
     }
     state.card?.let { card ->
+        item {
+            Text(
+                text = stringResource(R.string.holder_consent_screen_what_you_share_heading),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.padding(horizontal = horizontalPadding)
+            )
+        }
         item {
             SharingTheme {
                 AgreeToShareCard(

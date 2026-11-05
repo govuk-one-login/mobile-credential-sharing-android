@@ -10,6 +10,10 @@ import uk.gov.onelogin.sharing.holder.R
  * Ensures that tests would fail when the Welsh strings update without updating this test data.
  */
 enum class WelshStringsXmlData(val expected: String, @param:StringRes val resourceId: Int) {
+    CONSENT_SCREEN_WHAT_YOU_SHARE_HEADING(
+        expected = "Beth fyddwch yn ei rannu",
+        resourceId = R.string.consent_screen_what_you_share_heading
+    ),
     CONSENT_CARD_WILL_KEEP(
         expected = "Bydd %1\$s yn cadw\u2019r manylion hyn fel cofnod o\u2019r gwiriad hwn:",
         resourceId = R.string.consent_card_will_keep

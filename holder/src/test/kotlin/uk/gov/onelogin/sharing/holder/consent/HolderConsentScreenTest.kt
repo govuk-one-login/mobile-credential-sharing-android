@@ -167,6 +167,21 @@ class HolderConsentScreenTest {
         }
 
     @Test
+    fun `Displays the what you will share section heading`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.assertWhatYouShareHeadingIsDisplayed()
+        }
+
+    @Test
     fun `Displays the shared attribute count in the card heading`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {

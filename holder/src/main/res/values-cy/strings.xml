@@ -36,6 +36,7 @@
 
     <!-- Agree to Share screen -->
     <string name="consent_screen_title">Adolygu beth fyddwch yn ei rannu</string>
+    <string name="consent_screen_what_you_share_heading">Beth fyddwch yn ei rannu</string>
     <string name="consent_screen_privacy_notice_link">Darllenwch am %1$s a’u hysbysiad preifatrwydd</string>
     <plurals name="consent_screen_agree_button">
         <item quantity="zero">Cytuno a rhannu %1$d manylion</item>
