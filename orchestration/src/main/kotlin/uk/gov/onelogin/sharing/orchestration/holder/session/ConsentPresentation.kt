@@ -57,17 +57,17 @@ data class ConsentAttribute(
     ) : this(
         elementIdentifier = entry.key.value,
         intentToRetain = entry.value,
-        namespace = namespace
+        nameSpace = namespace
     )
 
     companion object {
         fun Map<MdlAttribute, Boolean>.toConsentAttributes(
-            namespace: String
+            nameSpace: String
         ): List<ConsentAttribute> =
             map { entry ->
                 ConsentAttribute(
                     entry = entry,
-                    namespace = namespace,
+                    namespace = nameSpace,
                 )
             }
     }

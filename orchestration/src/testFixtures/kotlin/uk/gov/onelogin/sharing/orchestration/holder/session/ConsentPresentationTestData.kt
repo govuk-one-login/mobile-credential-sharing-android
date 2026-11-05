@@ -20,10 +20,13 @@ object ConsentPresentationTestData {
 
     val partiallyRetainedAttributes = fullyRetainedAttributes + noRetainedAttributes
 
-    fun createConsentNamespaces(elements: Map<MdlAttribute, Boolean>) = listOf(
+    fun createConsentNamespaces(
+        elements: Map<MdlAttribute, Boolean>,
+        namespace: String = "org.iso.18013.5.1"
+    ) = listOf(
         ConsentNamespace(
-            nameSpace = "org.iso.18013.5.1",
-            attributes = elements.toConsentAttributes()
+            nameSpace = namespace,
+            attributes = elements.toConsentAttributes(namespace)
         )
     )
 
@@ -41,8 +44,8 @@ object ConsentPresentationTestData {
 
     fun createConsentPresentation(
         documents: List<ConsentDocument> = createConsentDocumentSingleton(),
-        privacyPolicyUrl: String? = "https://www.this.is.stub.data.com",
-        organizationName: String? = "Stub-DVS Ltd.",
+        privacyPolicyUrl: String = "https://www.this.is.stub.data.com",
+        organizationName: String = "Stub-DVS Ltd.",
         isBusy: Boolean = false
     ) = ConsentPresentation(
         documents = documents,

@@ -2,38 +2,25 @@ package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import android.content.Intent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
-import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
-import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
-import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValuesIn
-import com.google.testing.junit.testparameterinjector.TestParameter
 import io.mockk.mockk
-import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
-import uk.gov.logging.api.analytics.logging.MemorisedAnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
-import uk.gov.logging.api.v3dot1.model.ViewEvent
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
-import uk.gov.onelogin.sharing.analytics.SystemAnalyticsLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import kotlin.test.Test
 
 @RunWith(RobolectricTestParameterInjector::class)
 class MoreAboutDvsScreenTest {
@@ -41,7 +28,7 @@ class MoreAboutDvsScreenTest {
     @get:Rule
     val composeTestRule = MoreAboutDvsScreenRule()
 
-    private var organizationName: String? = null
+    private var organizationName: String = "Stub-DVS Ltd."
 
     private val analyticsLogger = FakeAnalyticsLogger()
 
@@ -51,12 +38,11 @@ class MoreAboutDvsScreenTest {
         )
     }
 
-    private val initialHolderState by lazy {
+    private var initialHolderState: HolderSessionState =
         HolderSessionState.AwaitingUserConsent(
             request = mockk(relaxed = true),
             presentation = presentation
         )
-    }
 
     private val orchestrator by lazy {
         FakeOrchestrator(
@@ -71,6 +57,10 @@ class MoreAboutDvsScreenTest {
         )
     }
 
+    private val uiState: MoreAboutDvsViewModel.MoreAboutDvsUiState
+        get() =
+            viewModel.uiState.value
+
     @Test
     fun `UI contains the correct elements`() = verifyUiElements(
         expectedOrganization = "Stub-DVS Ltd."
@@ -79,20 +69,20 @@ class MoreAboutDvsScreenTest {
     }
 
     @Test
-    fun `Preview contains the correct elements`() = verifyUiElements(
-        expectedOrganization = "Stub-DVS Ltd."
-    ) {
-        MoreAboutDvsPreview(
-            presentation = presentation
-        )
+    fun `Invalid holder session states show a Progress indicator`() = runTest {
+        initialHolderState = HolderSessionState.NotStarted
+
+        composeTestRule.run {
+            setContent { Render() }
+            assertProgressIndicatorIsDisplayed()
+        }
     }
 
     @Test
-    fun `Undefined organizations show 'Unknown' in the title`() = verifyUiElements(
-        expectedOrganization = "Unknown"
+    fun `Preview contains the correct elements`() = verifyUiElements(
+        expectedOrganization = "Stub-DVS Ltd."
     ) {
-        organizationName = null
-        Render()
+        MoreAboutDvsPreview(state = uiState)
     }
 
     @Test
@@ -111,7 +101,7 @@ class MoreAboutDvsScreenTest {
         composeTestRule.run {
             setContent { Render() }
 
-            onPrivacyPolicyButton(true).performClick()
+            performPrivacyPolicyButtonClick(true)
 
             waitUntil("Doesn't contain expected event!: $analyticsLogger") {
                 analyticsLogger.contains(MoreAboutDvsTestData.expectedButtonEvent)
@@ -125,7 +115,7 @@ class MoreAboutDvsScreenTest {
 
         composeTestRule.run {
             setContent { Render() }
-            onPrivacyPolicyButton(true).performClick()
+            performPrivacyPolicyButtonClick(true)
             waitForIdle()
         }
 

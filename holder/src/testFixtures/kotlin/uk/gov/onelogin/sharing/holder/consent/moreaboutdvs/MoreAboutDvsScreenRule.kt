@@ -10,16 +10,16 @@ import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertWidthIsAtLeast
+import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.android.ui.theme.minimumTouchTarget
@@ -30,6 +30,16 @@ class MoreAboutDvsScreenRule(
     private val resources: Resources = ApplicationProvider.getApplicationContext<Context>()
         .resources
 ) : ComposeContentTestRule by composeTestRule {
+
+    fun assertProgressIndicatorIsDisplayed(
+        expectedLabel: String = "Loading",
+        useUnmergedTree: Boolean = false
+    ) = onProgressIndicator(
+        expectedLabel = expectedLabel,
+        useUnmergedTree = useUnmergedTree
+    )
+        .assertExists()
+        .assertIsDisplayed()
 
     fun assertValidBody(organizationName: String, useUnmergedTree: Boolean = false) {
         mapOf(
@@ -125,6 +135,18 @@ class MoreAboutDvsScreenRule(
 
     fun onContainer() = onNode(hasScrollAction())
 
+    fun onHeader(
+        organizationName: String,
+        useUnmergedTree: Boolean = false
+    ): SemanticsNodeInteraction {
+        val heading = resources.getString(R.string.more_about_dvs_title, organizationName)
+
+        return onNodeWithText(
+            heading,
+            useUnmergedTree = useUnmergedTree
+        )
+    }
+
     fun onPrivacyPolicyBody(
         organizationName: String,
         useUnmergedTree: Boolean = false
@@ -162,6 +184,7 @@ class MoreAboutDvsScreenRule(
         )
     }
 
+
     fun onPrivacyPolicyButton(useUnmergedTree: Boolean = false): SemanticsNodeInteraction {
         onContainer().performScrollToNode(hasClickAction())
 
@@ -171,15 +194,15 @@ class MoreAboutDvsScreenRule(
         )
     }
 
-    fun onHeader(
-        organizationName: String,
+    fun onProgressIndicator(
+        expectedLabel: String = "Loading",
         useUnmergedTree: Boolean = false
-    ): SemanticsNodeInteraction {
-        val heading = resources.getString(R.string.more_about_dvs_title, organizationName)
+    ) = onNode(
+        hasAnyChild(hasText(expectedLabel)),
+        useUnmergedTree = useUnmergedTree
+    )
 
-        return onNodeWithText(
-            heading,
-            useUnmergedTree = useUnmergedTree
-        )
-    }
+    fun performPrivacyPolicyButtonClick(
+        useUnmergedTree: Boolean = true
+    ) = onPrivacyPolicyButton(useUnmergedTree).performClick()
 }

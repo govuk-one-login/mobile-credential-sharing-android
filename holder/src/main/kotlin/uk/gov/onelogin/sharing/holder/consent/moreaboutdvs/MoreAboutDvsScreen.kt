@@ -2,6 +2,8 @@ package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
@@ -9,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -18,11 +21,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
+import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicator
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsTheme
@@ -36,8 +39,7 @@ internal fun MoreAboutDvsScreen(
     modifier: Modifier = Modifier,
     viewModel: MoreAboutDvsViewModel = metroViewModel()
 ) {
-    val organizationName by viewModel.organizationName.collectAsStateWithLifecycle()
-    val privacyPolicyUrl by viewModel.privacyPolicyUrl.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -47,9 +49,9 @@ internal fun MoreAboutDvsScreen(
     }
 
     MoreAboutDvsContent(
-        organizationName = organizationName,
+        state = uiState,
         modifier = modifier
-    ) {
+    ) { privacyPolicyUrl ->
         scope.launch {
             viewModel.sendButtonEvent(context)
             val intent = CustomTabsIntent.Builder()
@@ -59,8 +61,8 @@ internal fun MoreAboutDvsScreen(
                 .build()
 
             privacyPolicyUrl
-                ?.let(Uri::parse)
-                ?.let { uri ->
+                .let(Uri::parse)
+                .let { uri ->
                     intent.launchUrl(context, uri)
                 }
         }
@@ -69,33 +71,50 @@ internal fun MoreAboutDvsScreen(
 
 @Composable
 internal fun MoreAboutDvsContent(
-    organizationName: String,
+    state: MoreAboutDvsViewModel.MoreAboutDvsUiState,
     modifier: Modifier = Modifier,
-    onPrivacyPolicyLinkClick: () -> Unit = {}
+    onPrivacyPolicyLinkClick: (String) -> Unit = {}
 ) {
-    LeftAlignedScreenV2(
-        modifier = modifier,
-        title = stringResource(
-            R.string.more_about_dvs_title,
-            organizationName
-        ),
-        body = organizationName.moreAboutDvsBodyContent(
-            onPrivacyPolicyLinkClick = onPrivacyPolicyLinkClick
-        ),
-        forceScroll = true
-    )
+    when (state) {
+        is MoreAboutDvsViewModel.MoreAboutDvsUiState.Loading -> {
+            Column(
+                modifier = modifier,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                GdsProgressIndicator()
+            }
+        }
+
+        is MoreAboutDvsViewModel.MoreAboutDvsUiState.Loaded -> {
+            LeftAlignedScreenV2(
+                modifier = modifier,
+                title = stringResource(
+                    R.string.more_about_dvs_title,
+                    state.organizationName
+                ),
+                body = state.organizationName.moreAboutDvsBodyContent(
+                    onPrivacyPolicyLinkClick = {
+                        onPrivacyPolicyLinkClick(state.privacyPolicyUrl)
+                    }
+                ),
+                forceScroll = true
+            )
+        }
+    }
+
 }
 
 @Composable
 private fun String.moreAboutDvsBodyContent(
     onPrivacyPolicyLinkClick: () -> Unit
 ): PersistentList<LeftAlignedScreenBodyV2> = (
-    introductionTexts() + introductionBullets() + privacyNoticeSubheading() + privacyNoticeBody() +
-        privacyNoticeBullets() +
-        privacyNoticeButton(
-            onClick = onPrivacyPolicyLinkClick
-        )
-    ).toPersistentList()
+        introductionTexts() + introductionBullets() + privacyNoticeSubheading() + privacyNoticeBody() +
+                privacyNoticeBullets() +
+                privacyNoticeButton(
+                    onClick = onPrivacyPolicyLinkClick
+                )
+        ).toPersistentList()
 
 @Composable
 private fun String.introductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
@@ -168,12 +187,12 @@ internal fun String.removeDoubleFullStop(): String = let { text ->
 @Composable
 internal fun MoreAboutDvsPreview(
     @PreviewParameter(provider = MoreAboutDvsPreviewParameters::class)
-    presentation: ConsentPresentation
+    state: MoreAboutDvsViewModel.MoreAboutDvsUiState
 ) {
     GdsTheme {
         Surface {
             MoreAboutDvsContent(
-                organizationName = presentation.organizationName ?: "Unknown",
+                state = state,
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -181,11 +200,21 @@ internal fun MoreAboutDvsPreview(
 }
 
 internal class MoreAboutDvsPreviewParameters(
-    override val values: Sequence<ConsentPresentation> = sequenceOf(
-        ConsentPresentation(
-            documents = emptyList(),
-            organizationName = "Stub-DVS Ltd.",
-            privacyPolicyUrl = "https://www.more.about.dvs/preview"
-        )
+    private val inputs: List<MoreAboutDvsViewModel.MoreAboutDvsUiState> = listOf(
+        MoreAboutDvsViewModel.MoreAboutDvsUiState.Loaded(
+            ConsentPresentation(
+                documents = emptyList(),
+                organizationName = "Stub-DVS Ltd.",
+                privacyPolicyUrl = "https://www.more.about.dvs/preview"
+            )
+        ),
+        MoreAboutDvsViewModel.MoreAboutDvsUiState.Loading,
     )
-) : PreviewParameterProvider<ConsentPresentation>
+) : PreviewParameterProvider<MoreAboutDvsViewModel.MoreAboutDvsUiState> {
+    override val values: Sequence<MoreAboutDvsViewModel.MoreAboutDvsUiState>
+        get() = inputs.asSequence()
+
+    override fun getDisplayName(index: Int): String? {
+        return inputs[index]::class.java.simpleName
+    }
+}

@@ -7,12 +7,9 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
@@ -31,24 +28,14 @@ class MoreAboutDvsViewModel(
     orchestrator: Orchestrator.Holder
 ) : ViewModel() {
 
-    private val presentation: Flow<ConsentPresentation> = orchestrator.holderSessionState
+    val uiState = orchestrator.holderSessionState
         .filterIsInstance<HolderSessionState.AwaitingUserConsent>()
         .map { it.presentation }
-
-    val organizationName: StateFlow<String> = presentation
-        .mapNotNull { it.normalisedOrganizationName }
+        .map(MoreAboutDvsUiState::Loaded)
         .stateIn(
             viewModelScope,
             SharingStarted.Eagerly,
-            "Unknown"
-        )
-
-    val privacyPolicyUrl: StateFlow<String?> = presentation
-        .map { it.privacyPolicyUrl }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            null
+            MoreAboutDvsUiState.Loading
         )
 
     fun sendScreenEvent(context: Context) = viewModelScope.launch {
@@ -57,5 +44,22 @@ class MoreAboutDvsViewModel(
 
     fun sendButtonEvent(context: Context) = viewModelScope.launch {
         analyticsLogger.moreAboutDvsPrivacyPolicyButton(context, "DVS")
+    }
+
+    sealed interface MoreAboutDvsUiState {
+        data object Loading : MoreAboutDvsUiState
+
+        data class Loaded(
+            val organizationName: String,
+            val privacyPolicyUrl: String
+        ) : MoreAboutDvsUiState {
+
+            internal constructor(
+                presentation: ConsentPresentation
+            ) : this(
+                organizationName = presentation.normalisedOrganizationName,
+                privacyPolicyUrl = presentation.privacyPolicyUrl
+            )
+        }
     }
 }

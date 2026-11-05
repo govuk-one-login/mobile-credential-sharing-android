@@ -5,21 +5,19 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import io.mockk.mockk
-import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
-import org.hamcrest.Matchers.equalTo
 import org.junit.runner.RunWith
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.expectedButtonEvent
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.expectedScreenEvent
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsUiStateMatchers.hasUiState
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import kotlin.test.Test
 
 @RunWith(AndroidJUnit4::class)
 class MoreAboutDvsViewModelTest {
@@ -28,7 +26,7 @@ class MoreAboutDvsViewModelTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    private var organizationName: String? = "Stub-DVS Ltd."
+    private var organizationName: String = "Stub-DVS Ltd."
 
     private val presentation by lazy {
         createConsentPresentation(
@@ -57,11 +55,11 @@ class MoreAboutDvsViewModelTest {
     }
 
     @Test
-    fun `Holder session state flow contains the organization name`() = runTest {
-        viewModel.organizationName.test {
+    fun `UI state flow maps the ConsentPresentation`() = runTest {
+        viewModel.uiState.test {
             assertThat(
                 expectMostRecentItem(),
-                equalTo(organizationName)
+                hasUiState(presentation)
             )
         }
     }
