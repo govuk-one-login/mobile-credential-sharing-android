@@ -70,6 +70,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderSessionTer
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeInboundMessageClassifier
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionImpl
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.consentPresentationStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageClassifier
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
@@ -1379,7 +1380,8 @@ class HolderOrchestratorTest {
 
     @Test
     fun `deny consent without skDevice transitions to failed`() = runTest {
-        val initialState = HolderSessionState.AwaitingUserConsent(deviceRequestStub)
+        val initialState =
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub, consentPresentationStub)
         initialStates = mutableListOf(initialState, HolderSessionState.NotStarted)
         val sessionFactory = FakeSessionFactory(
             listOf(
@@ -1676,7 +1678,8 @@ class HolderOrchestratorTest {
     fun `connection loss during active processing results in failure`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Processing establishment" to HolderSessionState.ProcessingEstablishment,
-            "Awaiting user consent" to HolderSessionState.AwaitingUserConsent(deviceRequestStub),
+            "Awaiting user consent" to
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub, consentPresentationStub),
             "Processing response" to HolderSessionState.ProcessingResponse
         )
     ) = runTest {
@@ -1746,7 +1749,8 @@ class HolderOrchestratorTest {
 
     @Test
     fun `connection loss during outbound message sending is suppressed`() = runTest {
-        val initialState = HolderSessionState.AwaitingUserConsent(deviceRequestStub)
+        val initialState =
+            HolderSessionState.AwaitingUserConsent(deviceRequestStub, consentPresentationStub)
         initialStates[0] = initialState
 
         val sessionWithContext = HolderSessionImpl(
