@@ -82,6 +82,7 @@ fun ScannedInvalidQrScreen(
                 textAlign = GdsHeadingAlignment.CenterAligned
             )
         },
+        supportingText = null,
         body = { horizontalPadding ->
             item {
                 Column(

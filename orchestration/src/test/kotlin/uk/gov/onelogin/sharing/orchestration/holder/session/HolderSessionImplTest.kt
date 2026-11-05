@@ -106,4 +106,64 @@ class HolderSessionImplTest {
                 "'${transition::class.java.simpleName}'" in logger
         )
     }
+
+    @Test
+    fun `updateEngagementDisplay hides the QR in place without a validated transition`() = runTest {
+        initialState = HolderSessionState.PresentingEngagement(qrData = "qr", showQr = true)
+
+        Assert.assertFalse(
+            HolderSessionState.PresentingEngagement::class in session.getAvailableTransitions()
+        )
+
+        session.updateEngagementDisplay(showQr = false)
+
+        MatcherAssert.assertThat(
+            session,
+            StateContainerMatchers.hasCurrentState(
+                HolderSessionState.PresentingEngagement(qrData = "qr", showQr = false)
+            )
+        )
+    }
+
+    @Test
+    fun `updateEngagementDisplay can restore the QR to visible in place`() = runTest {
+        initialState = HolderSessionState.PresentingEngagement(qrData = "qr", showQr = false)
+
+        session.updateEngagementDisplay(showQr = true)
+
+        MatcherAssert.assertThat(
+            session,
+            StateContainerMatchers.hasCurrentState(
+                HolderSessionState.PresentingEngagement(qrData = "qr", showQr = true)
+            )
+        )
+    }
+
+    @Test
+    fun `updateEngagementDisplay is a no-op when the flag already matches`() = runTest {
+        val state = HolderSessionState.PresentingEngagement(qrData = "qr", showQr = true)
+        initialState = state
+
+        session.updateEngagementDisplay(showQr = true)
+
+        MatcherAssert.assertThat(
+            session,
+            StateContainerMatchers.hasCurrentState(state)
+        )
+    }
+
+    @Test
+    fun `updateEngagementDisplay is a no-op outside PresentingEngagement`(
+        @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
+        state: HolderSessionState
+    ) = runTest {
+        initialState = state
+
+        session.updateEngagementDisplay(showQr = false)
+
+        MatcherAssert.assertThat(
+            session,
+            StateContainerMatchers.hasCurrentState(state)
+        )
+    }
 }

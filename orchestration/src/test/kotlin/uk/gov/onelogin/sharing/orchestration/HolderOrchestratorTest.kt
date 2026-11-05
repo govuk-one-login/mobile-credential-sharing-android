@@ -8,6 +8,8 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.mockk
 import java.security.GeneralSecurityException
 import java.security.cert.X509Certificate
+import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,7 +34,9 @@ import uk.gov.onelogin.sharing.bluetooth.api.peripheral.mdoc.PeripheralBluetooth
 import uk.gov.onelogin.sharing.bluetooth.ble.DEVICE_ADDRESS
 import uk.gov.onelogin.sharing.bluetooth.internal.core.SessionEndStates
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.core.engagement.EngagementTimingPolicy
 import uk.gov.onelogin.sharing.core.sessionTimer.FakeSessionTimer
+import uk.gov.onelogin.sharing.core.sessionTimer.SessionTimer
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequest
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
@@ -94,6 +98,7 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.StubPrerequisiteGate
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
@@ -174,11 +179,13 @@ class HolderOrchestratorTest {
         trustedReaderCertificates: List<X509Certificate> = emptyList(),
         authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory =
             FakeAuthenticatedReaderRequestFactory(),
-        readerAuthentication: ReaderAuthentication = fakeReaderAuthentication
+        readerAuthentication: ReaderAuthentication = fakeReaderAuthentication,
+        engagementTimer: SessionTimer = FakeSessionTimer(),
+        prerequisiteGate: PrerequisiteGate = gate
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
-        prerequisiteGate = gate,
+        prerequisiteGate = prerequisiteGate,
         peripheralBluetoothTransport = peripheralBluetoothTransport,
         appCoroutineScope = scope,
         decryptDeviceRequestUseCase = fakeDecryptDeviceRequestUseCase,
@@ -190,7 +197,8 @@ class HolderOrchestratorTest {
         sessionTimer = sessionTimer,
         readerAuthentication = readerAuthentication,
         trustedReaderCertificates = trustedReaderCertificates,
-        authenticatedReaderRequestFactory = authenticatedReaderRequestFactory
+        authenticatedReaderRequestFactory = authenticatedReaderRequestFactory,
+        engagementTimer = engagementTimer
     )
 
     @Test
@@ -2155,4 +2163,367 @@ class HolderOrchestratorTest {
             advanceUntilIdle()
         }
     }
+
+    @Test
+    fun `presenting engagement arms the display-window timer with showQr true`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val transport = FakePeripheralBluetoothTransport()
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            engagementTimer = engagementTimer
+        )
+
+        orchestrator.holderSessionState.test {
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+            orchestrator.start()
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                awaitItem()
+            )
+
+            assertEquals(
+                EngagementTimingPolicy().qrVisibleDuration as Any?,
+                engagementTimer.lastDuration as Any?
+            )
+            assertEquals(1, engagementTimer.startCalls)
+        }
+    }
+
+    @Test
+    fun `grace window hides the QR in place and keeps advertising`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val transport = FakePeripheralBluetoothTransport()
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            engagementTimer = engagementTimer
+        )
+
+        orchestrator.holderSessionState.test {
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+            orchestrator.start()
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                awaitItem()
+            )
+
+            val startCallsBeforeGrace = transport.startCalls
+            val stopCallsBeforeGrace = transport.stopCalls
+
+            engagementTimer.onTimeout?.invoke()
+
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                awaitItem()
+            )
+            assertEquals(1.seconds as Any?, engagementTimer.lastDuration as Any?)
+            assertEquals(startCallsBeforeGrace, transport.startCalls)
+            assertEquals(stopCallsBeforeGrace, transport.stopCalls)
+        }
+    }
+
+    @Test
+    fun `connect during the grace window cancels refresh and processes establishment`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val transport = FakePeripheralBluetoothTransport()
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            engagementTimer = engagementTimer
+        )
+
+        orchestrator.holderSessionState.test {
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+            orchestrator.start()
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                awaitItem()
+            )
+
+            engagementTimer.onTimeout?.invoke()
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                awaitItem()
+            )
+
+            val stopCallsBeforeConnect = engagementTimer.stopCalls
+
+            transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+
+            assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
+
+            assert(engagementTimer.stopCalls > stopCallsBeforeConnect)
+            assertEquals(1, transport.startCalls)
+        }
+    }
+
+    @Test
+    fun `at the deadline with no connection the session refreshes in place with a new QR`() =
+        runTest {
+            val engagementTimer = FakeSessionTimer()
+            val transport = FakePeripheralBluetoothTransport()
+
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                engagementTimer = engagementTimer
+            )
+
+            orchestrator.holderSessionState.test {
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+                orchestrator.start()
+                assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    awaitItem()
+                )
+
+                engagementTimer.onTimeout?.invoke()
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                    awaitItem()
+                )
+
+                engagementTimer.onTimeout?.invoke()
+                advanceUntilIdle()
+
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+                assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    awaitItem()
+                )
+                assert(transport.stopCalls >= 1)
+                assertEquals(2, transport.startCalls)
+                assertEquals(3, engagementTimer.startCalls)
+            }
+        }
+
+    @Test
+    fun `refresh re-evaluates prerequisites and routes to Preflight when Bluetooth unavailable`() =
+        runTest {
+            val engagementTimer = FakeSessionTimer()
+            val transport = FakePeripheralBluetoothTransport()
+
+            // Prerequisites pass on initial start, then Bluetooth is reported unavailable when the
+            // refresh re-evaluates at the deadline.
+            val missingBluetooth = MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            val togglingGate = object : PrerequisiteGate {
+                var evaluations = 0
+                override fun evaluatePrerequisites(
+                    prerequisites: Iterable<Prerequisite>
+                ): List<MissingPrerequisite> {
+                    evaluations++
+                    return if (evaluations == 1) emptyList() else listOf(missingBluetooth)
+                }
+            }
+
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                engagementTimer = engagementTimer,
+                prerequisiteGate = togglingGate
+            )
+
+            orchestrator.holderSessionState.test {
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+                orchestrator.start()
+                assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    awaitItem()
+                )
+
+                // Grace, then refresh at the deadline: prerequisites now fail.
+                engagementTimer.onTimeout?.invoke()
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                    awaitItem()
+                )
+
+                engagementTimer.onTimeout?.invoke()
+                advanceUntilIdle()
+
+                // S1 expires, then the new session starts NotStarted and routes to Preflight
+                // (not re-advertising) because Bluetooth is now unavailable. (Complete.Expired is
+                // filtered out of the observed stream.)
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+                assertThat(
+                    awaitItem(),
+                    hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+                )
+            }
+        }
+
+    @Suppress("LongMethod")
+    @Test
+    fun `refreshing at the deadline replaces the old session instance with a new one`() = runTest {
+        val engagementTimer = FakeSessionTimer()
+        val transport = FakePeripheralBluetoothTransport()
+
+        val firstSession = HolderSessionImpl(
+            logger = logger,
+            internalState = MutableStateFlow(HolderSessionState.NotStarted),
+            initialContext = holderSessionContextStub.copy(
+                sessionUuid = UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                qrCode = "qr_code_first"
+            )
+        )
+        val secondSession = HolderSessionImpl(
+            logger = logger,
+            internalState = MutableStateFlow(HolderSessionState.NotStarted),
+            initialContext = holderSessionContextStub.copy(
+                sessionUuid = UUID.fromString("00000000-0000-0000-0000-000000000002"),
+                qrCode = "qr_code_second"
+            )
+        )
+        val sessionFactory = FakeSessionFactory(firstSession, secondSession)
+
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            sessionFactory = sessionFactory,
+            engagementTimer = engagementTimer
+        )
+
+        orchestrator.holderSessionState.test {
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+            orchestrator.start()
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code_first", showQr = true),
+                awaitItem()
+            )
+
+            assert(sessionFactory.getCurrentSession() === firstSession)
+            engagementTimer.onTimeout?.invoke()
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code_first", showQr = false),
+                awaitItem()
+            )
+            assert(sessionFactory.getCurrentSession() === firstSession)
+
+            engagementTimer.onTimeout?.invoke()
+            advanceUntilIdle()
+
+            assert(sessionFactory.getCurrentSession() === secondSession)
+            assert(sessionFactory.getCurrentSession() !== firstSession)
+            assertEquals(
+                HolderSessionState.Complete.Expired,
+                firstSession.currentState.value
+            )
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code_second", showQr = true),
+                secondSession.currentState.value
+            )
+
+            assertEquals(HolderSessionState.NotStarted, awaitItem())
+            assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+            assertEquals(
+                HolderSessionState.PresentingEngagement("qr_code_second", showQr = true),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `refresh firing after a connection during grace does not replace the connected session`() =
+        runTest {
+            val engagementTimer = FakeSessionTimer()
+            val transport = FakePeripheralBluetoothTransport()
+            val sessionFactory = createSessionFactory()
+
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                sessionFactory = sessionFactory,
+                engagementTimer = engagementTimer
+            )
+
+            orchestrator.holderSessionState.test {
+                assertEquals(HolderSessionState.NotStarted, awaitItem())
+
+                orchestrator.start()
+                assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    awaitItem()
+                )
+
+                engagementTimer.onTimeout?.invoke()
+                assertEquals(
+                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                    awaitItem()
+                )
+
+                val connectedSession = sessionFactory.getCurrentSession()
+
+                transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+                assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
+
+                val startCallsAfterConnect = transport.startCalls
+
+                engagementTimer.onTimeout?.invoke()
+                advanceUntilIdle()
+
+                assert(sessionFactory.getCurrentSession() === connectedSession)
+                assertEquals(
+                    HolderSessionState.ProcessingEstablishment,
+                    orchestrator.holderSessionState.value
+                )
+                assertEquals(startCallsAfterConnect, transport.startCalls)
+                expectNoEvents()
+            }
+        }
+
+    @Test
+    fun `refresh awaits stop of the old session before starting the new session advertising`() =
+        runTest {
+            val engagementTimer = FakeSessionTimer()
+            val stopGate = CompletableDeferred<Unit>()
+            val operations = mutableListOf<String>()
+            val delegate = FakePeripheralBluetoothTransport()
+            val transport = object : PeripheralBluetoothTransport by delegate {
+                override suspend fun stop(sendEndCommand: Boolean) {
+                    stopGate.await()
+                    operations += "stop"
+                    delegate.stop(sendEndCommand)
+                }
+
+                override suspend fun start(serviceUuid: java.util.UUID) {
+                    operations += "start"
+                    delegate.start(serviceUuid)
+                }
+            }
+
+            val orchestrator = createOrchestrator(
+                peripheralBluetoothTransport = transport,
+                engagementTimer = engagementTimer
+            )
+
+            backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+            orchestrator.start()
+            advanceUntilIdle()
+
+            operations.clear()
+
+            engagementTimer.onTimeout?.invoke()
+            val refreshTrigger = backgroundScope.launch { engagementTimer.onTimeout?.invoke() }
+            advanceUntilIdle()
+
+            assertEquals(emptyList<String>(), operations)
+
+            stopGate.complete(Unit)
+            advanceUntilIdle()
+            refreshTrigger.join()
+
+            assertEquals(listOf("stop", "start"), operations)
+        }
 }
