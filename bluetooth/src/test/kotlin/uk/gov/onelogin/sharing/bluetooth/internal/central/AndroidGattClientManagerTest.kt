@@ -115,6 +115,7 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun `returns error if bluetooth gatt is null`() = runTest {
         val callbackSlot = slot<BluetoothGattCallback>()
@@ -145,6 +146,7 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun `returns error if exception is thrown`() = runTest {
         every {
@@ -212,6 +214,7 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun `emits error when discovered service is not valid`() = runTest {
         val callbackSlot = slot<BluetoothGattCallback>()
@@ -251,6 +254,7 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun `emits service connected when get service discovery is successful`() = runTest {
         val callbackSlot = slot<BluetoothGattCallback>()
@@ -1053,6 +1057,7 @@ internal class AndroidGattClientManagerTest {
         captured.onMtuChanged(bluetoothGatt, MtuValues.MAX_MTU, BluetoothGatt.GATT_SUCCESS)
     }
 
+    @Suppress("DEPRECATION")
     private suspend fun testEvents(
         validate: suspend TurbineTestContext<GattClientEvent>.(
             CapturingSlot<BluetoothGattCallback>
@@ -1081,6 +1086,7 @@ internal class AndroidGattClientManagerTest {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun setupConnectedGatt(
         gattWriter: GattWriter = fakeGattWriter,
         writeQueue: GattWriteQueue = fakeWriteQueue

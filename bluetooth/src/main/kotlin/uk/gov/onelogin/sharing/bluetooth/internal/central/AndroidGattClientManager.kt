@@ -96,6 +96,7 @@ class AndroidGattClientManager(
     private val pendingDescriptorWrites = ArrayDeque<BluetoothGattDescriptor>()
     private val messages: MutableMap<UUID, ByteArray> = mutableMapOf()
 
+    @Suppress("DEPRECATION")
     override fun connect(device: BluetoothDevice, serviceUuid: UUID) {
         if (permissionChecker.checkPermissions(getBluetoothPermissions()).isNotEmpty()) {
             _events.tryEmit(

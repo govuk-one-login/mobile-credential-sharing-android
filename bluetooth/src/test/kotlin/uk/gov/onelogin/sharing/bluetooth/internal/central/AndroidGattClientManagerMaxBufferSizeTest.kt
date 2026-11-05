@@ -59,6 +59,7 @@ internal class AndroidGattClientManagerMaxBufferSizeTest {
     private lateinit var server2ClientCharacteristic: BluetoothGattCharacteristic
     private lateinit var callbackSlot: io.mockk.CapturingSlot<BluetoothGattCallback>
 
+    @Suppress("DEPRECATION")
     @Before
     fun setup() {
         val service = mockk<BluetoothGattService>(relaxed = true)
