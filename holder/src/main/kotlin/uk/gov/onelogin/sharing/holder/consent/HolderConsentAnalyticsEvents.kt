@@ -16,8 +16,8 @@ internal object HolderConsentAnalyticsEvents {
         params = walletSharingRequiredParameters
     ).let(this::logEventV3Dot1)
 
-    internal fun AnalyticsLogger.readPrivacyNoticeButton(organisationName: String) = Button(
-        text = "Read about $organisationName and their privacy notice",
+    internal fun AnalyticsLogger.readPrivacyNoticeButton() = Button(
+        text = "Read about DVS and their privacy notice",
         params = walletSharingRequiredParameters
     ).let(this::logEventV3Dot1)
 

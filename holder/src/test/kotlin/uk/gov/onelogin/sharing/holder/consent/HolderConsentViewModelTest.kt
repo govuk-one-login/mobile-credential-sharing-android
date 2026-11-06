@@ -184,7 +184,7 @@ class HolderConsentViewModelTest {
                 analyticsLogger,
                 contains(
                     Button(
-                        text = "Read about Organisation Ltd and their privacy notice",
+                        text = "Read about DVS and their privacy notice",
                         params = walletSharingRequiredParameters
                     ).asLegacyEvent()
                 )

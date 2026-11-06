@@ -67,7 +67,7 @@ class HolderConsentViewModel(
 
     fun onReadPrivacyNotice() = viewModelScope.launch {
         presentation.value?.let {
-            analyticsLogger.readPrivacyNoticeButton(it.organizationName)
+            analyticsLogger.readPrivacyNoticeButton()
         }
     }
 
