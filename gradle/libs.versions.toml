@@ -36,7 +36,7 @@ mockk = "1.14.11" # https://github.com/mockk/mockk/releases
 org-hamcrest = "3.0" # https://github.com/hamcrest/JavaHamcrest/releases
 robolectric = "4.17" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.77.0" # https://github.com/takahirom/roborazzi/releases
-composable-preview-scanner = "0.9.3" # https://github.com/sergio-sastre/ComposablePreviewScanner/releases
+composable-preview-scanner = "0.10.0" # https://github.com/sergio-sastre/ComposablePreviewScanner/releases
 sonarqube = "7.3.0.8198" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 spotless = "8.10.4" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
