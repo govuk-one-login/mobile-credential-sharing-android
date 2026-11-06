@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+    <string name="holder_ble_restricted_title">@string/bluetooth_restricted_title</string>
+    <string name="holder_ble_restricted_body_1">@string/bluetooth_restricted_body_1</string>
+    <string name="holder_ble_restricted_body_2">@string/bluetooth_restricted_body_2</string>
+    <string name="holder_ble_restricted_body_3">@string/bluetooth_restricted_body_3</string>
+    <string name="holder_ble_restricted_button">@string/bluetooth_restricted_go_back_to_documents</string>
+</resources>
