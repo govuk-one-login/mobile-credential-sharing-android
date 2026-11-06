@@ -10,6 +10,7 @@ import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -25,15 +26,16 @@ class AwaitingVerifierResolutionScreenRule(
     }
 
     // node finders
-    fun onSuccessIcon() = onNodeWithContentDescription("Success")
+    fun onSuccessIcon() = onNodeWithTag(SUCCESS_ICON_TEST_TAG)
     fun onTitle() = onNode(
         hasText(resources.getString(R.string.holder_awaiting_verifier_resolution_title))
             and isHeading()
     )
-    fun onFirstParagraph() =
-        onNodeWithText(resources.getString(R.string.person_will_check_details_shared))
-    fun onSecondParagraph() =
-        onNodeWithText(resources.getString(R.string.bluetooth_connection_will_end))
+
+    fun onBody() = onNodeWithText(
+        resources.getString(R.string.person_will_check_details_shared)
+    )
+
     fun onGoBackToDocumentsButton() = onNode(
         hasText(resources.getString(R.string.go_back_to_documents)) and hasRole(Role.Button)
     )
@@ -46,10 +48,7 @@ class AwaitingVerifierResolutionScreenRule(
     fun assertWelshTitleIsDisplayed() =
         onNode(hasText("Manylion wedi’u rhannu") and isHeading()).assertIsDisplayed()
 
-    fun assertBodyIsDisplayed() {
-        onFirstParagraph().assertIsDisplayed()
-        onSecondParagraph().assertIsDisplayed()
-    }
+    fun assertBodyIsDisplayed() = onBody().assertIsDisplayed()
 
     fun assertGoBackToDocumentsButtonIsDisplayed() = onGoBackToDocumentsButton()
         .assertHasClickAction()

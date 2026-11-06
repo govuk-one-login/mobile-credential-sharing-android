@@ -90,6 +90,24 @@ class AwaitingVerifierResolutionScreenTest {
         }
 
     @Test
+    fun `Exits only after the vertical down animation completes`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                mainClock.autoAdvance = false
+
+                performGoBackToDocumentsClick()
+                mainClock.advanceTimeByFrame()
+                assertEquals(0, orchestrator.resetCount)
+                assertEquals(0, exitJourneyCount)
+
+                mainClock.autoAdvance = true
+                waitUntil { exitJourneyCount == 1 }
+                assertEquals(1, orchestrator.resetCount)
+            }
+        }
+
+    @Test
     @Config(qualifiers = "cy")
     fun `Displaying the screen in Welsh sends analytics events in English`() =
         runTest(dispatcherRule.testDispatcher) {

@@ -2,6 +2,9 @@ package uk.gov.onelogin.sharing.holder.awaitingresolution
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,17 +19,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.flow.first
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.componentsv2.heading.GdsHeading
@@ -41,6 +46,8 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 
+const val SUCCESS_ICON_TEST_TAG = "success"
+
 @Composable
 internal fun AwaitingVerifierResolutionScreen(
     modifier: Modifier = Modifier,
@@ -49,6 +56,7 @@ internal fun AwaitingVerifierResolutionScreen(
 ) {
     val context = LocalContext.current
     val currentOnExitJourney by rememberUpdatedState(onExitJourney)
+    val visibleState = remember { MutableTransitionState(true) }
 
     /**
      * Self-disabling callback handles both system/hardware back and "Go back to documents" so the
@@ -66,10 +74,15 @@ internal fun AwaitingVerifierResolutionScreen(
             override fun handleOnBackPressed() {
                 if (!isEnabled) return
                 isEnabled = false
-                viewModel.reset()
-                currentOnExitJourney()
+                visibleState.targetState = false
             }
         }
+    }
+
+    LaunchedEffect(visibleState) {
+        snapshotFlow { visibleState.isIdle && !visibleState.currentState }.first { it }
+        viewModel.reset()
+        currentOnExitJourney()
     }
 
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
@@ -86,13 +99,18 @@ internal fun AwaitingVerifierResolutionScreen(
         viewModel.sendScreenEvent(context.getEnglishString(titleRes))
     }
 
-    AwaitingVerifierResolutionContent(
-        modifier = modifier,
-        onGoBackToDocuments = {
-            viewModel.sendGoBackToDocumentsEvent()
-            exitCallback.handleOnBackPressed()
-        }
-    )
+    AnimatedVisibility(
+        visibleState = visibleState,
+        exit = slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }),
+        modifier = modifier
+    ) {
+        AwaitingVerifierResolutionContent(
+            onGoBackToDocuments = {
+                viewModel.sendGoBackToDocumentsEvent()
+                exitCallback.handleOnBackPressed()
+            }
+        )
+    }
 }
 
 @Suppress("LongMethod")
@@ -114,12 +132,13 @@ internal fun AwaitingVerifierResolutionContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = padding),
+                    .padding(horizontal = padding)
+                    .testTag(SUCCESS_ICON_TEST_TAG),
                 contentAlignment = Alignment.Center
             ) {
                 GdsIcon(
                     image = ImageVector.vectorResource(R.drawable.check_circle),
-                    contentDescription = "Success",
+                    contentDescription = null,
                     modifier = Modifier.size(75.dp),
                     color = GdsLocalColorScheme.current.successIcon
                 )
@@ -128,18 +147,7 @@ internal fun AwaitingVerifierResolutionContent(
         body = { padding ->
             item {
                 Text(
-                    text = stringResource(R.string.holder_awaiting_verifier_resolution_body_1),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = padding)
-                )
-            }
-            item {
-                Text(
-                    text = stringResource(R.string.holder_awaiting_verifier_resolution_body_2),
+                    text = stringResource(R.string.holder_awaiting_verifier_resolution_body),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground,
