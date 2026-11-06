@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -1379,6 +1380,30 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `deny consent never passes through ProcessingResponse`() = runTest {
+        with(TerminationTestFixture()) {
+            startAndDeliver()
+            assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
+
+            orchestrator.holderSessionState.test {
+                assertThat(awaitItem(), isAwaitingUserConsent())
+
+                orchestrator.denyConsent()
+
+                while (true) {
+                    val item = awaitItem()
+                    assertThat(
+                        "deny must not show the Sharing your details (ProcessingResponse) screen",
+                        item,
+                        not(isProcessingResponse())
+                    )
+                    if (item is HolderSessionState.Complete) break
+                }
+            }
+        }
+    }
+
+    @Test
     fun `deny consent without skDevice transitions to failed`() = runTest {
         val initialState =
             HolderSessionState.AwaitingUserConsent(deviceRequestStub, consentPresentationStub)
@@ -1814,7 +1839,11 @@ class HolderOrchestratorTest {
     @Test
     fun `cancels when timer fires`() = runTest {
         val transport = FakePeripheralBluetoothTransport()
-        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+        val terminator = FakeHolderSessionTerminator()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            holderSessionTerminator = terminator
+        )
         backgroundScope.launch { orchestrator.holderSessionState.collect {} }
         orchestrator.start()
         transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
@@ -1824,7 +1853,8 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertThat(orchestrator.holderSessionState.value, isCancelled())
-        assertEquals(1, transport.stopCalls)
+        assertEquals(1, terminator.terminateCalls)
+        assertEquals(0, transport.stopCalls)
     }
 
     @Test
@@ -1899,8 +1929,10 @@ class HolderOrchestratorTest {
 
                 orchestrator.denyConsent()
 
-                awaitItem()
-                awaitItem()
+                var item = awaitItem()
+                while (item !is HolderSessionState.Complete) {
+                    item = awaitItem()
+                }
 
                 assertEquals(
                     resetCallsBeforeOutbound + 1,
@@ -1919,6 +1951,27 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
 
         assertEquals(1, sessionTimer.stopCalls)
+    }
+
+    @Test
+    fun `cancel gracefully terminates the session so the central disconnects`() = runTest {
+        val transport = FakePeripheralBluetoothTransport()
+        val terminator = FakeHolderSessionTerminator()
+        val orchestrator = createOrchestrator(
+            peripheralBluetoothTransport = transport,
+            holderSessionTerminator = terminator
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+        orchestrator.start()
+        transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
+        advanceUntilIdle()
+
+        orchestrator.cancel()
+        advanceUntilIdle()
+
+        assertThat(orchestrator.holderSessionState.value, isCancelled())
+        assertEquals(1, terminator.terminateCalls)
+        assertEquals(0, transport.stopCalls)
     }
 
     @Test

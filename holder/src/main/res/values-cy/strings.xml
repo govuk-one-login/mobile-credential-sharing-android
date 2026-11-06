@@ -51,4 +51,7 @@
     <string name="consent_attr_driving_privileges">Cerbydau y gallwch eu gyrru</string>
     <string name="consent_attr_provisional_driving_privileges">Cerbydau y gallwch eu gyrru gyda’ch trwydded dros dro</string>
     <string name="consent_attr_welsh_licence">Os yw’ch trwydded yn ddwyieithog (Saesneg a Chymraeg)</string>
+
+    <string name="holder_sharing_details_label">Rhannu eich manylion</string>
+    <string name="holder_getting_details_label">Casglu rhestr o fanylion</string>
 </resources>

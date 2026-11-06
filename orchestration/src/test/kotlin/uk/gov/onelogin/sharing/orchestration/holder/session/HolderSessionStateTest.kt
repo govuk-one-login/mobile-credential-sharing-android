@@ -31,8 +31,7 @@ class HolderSessionStateTest {
             AwaitingVerifierResolution,
             ProcessingEstablishment,
             Preflight(listOf()),
-            PresentingEngagement("unit test"),
-            ProcessingResponse
+            PresentingEngagement("unit test")
         )
     ) {
         assertTrue {
@@ -48,6 +47,7 @@ class HolderSessionStateTest {
             NotStarted,
             ReadyToPresent,
             Success(),
+            ProcessingResponse,
             HolderSessionState.SendingTermination
         )
     ) {

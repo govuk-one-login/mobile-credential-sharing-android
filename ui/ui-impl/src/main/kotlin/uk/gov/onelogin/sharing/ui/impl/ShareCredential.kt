@@ -39,6 +39,7 @@ import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
 import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.navigateToHolderUserCancellationDialog
+import uk.gov.onelogin.sharing.holder.loading.LoadingAnalytics
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
@@ -96,6 +97,9 @@ internal fun ShareCredential(
 
     val onCancel: () -> Unit = {
         scope.launch {
+            if (state is HolderSessionState.ProcessingEstablishment) {
+                LoadingAnalytics.logCloseButton(analyticsLogger)
+            }
             if (state.shouldConfirmCancellation()) {
                 withContext(uiDispatcher) {
                     navController.navigateToHolderUserCancellationDialog()
