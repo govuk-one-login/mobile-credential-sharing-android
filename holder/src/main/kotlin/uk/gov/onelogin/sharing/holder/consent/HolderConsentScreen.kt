@@ -148,7 +148,9 @@ private fun LazyListScope.consentBody(
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Start,
-                modifier = Modifier.padding(horizontal = horizontalPadding)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = horizontalPadding)
             )
         }
         item {
