@@ -30,11 +30,46 @@ enum class TranslatableStringsData(
             "cy" to "Darganfyddwch sut mae rhannu yn gweithio"
         )
     ),
+    FIND_OUT_WHICH_DETAILS_TO_SHARE(
+        resourceId = R.string.holder_welcome_heading,
+        translations = mapOf(
+            "en" to "Find out which details you need to share",
+            "cy" to "Darganfyddwch pa fanylion y mae angen i chi eu rhannu"
+        )
+    ),
     GET_READY_TO_SHARE(
         resourceId = R.string.get_ready_to_share,
         translations = mapOf(
             "en" to "Get ready to share",
             "cy" to "Paratoi i rannu"
+        )
+    ),
+    QR_CODE_LETS_THEM_SEND_LIST_OF_DETAILS(
+        resourceId = R.string.qr_code_lets_them_send_list_of_details,
+        translations = mapOf(
+            "en" to "It lets them send you a list of the details they need to check.",
+            "cy" to "Mae’n caniatáu iddynt anfon rhestr atoch o’r manylion maent angen eu gwirio."
+        )
+    ),
+    QR_CODE_TO_GET_LIST_OF_DETAILS(
+        resourceId = R.string.qr_code_to_get_list_of_details,
+        translations = mapOf(
+            "en" to "QR code to get the list of details you need to share",
+            "cy" to "Cod QR i gael y rhestr o fanylion y mae angen i chi eu rhannu"
+        )
+    ),
+    REVIEW_LIST_BEFORE_AGREEING_TO_SHARE(
+        resourceId = R.string.review_list_before_agreeing_to_share,
+        translations = mapOf(
+            "en" to "You’ll review this list before agreeing to share your details with them.",
+            "cy" to "Byddwch yn adolygu’r rhestr hon cyn cytuno i rannu’ch manylion gyda hwy."
+        )
+    ),
+    SHOW_QR_CODE_PERSON_DOING_CHECK(
+        resourceId = R.string.show_qr_code_person_doing_check,
+        translations = mapOf(
+            "en" to "Show the QR code to the person doing the check.",
+            "cy" to "Dangoswch y cod QR i’r person sy’n gwneud y gwiriad."
         )
     ),
     TURN_ON_BLUETOOTH(

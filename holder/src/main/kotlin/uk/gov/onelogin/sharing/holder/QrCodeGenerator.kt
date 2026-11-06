@@ -7,6 +7,11 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 
+private const val TAG = "QRCodeGenerator"
+private const val QR_CODE_BLACK = 0xFF000000.toInt()
+private const val QR_CODE_WHITE = 0xFFFFFFFF.toInt()
+internal const val DEFAULT_QR_MARGIN = 4
+
 /**
  * Generates a QR code bitmap from the given string data.
  *
@@ -15,12 +20,6 @@ import com.google.zxing.qrcode.QRCodeWriter
  * @return A [Bitmap] object representing the QR code, or `null` if an error occurs during
  * generation.
  */
-
-private const val TAG = "QRCodeGenerator"
-private const val QR_CODE_BLACK = 0xFF000000.toInt()
-private const val QR_CODE_WHITE = 0xFFFFFFFF.toInt()
-private const val DEFAULT_QR_MARGIN = 4
-
 fun qrCodeGenerator(data: String, size: Int, margin: Int = DEFAULT_QR_MARGIN): Bitmap? = try {
     val writer = QRCodeWriter()
     val hints = mapOf(EncodeHintType.MARGIN to margin)

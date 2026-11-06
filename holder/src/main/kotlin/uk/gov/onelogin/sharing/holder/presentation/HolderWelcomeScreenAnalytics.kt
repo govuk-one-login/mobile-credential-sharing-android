@@ -1,6 +1,9 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
-import uk.gov.onelogin.sharing.analytics.WalletSharingScreen
+import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
 /**
  * Analytics identity for the Holder Welcome screen.
@@ -9,8 +12,9 @@ import uk.gov.onelogin.sharing.analytics.WalletSharingScreen
  * [HolderWelcomeViewModel] when sending the screen view event.
  */
 internal object HolderWelcomeScreenAnalytics {
-    val screen = WalletSharingScreen(
-        screenName = "HolderWelcomeScreen",
-        id = "29fd14a3-4390-4939-9d57-d9fe8cf61811"
-    )
+    internal fun AnalyticsLogger.holderWelcomeScreen(name: String) = Screen(
+        name = name,
+        id = "29fd14a3-4390-4939-9d57-d9fe8cf61811",
+        params = walletSharingRequiredParameters
+    ).let(this::logEventV3Dot1)
 }

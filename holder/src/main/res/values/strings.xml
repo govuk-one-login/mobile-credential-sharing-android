@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="allow_bluetooth" translatable="true">Allow Bluetooth</string>
     <string name="allow_bluetooth_before_sharing_details" translatable="true">Before you can share details from your UK driving licence, you need to allow this app to use Bluetooth.</string>
-<resources xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="MissingTranslation">
     <string name="enable_bluetooth_permission">Please enable bluetooth permissions to continue</string>
     <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
     <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>

@@ -15,6 +15,7 @@ import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModelTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -101,7 +102,7 @@ class HolderWelcomeViewModelTest {
 
     @Test
     fun `Logs screen view event`() = runTest(mainDispatcherRule.testDispatcher) {
-        viewModel.sendScreenEvent().join()
+        viewModel.sendScreenEvent(SCREEN_NAME).join()
         assertThat(
             analyticsLogger,
             hasSentEvents(

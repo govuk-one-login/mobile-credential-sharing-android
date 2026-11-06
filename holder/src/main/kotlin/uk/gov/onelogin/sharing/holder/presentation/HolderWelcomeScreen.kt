@@ -9,16 +9,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.PreviewFontScale
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.Dispatchers
-import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.presentation.component.LandscapeQrContent
 import uk.gov.onelogin.sharing.holder.presentation.component.PortraitQrContent
 
@@ -30,11 +29,13 @@ fun HolderWelcomeScreen(
     val contentState by viewModel.uiState.collectAsStateWithLifecycle(
         context = Dispatchers.Default
     )
+    val context = LocalContext.current
 
     val metrics = rememberMetricsStateHolder()
+    val titleRes = R.string.holder_welcome_heading
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderWelcomeScreen")
-        viewModel.sendScreenEvent()
+        viewModel.sendScreenEvent(context.getEnglishString(titleRes))
     }
 
     QrContent(
@@ -47,7 +48,7 @@ fun HolderWelcomeScreen(
 private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier) {
     val qrData = contentState.qrData
 
-    if (qrData == null) {
+    if (qrData == null || !contentState.showQr) {
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
@@ -61,28 +62,12 @@ private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = M
         LandscapeQrContent(qrData, modifier)
     } else {
         PortraitQrContent(qrData, modifier)
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        HolderWelcomeText()
-        val qrData = contentState.qrData
-        if (qrData != null && contentState.showQr) {
-            QrCodeImage(
-                data = qrData,
-                size = QR_SIZE
-            )
-        } else {
-            CircularProgressIndicator()
-        }
     }
 }
 
 @Composable
-@Preview(showBackground = true)
+@PreviewContent
 internal fun HolderWelcomeScreenPreview() {
     val contentState = HolderWelcomeUiState(qrData = "QR Data", showQr = true)
-
     QrContent(contentState, Modifier)
 }

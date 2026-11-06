@@ -12,13 +12,11 @@ fun QrCodeImage(
     data: String,
     size: Int,
     modifier: Modifier = Modifier,
-    margin: Int = 4,
+    margin: Int = DEFAULT_QR_MARGIN,
     contentDescription: String = "QR Code"
 ) {
-    qrCodeGenerator(data, size, margin)?.asImageBitmap()?.let {
-fun QrCodeImage(data: String, size: Int, modifier: Modifier = Modifier) {
-    val bitmap = remember(data, size) {
-        qrCodeGenerator(data, size)?.asImageBitmap()
+    val bitmap = remember(data, size, margin) {
+        qrCodeGenerator(data, size, margin)?.asImageBitmap()
     }
 
     bitmap?.let {

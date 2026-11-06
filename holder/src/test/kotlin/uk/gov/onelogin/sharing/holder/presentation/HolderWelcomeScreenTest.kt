@@ -71,6 +71,22 @@ class HolderWelcomeScreenTest {
         }
 
     @Test
+    fun `Shows a loading spinner while QR is hidden before a refresh`() =
+        runTest(dispatcherRule.testDispatcher) {
+            initialHolderState = HolderSessionState.PresentingEngagement(
+                "This is a unit test",
+                showQr = false
+            )
+            composeTestRule.run {
+                setContent { Render() }
+                assertLoadingSpinnerIsDisplayed()
+                assertHeadingDoesNotExist()
+                assertQrCodeDoesNotExist()
+                assertBodyDoesNotExist()
+            }
+        }
+
+    @Test
     fun `Closing the journey shows a loading spinner`() = runTest(dispatcherRule.testDispatcher) {
         composeTestRule.run {
             setContent { Render() }

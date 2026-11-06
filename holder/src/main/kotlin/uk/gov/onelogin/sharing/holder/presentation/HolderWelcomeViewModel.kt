@@ -19,6 +19,7 @@ import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenAnalytics.holderWelcomeScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -52,9 +53,8 @@ class HolderWelcomeViewModel(
             HolderWelcomeUiState()
         )
 
-    fun sendScreenEvent() = viewModelScope.launch(dispatcher) {
-        HolderWelcomeScreenAnalytics.screen.screenViewEvent
-            .let(analyticsLogger::logEventV3Dot1)
+    fun sendScreenEvent(screenName: String) = viewModelScope.launch(dispatcher) {
+        analyticsLogger.holderWelcomeScreen(screenName)
     }
 }
 
