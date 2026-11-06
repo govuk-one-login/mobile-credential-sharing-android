@@ -4,6 +4,7 @@ import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.consentPresentationStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.preflightEmptyPermissions
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.successStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.userCancellation
@@ -61,7 +62,8 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels from the QR code screen" to userCancellation,
             "QR generation fails" to userJourneyFailure,
             "QR code handshake completes" to HolderSessionState.ProcessingEstablishment,
-            "Handshake fails and begins termination" to HolderSessionState.SendingTermination
+            "Handshake fails and begins termination" to HolderSessionState.SendingTermination,
+            "Engagement session expires and is refreshed" to HolderSessionState.Complete.Expired
         ).map { (testName, transition) ->
             Triple(
                 testName,
@@ -73,7 +75,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels whilst connecting with Verifier device" to userCancellation,
             "Connection with verifier device cannot be established" to userJourneyFailure,
             "Receives Verifier device's data transfer request" to
-                HolderSessionState.AwaitingUserConsent(deviceRequestStub),
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub, consentPresentationStub),
             "No matching attributes begins session termination" to
                 HolderSessionState.SendingTermination,
             "No matching attributes terminates successfully" to successStub
@@ -92,7 +94,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.AwaitingUserConsent(deviceRequestStub),
+                HolderSessionState.AwaitingUserConsent(deviceRequestStub, consentPresentationStub),
                 transition
             )
         }

@@ -61,15 +61,28 @@ private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = M
         LandscapeQrContent(qrData, modifier)
     } else {
         PortraitQrContent(qrData, modifier)
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        HolderWelcomeText()
+        val qrData = contentState.qrData
+        if (qrData != null && contentState.showQr) {
+            QrCodeImage(
+                data = qrData,
+                size = QR_SIZE
+            )
+        } else {
+            CircularProgressIndicator()
+        }
     }
 }
 
 @Composable
-@PreviewLightDark
-@PreviewFontScale
-@PreviewContent
-private fun HolderWelcomeScreenPortraitPreview() {
-    GdsTheme {
-        QrContent(HolderWelcomeUiState(qrData = "QR Data"))
-    }
+@Preview(showBackground = true)
+internal fun HolderWelcomeScreenPreview() {
+    val contentState = HolderWelcomeUiState(qrData = "QR Data", showQr = true)
+
+    QrContent(contentState, Modifier)
 }

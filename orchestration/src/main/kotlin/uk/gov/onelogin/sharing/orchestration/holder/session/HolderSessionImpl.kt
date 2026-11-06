@@ -35,6 +35,17 @@ class HolderSessionImpl(
         _sessionContext = update(_sessionContext)
     }
 
+    override fun updateEngagementDisplay(showQr: Boolean) {
+        val current = currentState.value
+        if (current is HolderSessionState.PresentingEngagement && current.showQr != showQr) {
+            logger.debug(
+                logTag,
+                "Updating engagement display in place (no transition): showQr=$showQr"
+            )
+            update(current.copy(showQr = showQr))
+        }
+    }
+
     override val currentState: StateFlow<HolderSessionState> = internalState
 
     override fun isComplete(): Boolean = currentState.value.isComplete()

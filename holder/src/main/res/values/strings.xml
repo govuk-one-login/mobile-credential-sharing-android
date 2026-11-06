@@ -1,16 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="allow_bluetooth" translatable="true">Allow Bluetooth</string>
+    <string name="allow_bluetooth_before_sharing_details" translatable="true">Before you can share details from your UK driving licence, you need to allow this app to use Bluetooth.</string>
 <resources xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="MissingTranslation">
     <string name="enable_bluetooth_permission">Please enable bluetooth permissions to continue</string>
     <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
     <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>
-    <string name="open_app_permissions">Open app permissions</string>
     <string name="bluetooth_turned_off_holder">Bluetooth was turned off on holder device during session</string>
     <string name="checking_journey_requirements">Checking journey requirements...</string>
     <string name="creating_qr_code">Creating QR code...</string>
+    <string name="find_out_how_sharing_works" translatable="true">Find out how sharing works</string>
     <string name="generating_qr_code_data">Generating QR code data...</string>
+    <string name="get_ready_to_share" translatable="true">Get ready to share</string>
     <string name="have_not_met_requirements">Haven’t met requirements...</string>
     <string name="holder_consent_organization_sentence">The person doing the check is using an approved app powered by %1$s</string>
+    <string name="open_app_permissions">Open app permissions</string>
+    <string name="you_will_connect_via_qr_later" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that later.</string>
+    <string name="you_will_need_to_turn_on_bluetooth" translatable="true">If Bluetooth is turned off on your phone, you’ll need to turn it on too.</string>
+    <string name="turn_on_bluetooth" translatable="true">Turn on Bluetooth</string>
+    <string name="turn_on_bluetooth_before_sharing" translatable="true">Before you can share, you need to turn on Bluetooth.</string>
+    <string name="use_qr_code_to_connect_next" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
+
+    <!-- Consent card -->
+    <plurals name="consent_card_heading">
+        <item quantity="one">You’ll share %1$d detail from your %2$s</item>
+        <item quantity="other">You’ll share %1$d details from your %2$s</item>
+    </plurals>
+    <plurals name="consent_card_heading_emphasis">
+        <item quantity="one">%1$d detail</item>
+        <item quantity="other">%1$d details</item>
+    </plurals>
+    <string name="consent_card_will_keep">%1$s will keep these details as a record of this check:</string>
+    <string name="consent_card_will_not_keep">%1$s will not keep:</string>
+    <string name="consent_card_all_kept">%1$s will keep these details as a record of this check.</string>
+    <string name="consent_card_none_kept">These details will only be used for this check. They will not be saved.</string>
+    <string name="consent_doc_mdl">UK driving licence</string>
+    <string name="consent_attr_document_number">Licence number</string>
+    <string name="consent_attr_portrait">Photo</string>
+    <string name="consent_attr_title">Title</string>
+    <string name="consent_attr_family_name">Last name</string>
+    <string name="consent_attr_given_name">First name(s)</string>
+    <string name="consent_attr_expiry_date">Date of expiry</string>
+    <string name="consent_attr_birth_date">Date of birth</string>
+    <string name="consent_attr_age_over">If you’re over %1$d</string>
+    <string name="consent_attr_birth_place">Place of birth</string>
+    <string name="consent_attr_resident_address">Street address</string>
+    <string name="consent_attr_resident_city">Town or city (address)</string>
+    <string name="consent_attr_resident_postal_code">Postcode</string>
+    <string name="consent_attr_issue_date">Date of issue</string>
+    <string name="consent_attr_issuing_authority">Issuing authority</string>
+    <string name="consent_attr_issuing_country">Issuing country</string>
+    <string name="consent_attr_un_distinguishing_sign">Issuing country (UN distinguishing sign)</string>
+    <string name="consent_attr_driving_privileges">Vehicles you can drive</string>
+    <string name="consent_attr_provisional_driving_privileges">Vehicles you can drive with your provisional licence</string>
+    <string name="consent_attr_welsh_licence">If your licence is bilingual (English and Welsh)</string>
     <string name="find_out_which_details_to_share">Find out which details you need to share</string>
     <string name="show_qr_code_person_doing_check">Show the QR code to the person doing the check.</string>
     <string name="qr_code_lets_them_send_list_of_details">It lets them send you a list of the details they need to check.</string>
