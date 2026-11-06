@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.awaitingresolution
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -12,7 +13,13 @@ object AwaitingVerifierResolutionNavigationExt {
 
     internal fun NavGraphBuilder.configureAwaitingVerifierResolutionScreen() {
         composable<AwaitingVerifierResolutionRoute> {
-            AwaitingVerifierResolutionScreen()
+            val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+
+            AwaitingVerifierResolutionScreen(
+                onExitJourney = {
+                    backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
+                }
+            )
         }
     }
 }
