@@ -62,7 +62,7 @@ mavenPublishingConfig {
 
 tasks.matching {
     it.name.contains("ComposePreview", ignoreCase = true) ||
-            it.name.contains("Screenshot", ignoreCase = true)
+        it.name.contains("Screenshot", ignoreCase = true)
 }.configureEach {
     enabled = false
 }
