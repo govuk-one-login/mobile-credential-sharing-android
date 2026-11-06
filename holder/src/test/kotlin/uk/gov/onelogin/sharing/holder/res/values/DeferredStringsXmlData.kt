@@ -12,6 +12,26 @@ enum class DeferredStringsXmlData(
     @param:StringRes val defersTo: Int,
     @param:StringRes val resourceId: Int
 ) {
+    HOLDER_BLE_RESTRICTED_TITLE(
+        defersTo = R.string.bluetooth_restricted_title,
+        resourceId = R.string.holder_ble_restricted_title
+    ),
+    HOLDER_BLE_RESTRICTED_BODY_1(
+        defersTo = R.string.bluetooth_restricted_body_1,
+        resourceId = R.string.holder_ble_restricted_body_1
+    ),
+    HOLDER_BLE_RESTRICTED_BODY_2(
+        defersTo = R.string.bluetooth_restricted_body_2,
+        resourceId = R.string.holder_ble_restricted_body_2
+    ),
+    HOLDER_BLE_RESTRICTED_BODY_3(
+        defersTo = R.string.bluetooth_restricted_body_3,
+        resourceId = R.string.holder_ble_restricted_body_3
+    ),
+    HOLDER_BLE_RESTRICTED_BUTTON(
+        defersTo = R.string.bluetooth_restricted_go_back_to_documents,
+        resourceId = R.string.holder_ble_restricted_button
+    ),
     GET_READY_TO_SHARE_ALLOW_BLUETOOTH(
         defersTo = R.string.allow_bluetooth,
         resourceId = R.string.get_ready_to_share_allow_bluetooth
