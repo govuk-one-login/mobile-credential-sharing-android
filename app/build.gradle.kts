@@ -176,3 +176,7 @@ dependencies {
         testFixtures(projects.sdk)
     ).forEach(::testImplementation)
 }
+
+tasks.matching { it.name.contains("ComposePreviewRunfiles", ignoreCase = true) }.configureEach {
+    enabled = false
+}
