@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
     <string name="holder_prerequisites_not_started">@string/checking_journey_requirements</string>
     <string name="holder_prerequisites_preflight">@string/have_not_met_requirements</string>
     <string name="holder_prerequisites_ready_to_present">@string/generating_qr_code_data</string>

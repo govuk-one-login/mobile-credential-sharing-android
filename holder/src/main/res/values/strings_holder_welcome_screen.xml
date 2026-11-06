@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+    <string name="holder_welcome_heading">@string/find_out_which_details_to_share</string>
+    <string name="holder_welcome_body_1">@string/show_qr_code_person_doing_check</string>
+    <string name="holder_welcome_body_2">@string/qr_code_lets_them_send_list_of_details</string>
+    <string name="holder_welcome_body_3">@string/review_list_before_agreeing_to_share</string>
+    <string name="holder_welcome_qr_code_alt_text">@string/qr_code_to_get_list_of_details</string>
+</resources>
