@@ -3,6 +3,7 @@
 (?i)Gradle
 (?i)Mbps
 (?i)Roborazzi
+dotagents
 GOV
 ISO
 SDK
