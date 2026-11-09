@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
+package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable

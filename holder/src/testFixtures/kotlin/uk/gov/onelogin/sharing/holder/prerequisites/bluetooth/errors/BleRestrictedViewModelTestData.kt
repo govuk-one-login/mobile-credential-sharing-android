@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
+package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors
 
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.TrackEvent.Button

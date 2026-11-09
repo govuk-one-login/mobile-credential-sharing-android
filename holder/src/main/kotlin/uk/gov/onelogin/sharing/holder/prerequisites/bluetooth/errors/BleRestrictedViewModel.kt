@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
+package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,8 +13,8 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.core.Resettable
-import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.BleRestrictedAnalytics.bleRestrictedGoBackButton
-import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.BleRestrictedAnalytics.bleRestrictedScreen
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedAnalytics.bleRestrictedGoBackButton
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedAnalytics.bleRestrictedScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 
 @Inject

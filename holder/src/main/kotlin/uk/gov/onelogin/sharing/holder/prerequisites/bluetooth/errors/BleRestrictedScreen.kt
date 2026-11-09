@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
+package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

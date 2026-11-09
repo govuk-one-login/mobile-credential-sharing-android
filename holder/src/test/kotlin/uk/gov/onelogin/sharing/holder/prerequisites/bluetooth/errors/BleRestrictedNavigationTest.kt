@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth
+package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors
 
 import android.content.Context
 import androidx.compose.material3.Button
@@ -19,8 +19,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
-import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.BleRestrictedNavigationExt.configureBleRestricted
-import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.BleRestrictedNavigationExt.navigateToBleRestricted
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.configureBleRestricted
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.navigateToBleRestricted
 
 @RunWith(AndroidJUnit4::class)
 class BleRestrictedNavigationTest {
