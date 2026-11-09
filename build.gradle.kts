@@ -85,7 +85,7 @@ subprojects {
 }
 
 // Used within submodules instead of defining the API level in every submodule.
-val androidCompileSdk: Int by extra(36)
+val androidCompileSdk: Int by extra(37)
 val androidMinSdk: Int by extra(29)
 val androidTargetSdk: Int by extra(androidCompileSdk)
 
