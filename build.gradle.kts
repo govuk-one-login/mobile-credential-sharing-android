@@ -201,9 +201,25 @@ sonarqube {
 subprojects {
     tasks.matching { it.name == "sonarResolver" }.configureEach {
         dependsOn(tasks.matching {
-            it.name.startsWith("generate") ||
-                it.name.contains("ksp") && it.name.contains("Kotlin")
+            (
+                it.name.startsWith("generate") ||
+                    it.name.contains("ksp") && it.name.contains("Kotlin")
+            ) &&
+                // AGP 9.5's generate*ComposePreviewRunfiles crashes when it finds no manifest to
+                // pass to --compose-preview-manifest-file. Keep it out of the Sonar task graph.
+                !it.name.contains("ComposePreviewRunfiles", ignoreCase = true)
         })
+    }
+}
+
+// Disable AGP 9.5's generate*ComposePreviewRunfiles tasks across every module. They are only
+// used by the IDE/preview tooling and crash during headless builds (e.g. SonarCloud scans)
+// because no Compose preview manifest exists.
+subprojects {
+    tasks.matching {
+        it.name.contains("ComposePreviewRunfiles", ignoreCase = true)
+    }.configureEach {
+        enabled = false
     }
 }
 
