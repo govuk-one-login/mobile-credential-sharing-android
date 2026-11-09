@@ -47,17 +47,15 @@ class MoreAboutDvsViewModel(
     fun sendButtonEvent(buttonText: String) = viewModelScope.launch {
         TrackEvent.Button(
             text = buttonText,
-            params = walletSharingRequiredParameters,
+            params = walletSharingRequiredParameters
         ).let(analyticsLogger::logEventV3Dot1)
     }
 
     sealed interface MoreAboutDvsUiState {
         data object Loading : MoreAboutDvsUiState
 
-        data class Loaded(
-            val organizationName: String,
-            val privacyPolicyUrl: String
-        ) : MoreAboutDvsUiState {
+        data class Loaded(val organizationName: String, val privacyPolicyUrl: String) :
+            MoreAboutDvsUiState {
 
             internal constructor(
                 presentation: ConsentPresentation

@@ -44,7 +44,7 @@ class MoreAboutDvsScreenAccessibilityTest {
     private val viewModel by lazy {
         MoreAboutDvsViewModel(
             analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
 

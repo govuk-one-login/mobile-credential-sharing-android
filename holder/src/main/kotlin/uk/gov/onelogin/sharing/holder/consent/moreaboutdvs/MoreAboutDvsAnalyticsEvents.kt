@@ -21,10 +21,9 @@ internal object MoreAboutDvsAnalyticsEvents {
             params = walletSharingRequiredParameters
         ).let(this::logEventV3Dot1)
 
-    internal fun AnalyticsLogger.moreAboutDvsScreen(name: String) =
-        Screen(
-            name = name,
-            id = "288470f5-8bdb-43cf-8cd7-38bcd241413b",
-            params = walletSharingRequiredParameters
-        ).let(this::logEventV3Dot1)
+    internal fun AnalyticsLogger.moreAboutDvsScreen(name: String) = Screen(
+        name = name,
+        id = "288470f5-8bdb-43cf-8cd7-38bcd241413b",
+        params = walletSharingRequiredParameters
+    ).let(this::logEventV3Dot1)
 }

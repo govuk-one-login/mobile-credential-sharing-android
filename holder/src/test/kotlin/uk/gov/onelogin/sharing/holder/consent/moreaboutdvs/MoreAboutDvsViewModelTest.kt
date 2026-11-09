@@ -5,21 +5,21 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import io.mockk.mockk
+import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.junit.runner.RunWith
 import uk.gov.logging.analytics.FakeAnalyticsLogger
-import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.expectedButtonEvent
-import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.PRIVACY_NOTICE_BUTTON_TEXT
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.SCREEN_NAME
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.expectedButtonEvent
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsUiStateMatchers.hasUiState
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import kotlin.test.Test
 
 @RunWith(AndroidJUnit4::class)
 class MoreAboutDvsViewModelTest {

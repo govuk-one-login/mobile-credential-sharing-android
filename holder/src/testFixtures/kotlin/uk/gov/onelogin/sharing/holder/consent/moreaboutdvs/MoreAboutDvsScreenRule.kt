@@ -73,13 +73,12 @@ class MoreAboutDvsScreenRule(
         }
     }
 
-    fun assertValidDismissButton(
-        useUnmergedTree: Boolean = false
-    ) = onDismissButton(useUnmergedTree = useUnmergedTree)
-        .assertExists()
-        .assertHasClickAction()
-        .assertIsEnabled()
-        .assertIsDisplayed()
+    fun assertValidDismissButton(useUnmergedTree: Boolean = false) =
+        onDismissButton(useUnmergedTree = useUnmergedTree)
+            .assertExists()
+            .assertHasClickAction()
+            .assertIsEnabled()
+            .assertIsDisplayed()
 
     fun assertValidHeader(organizationName: String, useUnmergedTree: Boolean = false) {
         onHeader(
@@ -200,10 +199,7 @@ class MoreAboutDvsScreenRule(
         )
     }
 
-
-    fun onPrivacyPolicyButton(
-        useUnmergedTree: Boolean = false
-    ): SemanticsNodeInteraction {
+    fun onPrivacyPolicyButton(useUnmergedTree: Boolean = false): SemanticsNodeInteraction {
         onContainer().performScrollToNode(
             hasTestTag("openUri")
         )
@@ -211,15 +207,12 @@ class MoreAboutDvsScreenRule(
         return onNodeWithTag("openUri", useUnmergedTree = useUnmergedTree)
     }
 
-    fun onProgressIndicator(
-        expectedLabel: String = "Loading",
-        useUnmergedTree: Boolean = false
-    ) = onNode(
-        hasAnyChild(hasText(expectedLabel)),
-        useUnmergedTree = useUnmergedTree
-    )
+    fun onProgressIndicator(expectedLabel: String = "Loading", useUnmergedTree: Boolean = false) =
+        onNode(
+            hasAnyChild(hasText(expectedLabel)),
+            useUnmergedTree = useUnmergedTree
+        )
 
-    fun performPrivacyPolicyButtonClick(
-        useUnmergedTree: Boolean = true
-    ) = onPrivacyPolicyButton(useUnmergedTree).performClick()
+    fun performPrivacyPolicyButtonClick(useUnmergedTree: Boolean = true) =
+        onPrivacyPolicyButton(useUnmergedTree).performClick()
 }

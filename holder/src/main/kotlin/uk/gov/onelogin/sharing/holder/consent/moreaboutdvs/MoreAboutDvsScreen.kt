@@ -32,6 +32,7 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
+import uk.gov.android.ui.componentsv2.camera.R as cameraR
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
@@ -43,11 +44,10 @@ import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.logging.api.analytics.extensions.getEnglishString
-import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.core.R as coreR
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
-import uk.gov.android.ui.componentsv2.camera.R as cameraR
 
 @Composable
 internal fun MoreAboutDvsScreen(
@@ -123,7 +123,7 @@ internal fun MoreAboutDvsContent(
                 )
 
                 LeftAlignedScreenV2(
-                    modifier = modifier,
+                    modifier = Modifier.fillMaxSize(),
                     title = stringResource(
                         R.string.more_about_dvs_title,
                         state.organizationName
@@ -138,15 +138,11 @@ internal fun MoreAboutDvsContent(
             }
         }
     }
-
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DismissScreenButton(
-    modifier: Modifier = Modifier,
-    onCancelScreen: () -> Unit = {}
-) {
+private fun DismissScreenButton(modifier: Modifier = Modifier, onCancelScreen: () -> Unit = {}) {
     TopAppBar(
         title = {},
         modifier = modifier,
@@ -177,15 +173,15 @@ private fun DismissScreenButton(
 private fun String.moreAboutDvsBodyContent(
     onPrivacyPolicyLinkClick: () -> Unit
 ): PersistentList<LeftAlignedScreenBodyV2> = (
-        introductionTexts() +
-                introductionBullets() +
-                privacyNoticeSubheading() +
-                privacyNoticeBody() +
-                privacyNoticeBullets() +
-                privacyNoticeButton(
-                    onClick = onPrivacyPolicyLinkClick
-                )
-        ).toPersistentList()
+    introductionTexts() +
+        introductionBullets() +
+        privacyNoticeSubheading() +
+        privacyNoticeBody() +
+        privacyNoticeBullets() +
+        privacyNoticeButton(
+            onClick = onPrivacyPolicyLinkClick
+        )
+    ).toPersistentList()
 
 @Composable
 private fun String.introductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
@@ -280,13 +276,11 @@ internal class MoreAboutDvsPreviewParameters(
                 privacyPolicyUrl = "https://www.more.about.dvs/preview"
             )
         ),
-        MoreAboutDvsViewModel.MoreAboutDvsUiState.Loading,
+        MoreAboutDvsViewModel.MoreAboutDvsUiState.Loading
     )
 ) : PreviewParameterProvider<MoreAboutDvsViewModel.MoreAboutDvsUiState> {
     override val values: Sequence<MoreAboutDvsViewModel.MoreAboutDvsUiState>
         get() = inputs.asSequence()
 
-    override fun getDisplayName(index: Int): String? {
-        return inputs[index]::class.java.simpleName
-    }
+    override fun getDisplayName(index: Int): String? = inputs[index]::class.java.simpleName
 }

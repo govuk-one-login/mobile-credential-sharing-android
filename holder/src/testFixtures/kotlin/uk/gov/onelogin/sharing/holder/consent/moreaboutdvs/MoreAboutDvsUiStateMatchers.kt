@@ -19,29 +19,21 @@ object MoreAboutDvsUiStateMatchers {
         MoreAboutDvsUiState.Loaded::class.java
     )
 
-    fun hasOrganizationName(
-        expected: String
-    ) = hasOrganizationName(equalTo(expected))
+    fun hasOrganizationName(expected: String) = hasOrganizationName(equalTo(expected))
 
-    fun hasOrganizationName(
-        matcher: Matcher<in String>
-    ): Matcher<in MoreAboutDvsUiState> = MoreAboutDvsUiStateMatcher(matcher) {
-        (it as? MoreAboutDvsUiState.Loaded)?.organizationName
-    }
+    fun hasOrganizationName(matcher: Matcher<in String>): Matcher<in MoreAboutDvsUiState> =
+        MoreAboutDvsUiStateMatcher(matcher) {
+            (it as? MoreAboutDvsUiState.Loaded)?.organizationName
+        }
 
-    fun hasPrivacyPolicyUrl(
-        expected: String
-    ) = hasPrivacyPolicyUrl(equalTo(expected))
+    fun hasPrivacyPolicyUrl(expected: String) = hasPrivacyPolicyUrl(equalTo(expected))
 
-    fun hasPrivacyPolicyUrl(
-        matcher: Matcher<in String>
-    ): Matcher<in MoreAboutDvsUiState> = MoreAboutDvsUiStateMatcher(matcher) {
-        (it as? MoreAboutDvsUiState.Loaded)?.privacyPolicyUrl
-    }
+    fun hasPrivacyPolicyUrl(matcher: Matcher<in String>): Matcher<in MoreAboutDvsUiState> =
+        MoreAboutDvsUiStateMatcher(matcher) {
+            (it as? MoreAboutDvsUiState.Loaded)?.privacyPolicyUrl
+        }
 
-    fun hasUiState(
-        presentation: ConsentPresentation
-    ): Matcher<in MoreAboutDvsUiState> = allOf(
+    fun hasUiState(presentation: ConsentPresentation): Matcher<in MoreAboutDvsUiState> = allOf(
         hasOrganizationName(presentation.normalisedOrganizationName),
         hasPrivacyPolicyUrl(presentation.privacyPolicyUrl)
     )
@@ -56,8 +48,7 @@ object MoreAboutDvsUiStateMatchers {
             mismatchDescription: Description?
         ) = matcher.describeMismatch(transformer(item), mismatchDescription)
 
-        override fun matchesSafely(
-            item: MoreAboutDvsUiState?
-        ): Boolean = matcher.matches(transformer(item))
+        override fun matchesSafely(item: MoreAboutDvsUiState?): Boolean =
+            matcher.matches(transformer(item))
     }
 }
