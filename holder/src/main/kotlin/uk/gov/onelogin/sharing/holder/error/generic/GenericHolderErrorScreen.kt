@@ -24,12 +24,9 @@ import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.componentsv2.heading.GdsHeading
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.images.GdsIcon
-import uk.gov.android.ui.componentsv2.supportingtext.GdsSupportingText
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreen
-import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenBodyContent
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenIcon
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
