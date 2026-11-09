@@ -42,9 +42,3 @@ kotlin {
         jvmTarget.set(JvmTarget.JVM_21)
     }
 }
-
-tasks.matching {
-    it.name.contains("ComposePreviewRunfiles", ignoreCase = true)
-}.configureEach {
-    enabled = false
-}
