@@ -38,7 +38,7 @@ robolectric = "4.17" # https://github.com/robolectric/robolectric/releases
 roborazzi = "1.77.0" # https://github.com/takahirom/roborazzi/releases
 composable-preview-scanner = "0.9.3" # https://github.com/sergio-sastre/ComposablePreviewScanner/releases
 sonarqube = "7.3.0.8198" # https://github.com/SonarSource/sonar-scanner-gradle/releases
-spotless = "8.10.4" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
+spotless = "8.11.0" # https://github.com/diffplug/spotless/releases?q=%22Gradle+Plugin%22
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "1.0.1" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
 uk-gov-ui = "20.2.1" # https://github.com/govuk-one-login/mobile-android-ui/tags
