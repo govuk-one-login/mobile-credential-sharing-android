@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.holder.error.generic
 
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,12 +14,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import kotlin.test.Test
+import kotlin.test.fail
 
 @RunWith(RobolectricTestParameterInjector::class)
 class GenericHolderErrorScreenTest {
@@ -72,6 +76,42 @@ class GenericHolderErrorScreenTest {
 
             waitUntil("Cannot find expected event!: $analyticsLogger") {
                 analyticsLogger.contains(expectedScreenEvent)
+            }
+        }
+    }
+
+    @Test
+    fun `Navigating back to documents also sends an analytics event`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+            performGoBackToDocumentsClick()
+            waitForIdle()
+
+            waitUntil("Cannot find expected event!: $analyticsLogger") {
+                analyticsLogger.contains(expectedGoBackToDocumentsButtonEvent)
+            }
+        }
+    }
+
+    @Test
+    fun `Pressing back on the device sends the same event as going back to documents`() = runTest {
+        var onBackPressedDispatcher: OnBackPressedDispatcher? = null
+        composeTestRule.run {
+            setContent {
+                onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+                    ?.onBackPressedDispatcher
+                Render()
+            }
+            waitForIdle()
+
+            runOnUiThread {
+                onBackPressedDispatcher?.onBackPressed() ?: fail(
+                    "Cannot find back press dispatcher!"
+                )
+            }
+
+            waitUntil("Cannot find expected event!: $analyticsLogger") {
+                analyticsLogger.contains(expectedGoBackToDocumentsButtonEvent)
             }
         }
     }

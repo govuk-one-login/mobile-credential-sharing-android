@@ -12,6 +12,7 @@ import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
@@ -65,4 +66,7 @@ class GenericHolderErrorScreenRule(
         resources.getString(R.string.holder_generic_error_title),
         useUnmergedTree = useUnmergedTree
     )
+
+    fun performGoBackToDocumentsClick(useUnmergedTree: Boolean = true) = onButton(useUnmergedTree)
+        .performClick()
 }

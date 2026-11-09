@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.v3dot1.model.TrackEvent
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorAnalyticsEvents.genericHolderErrorScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -28,6 +31,13 @@ class GenericHolderErrorViewModel(
     fun reset() = viewModelScope.launch {
         orchestrator.reset()
         _navigationEvent.emit(NavigationEvent.ExitJourney)
+    }
+
+    fun sendButtonEvent(name: String) = viewModelScope.launch {
+        TrackEvent.Button(
+            text = name,
+            params = walletSharingRequiredParameters,
+        ).let(analyticsLogger::logEventV3Dot1)
     }
 
     fun sendScreenEvent(name: String) = viewModelScope.launch {

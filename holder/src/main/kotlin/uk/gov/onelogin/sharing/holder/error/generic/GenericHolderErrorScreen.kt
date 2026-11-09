@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
@@ -50,6 +51,15 @@ internal fun GenericHolderErrorScreen(
         metrics.putScreenState("GenericHolderErrorScreen")
     }
 
+    val buttonBehaviour: () -> Unit = {
+        scope.launch {
+            R.string.holder_generic_error_button
+                .let(context::getEnglishString)
+                .let(viewModel::sendButtonEvent)
+            viewModel.reset()
+        }
+    }
+
     LaunchedEffect(Unit) {
         scope.launch {
             R.string.holder_generic_error_title
@@ -58,9 +68,7 @@ internal fun GenericHolderErrorScreen(
         }
     }
 
-    BackHandler(true) {
-        scope.launch { viewModel.reset() }
-    }
+    BackHandler(true, buttonBehaviour)
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
@@ -77,9 +85,7 @@ internal fun GenericHolderErrorScreen(
     }
 
     GenericErrorScreenContent(modifier) {
-        scope.launch {
-            viewModel.reset()
-        }
+        buttonBehaviour()
     }
 }
 
