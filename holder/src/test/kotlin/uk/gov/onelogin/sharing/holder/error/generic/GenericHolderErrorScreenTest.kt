@@ -1,10 +1,8 @@
 package uk.gov.onelogin.sharing.holder.error.generic
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.test.core.app.ApplicationProvider
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +19,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestParameterInjector::class)
 class GenericHolderErrorScreenTest {
-
-    private val resources = ApplicationProvider.getApplicationContext<Context>().resources
 
     @get:Rule
     val composeTestRule = GenericHolderErrorScreenRule()
