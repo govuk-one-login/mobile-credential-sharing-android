@@ -1,0 +1,102 @@
+package uk.gov.onelogin.sharing.holder.error.generic
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.launch
+import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
+import uk.gov.android.ui.componentsv2.button.GdsButton
+import uk.gov.android.ui.componentsv2.heading.GdsHeading
+import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
+import uk.gov.android.ui.componentsv2.images.GdsIcon
+import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreen
+import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenIcon
+import uk.gov.onelogin.sharing.core.R
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderViewModel.NavigationEvent as ViewModelEvent
+
+@Composable
+internal fun GenericHolderErrorScreen(
+    modifier: Modifier = Modifier,
+    viewModel: GenericHolderViewModel = metroViewModel(),
+    onExitJourney: () -> Unit = {}
+) {
+    val scope = rememberCoroutineScope()
+    val currentOnExitJourney by rememberUpdatedState(onExitJourney)
+
+    val metrics = rememberMetricsStateHolder()
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("UnrecoverableHolderErrorScreen")
+    }
+
+    BackHandler(true) {
+        scope.launch { viewModel.reset() }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is ViewModelEvent.ExitJourney -> {
+                    currentOnExitJourney()
+                }
+
+                else -> {
+                    // do nothing with null events
+                }
+            }
+        }
+    }
+
+    ErrorScreen(
+        modifier = modifier.fillMaxWidth(),
+        icon = { horizontalPadding ->
+            GdsIcon(
+                image = ImageVector.vectorResource(ErrorScreenIcon.ErrorIcon.icon),
+                contentDescription = stringResource(ErrorScreenIcon.ErrorIcon.description),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = horizontalPadding),
+                color = colorScheme.onBackground
+            )
+        },
+        title = { horizontalPadding ->
+            GdsHeading(
+                text = "",
+                modifier = Modifier
+                    .padding(horizontal = horizontalPadding),
+                textAlign = GdsHeadingAlignment.CenterAligned
+            )
+        },
+        supportingText = null,
+        primaryButton = {
+            GdsButton(
+                text = stringResource(R.string.bluetooth_connection_error_try_again),
+                buttonType = ButtonTypeV2.Primary(),
+                onClick = {
+                    scope.launch {
+                        viewModel.reset()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    )
+}
