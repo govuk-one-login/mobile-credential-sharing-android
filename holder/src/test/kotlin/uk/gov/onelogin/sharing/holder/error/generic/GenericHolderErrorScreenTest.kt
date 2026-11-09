@@ -29,7 +29,7 @@ class GenericHolderErrorScreenTest {
     private val resources = ApplicationProvider.getApplicationContext<Context>().resources
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = GenericHolderErrorScreenRule()
 
     private var initialHolderState: HolderSessionState = HolderSessionState.Complete.Failed(
         error = SessionError(
@@ -67,14 +67,7 @@ class GenericHolderErrorScreenTest {
         composeTestRule.run {
             setContent(content)
 
-            onNodeWithText(
-                resources.getString(
-                    R.string.holder_generic_error_title
-                ),
-                useUnmergedTree = false
-            )
-                .assertExists()
-                .assert(isHeading())
+            assertValidTitle()
         }
     }
 }
