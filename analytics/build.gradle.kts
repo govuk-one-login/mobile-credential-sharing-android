@@ -28,6 +28,10 @@ android {
             )
         }
     }
+
+    buildFeatures {
+        compose = false
+    }
 }
 
 dependencies {
