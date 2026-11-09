@@ -74,6 +74,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateSt
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageClassifier
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
@@ -1626,6 +1628,68 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `status 20 in awaitingVerifierResolution stops transport and supplies DetailsShared`() =
+        runTest {
+            with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+                deliverMessage()
+
+                val state = orchestrator.holderSessionState.value as
+                    HolderSessionState.Complete.Success
+                assertEquals(
+                    ResolutionPresentation(ResolutionResult.DetailsShared),
+                    state.presentation
+                )
+                assertEquals(1, transport.stopCalls)
+            }
+        }
+
+    @Test
+    fun `dismissJourney is ignored until a delayed Verifier reply resolves the journey`() =
+        runTest {
+            with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+                backgroundScope.launch { orchestrator.holderSessionState.collect { } }
+                advanceUntilIdle()
+
+                // verifier hasn't replied yet - transaction still active
+                orchestrator.dismissJourney()
+                advanceUntilIdle()
+
+                assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
+                assert(resetOrchestratorSessionLog !in logger)
+                assertEquals(0, transport.stopCalls)
+
+                // delayed verifier response
+                transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+                advanceUntilIdle()
+
+                assertThat(orchestrator.holderSessionState.value, isSuccessful())
+                assertEquals(1, transport.stopCalls)
+
+                // terminal state - cleaned up - dismissal clears session
+                orchestrator.dismissJourney()
+                advanceUntilIdle()
+
+                assert(resetOrchestratorSessionLog in logger)
+                assertThat(orchestrator.holderSessionState.value, isNotStarted())
+            }
+        }
+
+    @Test
+    fun `GATT End in awaitingVerifierResolution supplies DetailsShared`() = runTest {
+        initialStates[0] = HolderSessionState.AwaitingVerifierResolution
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+        backgroundScope.launch { orchestrator.holderSessionState.collect { } }
+
+        transport.emitState(PeripheralBluetoothState.Ended(SessionEndStates.SUCCESS))
+        advanceUntilIdle()
+
+        val state = orchestrator.holderSessionState.value as HolderSessionState.Complete.Success
+        assertEquals(ResolutionPresentation(ResolutionResult.DetailsShared), state.presentation)
+        assertEquals(1, transport.stopCalls)
+    }
+
+    @Test
     fun `non-20 status SessionData in awaitingVerifierResolution transitions to failed`() =
         runTest {
             with(PeerTerminationFixture(SessionDataStatus.ERROR_SESSION_ENCRYPTION)) {
@@ -1659,6 +1723,7 @@ class HolderOrchestratorTest {
                 advanceUntilIdle()
 
                 assertThat(orchestrator.holderSessionState.value, isSuccessful())
+                assertEquals(1, transport.stopCalls)
             }
         }
 

@@ -377,7 +377,7 @@ class ShareCredentialTest {
         ).performClick()
         composeTestRule.waitForIdle()
 
-        assertEquals(1, orchestrator.resetCount)
+        assertEquals(1, orchestrator.dismissCount)
         assertEquals(1, hostBackPresses)
     }
 
@@ -404,7 +404,7 @@ class ShareCredentialTest {
         dispatcher.onBackPressed()
         composeTestRule.waitForIdle()
 
-        assertEquals(1, orchestrator.resetCount)
+        assertEquals(1, orchestrator.dismissCount)
         assertEquals(1, hostBackPresses)
     }
 

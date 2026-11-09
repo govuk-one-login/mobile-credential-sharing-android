@@ -64,6 +64,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageClassifier
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
@@ -454,6 +456,17 @@ class HolderOrchestrator(
                 )
             }
         }
+    }
+
+    override fun dismissJourney() {
+        if (!sessionFlow.value.isComplete()) {
+            logger.debug(
+                logTag,
+                "dismissJourney ignored: journey still active in state ${holderSessionState.value}"
+            )
+            return
+        }
+        reset()
     }
 
     private fun enterGraceWindow() {
@@ -1037,7 +1050,7 @@ class HolderOrchestrator(
         when (currentState) {
             is HolderSessionState.AwaitingVerifierResolution -> {
                 if (status == SessionDataStatus.SESSION_TERMINATION) {
-                    safeTransitionTo(HolderSessionState.Complete.Success())
+                    resolveDetailsShared()
                 } else {
                     safeTransitionTo(
                         HolderSessionState.Complete.Failed(
@@ -1047,9 +1060,9 @@ class HolderOrchestrator(
                             )
                         )
                     )
+                    logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                    stopAdvertising(sendEndCommand = false)
                 }
-                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
-                stopAdvertising(sendEndCommand = false)
                 logger.debug(logTag, "Holder session terminated")
             }
 
@@ -1126,9 +1139,7 @@ class HolderOrchestrator(
             }
 
             is HolderSessionState.AwaitingVerifierResolution -> {
-                appCoroutineScope.launch {
-                    terminateSession(finalState = HolderSessionState.Complete.Success())
-                }
+                resolveDetailsShared()
             }
 
             else -> {
@@ -1136,6 +1147,29 @@ class HolderOrchestrator(
                     terminateSession(finalState = HolderSessionState.Complete.Cancelled)
                 }
             }
+        }
+    }
+
+    /**
+     * Completes an approved journey once the Verifier has resolved it.
+     *
+     * Cleanup happens before the terminal state is published so "Details shared" (and its
+     * dismissal) are only offered once nothing is left hanging.
+     * [HolderSessionState.SendingTermination] is entered synchronously so other signals are
+     * ignored while stopping.
+     */
+    private fun resolveDetailsShared() {
+        safeTransitionTo(HolderSessionState.SendingTermination)
+        sessionTimer.stop()
+        appCoroutineScope.launch {
+            logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+            peripheralBluetoothTransport.stop(sendEndCommand = false)
+            safeTransitionTo(
+                HolderSessionState.Complete.Success(
+                    successReason = HolderSessionState.Complete.SuccessReason.Approved,
+                    presentation = ResolutionPresentation(ResolutionResult.DetailsShared)
+                )
+            )
         }
     }
 

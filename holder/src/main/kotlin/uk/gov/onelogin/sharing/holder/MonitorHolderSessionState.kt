@@ -27,6 +27,7 @@ import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigat
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 /**
@@ -132,14 +133,6 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
-        HolderSessionState.AwaitingVerifierResolution -> {
-            {
-                navController.navigateToAwaitingVerifierResolutionScreen {
-                    exitJourneyOptions()
-                }
-            }
-        }
-
         is HolderSessionState.Complete.Failed -> {
             {
                 handleHolderSessionFailure(state, navController, context)
@@ -158,6 +151,7 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        HolderSessionState.AwaitingVerifierResolution,
         HolderSessionState.Complete.Expired,
         HolderSessionState.ReadyToPresent,
         HolderSessionState.ProcessingEstablishment,
@@ -197,8 +191,17 @@ private fun convertSuccessStateToNavigation(
     state: HolderSessionState.Complete.Success,
     navController: NavHostController,
     exitJourneyOptions: NavOptionsBuilder.() -> Unit
-): () -> Unit = when (state.successReason) {
-    SuccessReason.UnfulfillableRequest -> {
+): () -> Unit = when (state.presentation.result) {
+    ResolutionResult.DetailsShared -> {
+        {
+            navController.navigateToAwaitingVerifierResolutionScreen {
+                exitJourneyOptions()
+                launchSingleTop = true
+            }
+        }
+    }
+
+    ResolutionResult.UnfulfillableRequest -> {
         {
             navController.navigateToHolderSuccessScreen {
                 exitJourneyOptions()
@@ -206,19 +209,20 @@ private fun convertSuccessStateToNavigation(
         }
     }
 
-    SuccessReason.Denied -> {
+    // failures categories are not surfaced on Success yet
+    // fallback to the generic error screen
+    is ResolutionResult.Failed -> {
         {
-            navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
+            navController.navigateToUnrecoverableHolderError {
                 exitJourneyOptions()
             }
         }
     }
 
-    SuccessReason.Approved -> {
+    null -> {
         {
-            navController.navigateToAwaitingVerifierResolutionScreen {
+            navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
                 exitJourneyOptions()
-                launchSingleTop = true
             }
         }
     }

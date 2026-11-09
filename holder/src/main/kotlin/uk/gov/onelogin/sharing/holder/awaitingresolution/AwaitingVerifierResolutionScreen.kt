@@ -81,7 +81,7 @@ internal fun AwaitingVerifierResolutionScreen(
 
     LaunchedEffect(visibleState) {
         snapshotFlow { visibleState.isIdle && !visibleState.currentState }.first { it }
-        viewModel.reset()
+        viewModel.dismissJourney()
         currentOnExitJourney()
     }
 

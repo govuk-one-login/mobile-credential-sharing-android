@@ -1,15 +1,12 @@
 package uk.gov.onelogin.sharing.holder.awaitingresolution
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
-import uk.gov.onelogin.sharing.core.Resettable
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionAnalytics.detailsSharedScreen
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionAnalytics.goBackToDocuments
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -20,11 +17,10 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator
 class AwaitingVerifierResolutionViewModel(
     private val analyticsLogger: AnalyticsLogger,
     private val orchestrator: Orchestrator.Holder
-) : ViewModel(),
-    Resettable {
+) : ViewModel() {
 
-    override fun reset() {
-        viewModelScope.launch { orchestrator.reset() }
+    fun dismissJourney() {
+        orchestrator.dismissJourney()
     }
 
     fun sendScreenEvent(screenName: String) {
