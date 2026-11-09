@@ -6,13 +6,16 @@ import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
 object GenericHolderErrorScreenTestData {
+    const val BUTTON_TEXT = "Go back to documents"
     val expectedGoBackToDocumentsButtonEvent = TrackEvent.Button(
-        text = "Go back to documents",
+        text = BUTTON_TEXT,
         params = walletSharingRequiredParameters,
     ).asLegacyEvent()
 
+    const val SCREEN_NAME = "Sharing is currently unavailable"
+
     val expectedScreenEvent = ViewEvent.Screen(
-        name = "Sharing is currently unavailable",
+        name = SCREEN_NAME,
         id = "9bf821af-e8ff-41cf-a311-4b6cec989315",
         params = walletSharingRequiredParameters,
     ).asLegacyEvent()
