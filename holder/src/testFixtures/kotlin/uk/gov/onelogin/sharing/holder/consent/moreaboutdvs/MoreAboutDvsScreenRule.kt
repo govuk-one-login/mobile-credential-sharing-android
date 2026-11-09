@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import android.content.Context
 import android.content.res.Resources
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
@@ -11,17 +10,18 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasAnyChild
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.core.app.ApplicationProvider
-import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
 
@@ -72,6 +72,14 @@ class MoreAboutDvsScreenRule(
             ).assertExists("Cannot find $description bullet point")
         }
     }
+
+    fun assertValidDismissButton(
+        useUnmergedTree: Boolean = false
+    ) = onDismissButton(useUnmergedTree = useUnmergedTree)
+        .assertExists()
+        .assertHasClickAction()
+        .assertIsEnabled()
+        .assertIsDisplayed()
 
     fun assertValidHeader(organizationName: String, useUnmergedTree: Boolean = false) {
         onHeader(
@@ -124,16 +132,24 @@ class MoreAboutDvsScreenRule(
         .assert(isHeading())
 
     fun assertValidUi(expectedOrganization: String, useUnmergedTree: Boolean = false) {
+        assertValidDismissButton(useUnmergedTree)
         assertValidHeader(organizationName = expectedOrganization, useUnmergedTree)
         assertValidBody(organizationName = expectedOrganization, useUnmergedTree)
         assertValidBulletPoints(organizationName = expectedOrganization, useUnmergedTree)
         assertValidPrivacyPolicySubheading(organizationName = expectedOrganization, useUnmergedTree)
         assertValidPrivacyPolicyBody(organizationName = expectedOrganization, useUnmergedTree)
         assertValidPrivacyPolicyBulletPoints(useUnmergedTree = true)
-        assertValidPrivacyPolicyButton(useUnmergedTree = true)
+        assertValidPrivacyPolicyButton(
+            useUnmergedTree = true
+        )
     }
 
     fun onContainer() = onNode(hasScrollAction())
+
+    fun onDismissButton(useUnmergedTree: Boolean = false) = onNodeWithTag(
+        "closeButton",
+        useUnmergedTree = useUnmergedTree
+    )
 
     fun onHeader(
         organizationName: String,
@@ -185,13 +201,14 @@ class MoreAboutDvsScreenRule(
     }
 
 
-    fun onPrivacyPolicyButton(useUnmergedTree: Boolean = false): SemanticsNodeInteraction {
-        onContainer().performScrollToNode(hasClickAction())
-
-        return onNode(
-            hasRole(Role.Button),
-            useUnmergedTree = useUnmergedTree
+    fun onPrivacyPolicyButton(
+        useUnmergedTree: Boolean = false
+    ): SemanticsNodeInteraction {
+        onContainer().performScrollToNode(
+            hasTestTag("openUri")
         )
+
+        return onNodeWithTag("openUri", useUnmergedTree = useUnmergedTree)
     }
 
     fun onProgressIndicator(

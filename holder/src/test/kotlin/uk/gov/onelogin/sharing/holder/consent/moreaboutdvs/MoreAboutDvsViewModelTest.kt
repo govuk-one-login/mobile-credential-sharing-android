@@ -13,6 +13,8 @@ import org.junit.runner.RunWith
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.expectedButtonEvent
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.expectedScreenEvent
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.PRIVACY_NOTICE_BUTTON_TEXT
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsUiStateMatchers.hasUiState
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
@@ -66,7 +68,7 @@ class MoreAboutDvsViewModelTest {
 
     @Test
     fun `Sends a screen-level analytics event`() = runTest {
-        viewModel.sendScreenEvent(context).join()
+        viewModel.sendScreenEvent(SCREEN_NAME).join()
 
         assertThat(
             analyticsLogger,
@@ -76,7 +78,7 @@ class MoreAboutDvsViewModelTest {
 
     @Test
     fun `Sends a button-level analytics event`() = runTest {
-        viewModel.sendButtonEvent(context).join()
+        viewModel.sendButtonEvent(PRIVACY_NOTICE_BUTTON_TEXT).join()
 
         assertThat(
             analyticsLogger,

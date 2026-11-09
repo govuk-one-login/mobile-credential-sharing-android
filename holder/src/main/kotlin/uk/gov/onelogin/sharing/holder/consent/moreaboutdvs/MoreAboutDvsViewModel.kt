@@ -13,8 +13,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.v3dot1.model.TrackEvent
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
-import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsAnalyticsEvents.moreAboutDvsPrivacyPolicyButton
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsAnalyticsEvents.moreAboutDvsScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
@@ -38,12 +40,15 @@ class MoreAboutDvsViewModel(
             MoreAboutDvsUiState.Loading
         )
 
-    fun sendScreenEvent(context: Context) = viewModelScope.launch {
-        analyticsLogger.moreAboutDvsScreen(context, "DVS")
+    fun sendScreenEvent(name: String) = viewModelScope.launch {
+        analyticsLogger.moreAboutDvsScreen(name)
     }
 
-    fun sendButtonEvent(context: Context) = viewModelScope.launch {
-        analyticsLogger.moreAboutDvsPrivacyPolicyButton(context, "DVS")
+    fun sendButtonEvent(buttonText: String) = viewModelScope.launch {
+        TrackEvent.Button(
+            text = buttonText,
+            params = walletSharingRequiredParameters,
+        ).let(analyticsLogger::logEventV3Dot1)
     }
 
     sealed interface MoreAboutDvsUiState {

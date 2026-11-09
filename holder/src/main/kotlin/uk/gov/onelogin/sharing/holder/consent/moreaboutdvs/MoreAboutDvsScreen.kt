@@ -5,8 +5,16 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,6 +22,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -26,13 +36,18 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
 import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicator
+import uk.gov.android.ui.componentsv2.topappbar.GdsTopAppBarDefaults.scrollBehaviour
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
+import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
+import uk.gov.android.ui.componentsv2.camera.R as cameraR
 
 @Composable
 internal fun MoreAboutDvsScreen(
@@ -45,15 +60,27 @@ internal fun MoreAboutDvsScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.sendScreenEvent(context)
+        context.getEnglishString(
+            R.string.more_about_dvs_title,
+            "DVS"
+        ).let(viewModel::sendScreenEvent)
     }
 
     MoreAboutDvsContent(
         state = uiState,
-        modifier = modifier
+        modifier = modifier,
+        onCancelScreen = {
+            context.getEnglishString(
+                cameraR.string.close_icon_button
+            ).let(viewModel::sendButtonEvent)
+        }
     ) { privacyPolicyUrl ->
         scope.launch {
-            viewModel.sendButtonEvent(context)
+            context.getEnglishString(
+                R.string.more_about_dvs_privacy_policy_link,
+                "DVS"
+            ).let(viewModel::sendButtonEvent)
+
             val intent = CustomTabsIntent.Builder()
                 .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
                 .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
@@ -73,6 +100,7 @@ internal fun MoreAboutDvsScreen(
 internal fun MoreAboutDvsContent(
     state: MoreAboutDvsViewModel.MoreAboutDvsUiState,
     modifier: Modifier = Modifier,
+    onCancelScreen: () -> Unit = {},
     onPrivacyPolicyLinkClick: (String) -> Unit = {}
 ) {
     when (state) {
@@ -87,29 +115,72 @@ internal fun MoreAboutDvsContent(
         }
 
         is MoreAboutDvsViewModel.MoreAboutDvsUiState.Loaded -> {
-            LeftAlignedScreenV2(
-                modifier = modifier,
-                title = stringResource(
-                    R.string.more_about_dvs_title,
-                    state.organizationName
-                ),
-                body = state.organizationName.moreAboutDvsBodyContent(
-                    onPrivacyPolicyLinkClick = {
-                        onPrivacyPolicyLinkClick(state.privacyPolicyUrl)
-                    }
-                ),
-                forceScroll = true
-            )
+            Column(modifier = modifier) {
+                DismissScreenButton(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onCancelScreen = onCancelScreen
+                )
+
+                LeftAlignedScreenV2(
+                    modifier = modifier,
+                    title = stringResource(
+                        R.string.more_about_dvs_title,
+                        state.organizationName
+                    ),
+                    body = state.organizationName.moreAboutDvsBodyContent(
+                        onPrivacyPolicyLinkClick = {
+                            onPrivacyPolicyLinkClick(state.privacyPolicyUrl)
+                        }
+                    ),
+                    forceScroll = true
+                )
+            }
         }
     }
 
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun DismissScreenButton(
+    modifier: Modifier = Modifier,
+    onCancelScreen: () -> Unit = {}
+) {
+    TopAppBar(
+        title = {},
+        modifier = modifier,
+        navigationIcon = {
+            IconButton(
+                onCancelScreen,
+                modifier = Modifier
+                    .testTag("closeButton")
+                    .minimumInteractiveComponentSize()
+            ) {
+                Icon(
+                    painter = painterResource(coreR.drawable.filled_close),
+                    contentDescription = "Close",
+                    modifier = Modifier.minimumInteractiveComponentSize(),
+                    tint = GdsLocalColorScheme.current.topBarIcon
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            scrolledContainerColor = GdsLocalColorScheme.current.topBarScrolledBackground
+        ),
+        scrollBehavior = scrollBehaviour()
+    )
+}
+
+@Composable
 private fun String.moreAboutDvsBodyContent(
     onPrivacyPolicyLinkClick: () -> Unit
 ): PersistentList<LeftAlignedScreenBodyV2> = (
-        introductionTexts() + introductionBullets() + privacyNoticeSubheading() + privacyNoticeBody() +
+        introductionTexts() +
+                introductionBullets() +
+                privacyNoticeSubheading() +
+                privacyNoticeBody() +
                 privacyNoticeBullets() +
                 privacyNoticeButton(
                     onClick = onPrivacyPolicyLinkClick
@@ -172,7 +243,8 @@ private fun String.privacyNoticeButton(
 ): LeftAlignedScreenBodyV2.SecondaryButton = LeftAlignedScreenBodyV2.SecondaryButton(
     text = stringResource(R.string.more_about_dvs_privacy_policy_link, this),
     onClick = onClick,
-    showIcon = true
+    showIcon = true,
+    modifier = Modifier.testTag("openUri")
 )
 
 internal fun String.removeDoubleFullStop(): String = let { text ->

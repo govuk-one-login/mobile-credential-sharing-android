@@ -44,7 +44,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.ShareCredentialAnalytics.closeButton
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
-import uk.gov.onelogin.sharing.uiimpl.R
+import uk.gov.onelogin.sharing.core.R as coreR
 
 /**
  * Composable entry point for the Holder role (credential sharing).
@@ -164,7 +164,7 @@ internal fun CloseButtonAppBar(
         navigationIcon = {
             IconButton(onCancel) {
                 Icon(
-                    painter = painterResource(R.drawable.filled_close),
+                    painter = painterResource(coreR.drawable.filled_close),
                     contentDescription = "Close",
                     tint = GdsLocalColorScheme.current.topBarIcon
                 )

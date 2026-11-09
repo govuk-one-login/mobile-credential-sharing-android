@@ -101,7 +101,7 @@ class MoreAboutDvsScreenTest {
         composeTestRule.run {
             setContent { Render() }
 
-            performPrivacyPolicyButtonClick(true)
+            performPrivacyPolicyButtonClick()
 
             waitUntil("Doesn't contain expected event!: $analyticsLogger") {
                 analyticsLogger.contains(MoreAboutDvsTestData.expectedButtonEvent)
@@ -115,7 +115,7 @@ class MoreAboutDvsScreenTest {
 
         composeTestRule.run {
             setContent { Render() }
-            performPrivacyPolicyButtonClick(true)
+            performPrivacyPolicyButtonClick()
             waitForIdle()
         }
 
