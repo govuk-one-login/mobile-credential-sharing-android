@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -54,20 +55,26 @@ class GenericHolderErrorScreenTest {
     fun `Is valid UI`(
         @TestParameter content: @Composable () -> Unit = namedTestValues(
             "Screen-level composable" to {
-                GenericHolderErrorScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = viewModel,
-                )
+                Render()
             },
             "Preview composable" to {
-                GenericHolderErrorScreenPreview()
+                GdsTheme { GenericHolderErrorScreenPreview() }
             }
         )
     ) = runTest {
         composeTestRule.run {
             setContent(content)
+            assertValidUi()
+        }
+    }
 
-            assertValidTitle()
+    @Composable
+    private fun Render() {
+        GdsTheme {
+            GenericHolderErrorScreen(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel,
+            )
         }
     }
 }
