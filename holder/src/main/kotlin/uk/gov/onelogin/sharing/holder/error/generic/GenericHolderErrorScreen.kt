@@ -18,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
@@ -28,9 +30,11 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.images.GdsIcon
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreen
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenIcon
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.R
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderViewModel.NavigationEvent as ViewModelEvent
 
 @Composable
@@ -65,8 +69,22 @@ internal fun GenericHolderErrorScreen(
         }
     }
 
+    GenericErrorScreenContent(
+        modifier,
+    ) {
+        scope.launch {
+            viewModel.reset()
+        }
+    }
+}
+
+@Composable
+private fun GenericErrorScreenContent(
+    modifier: Modifier,
+    onGoBackToDocumentsClick: () -> Unit = {},
+) {
     ErrorScreen(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         icon = { horizontalPadding ->
             GdsIcon(
                 image = ImageVector.vectorResource(ErrorScreenIcon.ErrorIcon.icon),
@@ -90,13 +108,19 @@ internal fun GenericHolderErrorScreen(
             GdsButton(
                 text = stringResource(R.string.bluetooth_connection_error_try_again),
                 buttonType = ButtonTypeV2.Primary(),
-                onClick = {
-                    scope.launch {
-                        viewModel.reset()
-                    }
-                },
+                onClick = onGoBackToDocumentsClick,
                 modifier = Modifier.fillMaxWidth()
             )
         }
     )
+}
+
+@PreviewContent
+@Composable
+fun GenericHolderErrorScreenPreview() {
+    GdsTheme {
+        GenericErrorScreenContent(
+            modifier = Modifier.fillMaxSize()
+        )
+    }
 }
