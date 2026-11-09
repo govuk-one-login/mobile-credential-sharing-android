@@ -89,7 +89,6 @@ class GenericHolderErrorScreenTest {
             }
 
             performGoBackToDocumentsClick()
-            waitForIdle()
 
             waitUntil("Orchestrator should have been reset!") {
                 orchestrator.resetCount == 1
@@ -102,10 +101,35 @@ class GenericHolderErrorScreenTest {
         composeTestRule.run {
             setContent { Render() }
             performGoBackToDocumentsClick()
-            waitForIdle()
 
             waitUntil("Cannot find expected event!: $analyticsLogger") {
                 analyticsLogger.contains(expectedGoBackToDocumentsButtonEvent)
+            }
+        }
+    }
+
+    @Test
+    fun `Pressing back on the device resets the orchestrator`() = runTest {
+        composeTestRule.run {
+            var onBackPressedDispatcher: OnBackPressedDispatcher? = null
+
+            setContent {
+                onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+                    ?.onBackPressedDispatcher
+                Render()
+            }
+            waitUntil("Orchestrator shouldn't have reset yet!") {
+                orchestrator.resetCount == 0
+            }
+
+            runOnUiThread {
+                onBackPressedDispatcher?.onBackPressed() ?: fail(
+                    "Cannot find back press dispatcher!"
+                )
+            }
+
+            waitUntil("Orchestrator should have been reset!") {
+                orchestrator.resetCount == 1
             }
         }
     }
