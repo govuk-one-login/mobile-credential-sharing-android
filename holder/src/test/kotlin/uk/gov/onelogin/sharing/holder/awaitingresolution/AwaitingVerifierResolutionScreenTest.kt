@@ -56,7 +56,7 @@ class AwaitingVerifierResolutionScreenTest {
             composeTestRule.run {
                 composeTestRule.setContent { Render() }
                 performGoBackToDocumentsClick()
-                waitUntil { orchestrator.resetCount == 1 }
+                waitUntil { orchestrator.dismissCount == 1 }
                 waitUntil { exitJourneyCount == 1 }
             }
         }
@@ -84,7 +84,7 @@ class AwaitingVerifierResolutionScreenTest {
                     backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
                 }
                 waitForIdle()
-                assertEquals(1, orchestrator.resetCount, "Journey was not reset")
+                assertEquals(1, orchestrator.dismissCount, "Journey was not reset")
                 assertEquals(1, hostBackPresses, "Host app did not press back")
             }
         }
@@ -98,12 +98,12 @@ class AwaitingVerifierResolutionScreenTest {
 
                 performGoBackToDocumentsClick()
                 mainClock.advanceTimeByFrame()
-                assertEquals(0, orchestrator.resetCount)
+                assertEquals(0, orchestrator.dismissCount)
                 assertEquals(0, exitJourneyCount)
 
                 mainClock.autoAdvance = true
                 waitUntil { exitJourneyCount == 1 }
-                assertEquals(1, orchestrator.resetCount)
+                assertEquals(1, orchestrator.dismissCount)
             }
         }
 

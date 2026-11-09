@@ -123,9 +123,13 @@ sealed class HolderSessionState :
         /**
          * The User has completed a digital credential verification journey without un-resolvable
          * errors occurring.
+         *
+         * @param presentation What the UI should show for this outcome.
          */
-        data class Success(val successReason: SuccessReason = SuccessReason.Approved) :
-            Complete("Successful journey")
+        data class Success(
+            val successReason: SuccessReason = SuccessReason.Approved,
+            val presentation: ResolutionPresentation = ResolutionPresentation.from(successReason)
+        ) : Complete("Successful journey")
 
         /**
          * Describes why the journey completed successfully.

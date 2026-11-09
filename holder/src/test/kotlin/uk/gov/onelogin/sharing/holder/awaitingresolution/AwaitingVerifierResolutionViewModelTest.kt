@@ -34,10 +34,10 @@ class AwaitingVerifierResolutionViewModelTest {
     private val viewModel = AwaitingVerifierResolutionViewModel(analyticsLogger, orchestrator)
 
     @Test
-    fun `Resets the orchestrator`() = runTest(dispatcherRule.testDispatcher) {
-        viewModel.reset()
-        advanceUntilIdle()
-        assertThat(orchestrator.resetCount, equalTo(1))
+    fun `Dismisses the journey through orchestrator`() {
+        viewModel.dismissJourney()
+        assertThat(orchestrator.dismissCount, equalTo(1))
+        assertThat(orchestrator.resetCount, equalTo(0))
     }
 
     @Test
