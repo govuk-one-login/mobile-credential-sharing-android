@@ -11,6 +11,8 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
@@ -30,6 +32,8 @@ class GenericHolderErrorScreenTest {
         )
     )
 
+    private val analyticsLogger = FakeAnalyticsLogger()
+
     private val orchestrator by lazy {
         FakeOrchestrator(
             initialHolderState = MutableStateFlow(initialHolderState)
@@ -38,6 +42,7 @@ class GenericHolderErrorScreenTest {
 
     private val viewModel by lazy {
         GenericHolderErrorViewModel(
+            analyticsLogger = analyticsLogger,
             orchestrator = orchestrator,
         )
     }
@@ -59,6 +64,18 @@ class GenericHolderErrorScreenTest {
         }
     }
 
+    @Test
+    fun `Launching the screen sends an analytics event`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+            waitForIdle()
+
+            waitUntil("Cannot find expected event!: $analyticsLogger") {
+                analyticsLogger.contains(expectedScreenEvent)
+            }
+        }
+    }
+
     @Composable
     private fun Render() {
         GdsTheme {
@@ -69,3 +86,4 @@ class GenericHolderErrorScreenTest {
         }
     }
 }
+

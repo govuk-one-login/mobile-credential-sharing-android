@@ -14,6 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +28,7 @@ import uk.gov.android.ui.componentsv2.images.GdsIcon
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreen
 import uk.gov.android.ui.patterns.errorscreen.v2.ErrorScreenIcon
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
@@ -39,12 +41,21 @@ internal fun GenericHolderErrorScreen(
     viewModel: GenericHolderErrorViewModel = metroViewModel(),
     onExitJourney: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val currentOnExitJourney by rememberUpdatedState(onExitJourney)
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
-        metrics.putScreenState("UnrecoverableHolderErrorScreen")
+        metrics.putScreenState("GenericHolderErrorScreen")
+    }
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            R.string.holder_generic_error_title
+                .let(context::getEnglishString)
+                .let(viewModel::sendScreenEvent)
+        }
     }
 
     BackHandler(true) {
@@ -65,9 +76,7 @@ internal fun GenericHolderErrorScreen(
         }
     }
 
-    GenericErrorScreenContent(
-        modifier,
-    ) {
+    GenericErrorScreenContent(modifier) {
         scope.launch {
             viewModel.reset()
         }
@@ -93,7 +102,7 @@ internal fun GenericErrorScreenContent(
         },
         title = { horizontalPadding ->
             GdsHeading(
-                text = "Sharing is currently unavailable",
+                text = stringResource(R.string.holder_generic_error_title),
                 modifier = Modifier
                     .padding(horizontal = horizontalPadding),
                 textAlign = GdsHeadingAlignment.CenterAligned
