@@ -56,6 +56,7 @@ class AwaitingVerifierResolutionScreenTest {
             composeTestRule.run {
                 composeTestRule.setContent { Render() }
                 performGoBackToDocumentsClick()
+                waitForIdle()
                 waitUntil { orchestrator.dismissCount == 1 }
                 waitUntil { exitJourneyCount == 1 }
             }
@@ -102,6 +103,7 @@ class AwaitingVerifierResolutionScreenTest {
                 assertEquals(0, exitJourneyCount)
 
                 mainClock.autoAdvance = true
+                waitForIdle()
                 waitUntil { exitJourneyCount == 1 }
                 assertEquals(1, orchestrator.dismissCount)
             }
