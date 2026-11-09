@@ -81,6 +81,23 @@ class GenericHolderErrorScreenTest {
     }
 
     @Test
+    fun `Resets the orchestrator when going back to documents`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+            waitUntil("Orchestrator shouldn't have reset yet!") {
+                orchestrator.resetCount == 0
+            }
+
+            performGoBackToDocumentsClick()
+            waitForIdle()
+
+            waitUntil("Orchestrator should have been reset!") {
+                orchestrator.resetCount == 1
+            }
+        }
+    }
+
+    @Test
     fun `Navigating back to documents also sends an analytics event`() = runTest {
         composeTestRule.run {
             setContent { Render() }
