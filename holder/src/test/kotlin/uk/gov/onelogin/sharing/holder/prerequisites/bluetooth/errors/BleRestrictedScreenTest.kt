@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors
 
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,6 +9,8 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.hasItem
+import org.hamcrest.Matchers.not
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
@@ -94,6 +98,31 @@ class BleRestrictedScreenTest {
                 BleRestrictedViewModelTestData.expectedGoBackEvent
             )
         )
+    }
+
+    @Test
+    fun `System back resets the journey and dismisses resets state`() = runTest {
+        var dismissed = false
+        var backPressedDispatcher: OnBackPressedDispatcherOwner? = null
+        screenRule.run {
+            setContent {
+                backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+                Render(onGoBackToDocuments = { dismissed = true })
+            }
+            waitUntil { analyticsLogger.size == 1 }
+
+            runOnUiThread {
+                backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
+            }
+
+            waitUntil("Didn't call `orchestrator.reset()` via the view model!") {
+                orchestrator.resetCount == 1
+            }
+            waitUntil("Didn't call the 'onGoBackToDocuments' lambda!") { dismissed }
+        }
+
+        assertThat(dismissed, equalTo(true))
+        assertThat(orchestrator.resetCount, equalTo(1))
     }
 
     @Test

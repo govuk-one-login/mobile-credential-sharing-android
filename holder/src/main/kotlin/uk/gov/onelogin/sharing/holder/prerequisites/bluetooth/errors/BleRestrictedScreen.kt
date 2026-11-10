@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +50,11 @@ internal fun BleRestrictedScreen(
         )
     }
 
+    BackHandler(enabled = true) {
+        viewModel.reset()
+        onGoBackToDocuments()
+    }
+
     BleRestrictedContent(
         modifier = modifier,
         onGoBackToDocuments = {
@@ -61,6 +67,7 @@ internal fun BleRestrictedScreen(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 internal fun BleRestrictedContent(
     modifier: Modifier = Modifier,
