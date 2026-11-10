@@ -81,6 +81,7 @@ class HolderWelcomeScreenTest {
         }
 
     @Test
+    @Config(qualifiers = "+land")
     fun `Keeps the landscape screen and hides only the QR before it is being renewed`() =
         runTest(dispatcherRule.testDispatcher) {
             initialHolderState = HolderSessionState.PresentingEngagement(

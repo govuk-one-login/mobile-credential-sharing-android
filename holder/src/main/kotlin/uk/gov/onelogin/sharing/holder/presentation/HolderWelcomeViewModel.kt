@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenAnalytics.holderWelcomeScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -29,7 +28,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ViewModelKey
 class HolderWelcomeViewModel(
     orchestrator: Orchestrator.Holder,
-    @Suppress("UnusedPrivateProperty")
     private val analyticsLogger: AnalyticsLogger,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
@@ -58,10 +56,3 @@ class HolderWelcomeViewModel(
         analyticsLogger.holderWelcomeScreen(screenName)
     }
 }
-
-/**
- * @param qrData The QR payload to render, or `null` when no engagement is being presented.
- * @param showQr `true` to render the QR; `false` to show the loading spinner during the grace
- * window while the session is about to be refreshed. Only meaningful when [qrData] is non-null.
- */
-data class HolderWelcomeUiState(val qrData: String? = null, val showQr: Boolean = false)

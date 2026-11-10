@@ -71,8 +71,32 @@ class HolderWelcomeViewModelTest {
             val hidden = awaitItem()
             assertNull(hidden.qrPayload)
             assertThat(hidden.cancelRequiresConfirmation, equalTo(false))
+
+            holderState.value = HolderSessionState.PresentingEngagement(
+                EngagementPresentation("Fresh QR code")
+            )
+            assertThat(
+                awaitItem(),
+                equalTo(EngagementPresentation("Fresh QR code"))
+            )
         }
     }
+
+    @Test
+    fun `Replacement hides the expired QR code when the hiding update is skipped`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            viewModel.uiState.test {
+                assertThat(awaitItem(), equalTo(qrData))
+
+                holderState.value = HolderSessionState.ReadyToPresent
+                assertNull(awaitItem().qrPayload)
+
+                holderState.value = HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("Fresh QR code")
+                )
+                assertThat(awaitItem(), equalTo(EngagementPresentation("Fresh QR code")))
+            }
+        }
 
     @Test
     fun `Has no QR data for inapplicable session states`() = runTest(
