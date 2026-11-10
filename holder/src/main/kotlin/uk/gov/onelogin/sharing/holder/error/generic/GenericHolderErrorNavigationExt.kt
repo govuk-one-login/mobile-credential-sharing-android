@@ -8,8 +8,6 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
-import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorScreen
 
 object GenericHolderErrorNavigationExt {
     fun NavController.navigateToGenericHolderError(
