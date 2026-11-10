@@ -26,7 +26,7 @@ class AwaitingVerifierResolutionScreenRule(
     }
 
     // node finders
-    fun onSuccessIcon() = onNodeWithTag(SUCCESS_ICON_TEST_TAG)
+    fun onSuccessIcon() = onNodeWithTag(SUCCESS_ICON_TEST_TAG, useUnmergedTree = true)
     fun onTitle() = onNode(
         hasText(resources.getString(R.string.holder_awaiting_verifier_resolution_title))
             and isHeading()
@@ -34,6 +34,14 @@ class AwaitingVerifierResolutionScreenRule(
 
     fun onBody() = onNodeWithText(
         resources.getString(R.string.person_will_check_details_shared)
+    )
+
+    fun onBodyFirstParagraph() = onNodeWithText(
+        resources.getString(R.string.holder_awaiting_verifier_resolution_body_1)
+    )
+
+    fun onBodySecondParagraph() = onNodeWithText(
+        resources.getString(R.string.holder_awaiting_verifier_resolution_body_2)
     )
 
     fun onGoBackToDocumentsButton() = onNode(
@@ -48,7 +56,10 @@ class AwaitingVerifierResolutionScreenRule(
     fun assertWelshTitleIsDisplayed() =
         onNode(hasText("Manylion wedi’u rhannu") and isHeading()).assertIsDisplayed()
 
-    fun assertBodyIsDisplayed() = onBody().assertIsDisplayed()
+    fun assertBodyIsDisplayed() {
+        onBodyFirstParagraph().assertIsDisplayed()
+        onBodySecondParagraph().assertIsDisplayed()
+    }
 
     fun assertGoBackToDocumentsButtonIsDisplayed() = onGoBackToDocumentsButton()
         .assertHasClickAction()

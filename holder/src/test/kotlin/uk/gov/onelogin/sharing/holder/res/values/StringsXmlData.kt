@@ -61,10 +61,13 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Details shared",
         resourceId = R.string.details_shared
     ),
+    BLUETOOTH_CONNECTION_WILL_NOW_END(
+        expected = "Your bluetooth connection with them will now end.",
+        resourceId = R.string.bluetooth_connection_will_now_end
+    ),
     PERSON_WILL_CHECK_DETAILS_SHARED(
         expected =
-            "The person will check the details you shared.\n\nYour bluetooth connection with " +
-                "them will now end.",
+            "The person will check the details you shared.",
         resourceId = R.string.person_will_check_details_shared
     ),
     GO_BACK_TO_DOCUMENTS(

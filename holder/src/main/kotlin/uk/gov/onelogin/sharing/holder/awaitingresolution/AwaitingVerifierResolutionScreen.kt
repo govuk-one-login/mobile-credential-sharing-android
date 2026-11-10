@@ -2,10 +2,12 @@ package uk.gov.onelogin.sharing.holder.awaitingresolution
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,6 +29,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -40,6 +44,7 @@ import uk.gov.android.ui.componentsv2.images.GdsIcon
 import uk.gov.android.ui.patterns.centrealignedscreen.CentreAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -121,39 +126,40 @@ internal fun AwaitingVerifierResolutionContent(
 ) {
     CentreAlignedScreen(
         title = { padding ->
-            GdsHeading(
-                text = stringResource(R.string.holder_awaiting_verifier_resolution_title),
-                textAlign = GdsHeadingAlignment.CenterAligned,
-                modifier = Modifier.padding(horizontal = padding)
-            )
-        },
-        modifier = modifier.fillMaxSize(),
-        image = { padding ->
-            Box(
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(spacingDouble),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = padding)
-                    .testTag(SUCCESS_ICON_TEST_TAG),
-                contentAlignment = Alignment.Center
+                    .semantics(mergeDescendants = true) { heading() }
             ) {
                 GdsIcon(
                     image = ImageVector.vectorResource(R.drawable.check_circle),
-                    contentDescription = null,
-                    modifier = Modifier.size(75.dp),
+                    contentDescription = "Success",
+                    modifier = Modifier
+                        .size(75.dp)
+                        .testTag(SUCCESS_ICON_TEST_TAG),
                     color = GdsLocalColorScheme.current.successIcon
+                )
+                GdsHeading(
+                    text = stringResource(R.string.holder_awaiting_verifier_resolution_title),
+                    textAlign = GdsHeadingAlignment.CenterAligned
                 )
             }
         },
+        modifier = modifier.fillMaxSize(),
         body = { padding ->
             item {
-                Text(
-                    text = stringResource(R.string.holder_awaiting_verifier_resolution_body),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = padding)
+                BodyText(
+                    textRes = R.string.holder_awaiting_verifier_resolution_body_1,
+                    modifier = Modifier.padding(horizontal = padding)
+                )
+            }
+            item {
+                BodyText(
+                    textRes = R.string.holder_awaiting_verifier_resolution_body_2,
+                    modifier = Modifier.padding(horizontal = padding)
                 )
             }
         },
@@ -165,6 +171,17 @@ internal fun AwaitingVerifierResolutionContent(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    )
+}
+
+@Composable
+private fun BodyText(@StringRes textRes: Int, modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(textRes),
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onBackground,
+        modifier = modifier.fillMaxWidth()
     )
 }
 
