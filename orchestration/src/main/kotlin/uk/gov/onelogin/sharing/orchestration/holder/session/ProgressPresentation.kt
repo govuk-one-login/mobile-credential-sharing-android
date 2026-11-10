@@ -18,10 +18,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
  * @param cancellationAvailable Whether the User may cancel (Back / Close) during this phase. This is
  * the single source of truth for cancellation while a loading screen is shown.
  */
-data class ProgressPresentation(
-    val phase: Phase,
-    val cancellationAvailable: Boolean
-) {
+data class ProgressPresentation(val phase: Phase, val cancellationAvailable: Boolean) {
     /**
      * The loading phase currently in progress.
      */

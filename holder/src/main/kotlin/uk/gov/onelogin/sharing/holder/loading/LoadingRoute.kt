@@ -12,7 +12,4 @@ import kotlinx.serialization.Serializable
  */
 @Keep
 @Serializable
-internal data class LoadingRoute(
-    val type: LoadingScreenType,
-    val cancellationAvailable: Boolean
-)
+internal data class LoadingRoute(val type: LoadingScreenType, val cancellationAvailable: Boolean)
