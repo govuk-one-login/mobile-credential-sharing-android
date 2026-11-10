@@ -90,8 +90,8 @@ internal fun GenericHolderErrorScreen(
 
 @Composable
 internal fun GenericErrorScreenContent(
-    modifier: Modifier,
-    onGoBackToDocumentsClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
+    onGoBackToDocumentsClick: () -> Unit = {}
 ) {
     ErrorScreen(
         modifier = modifier,
@@ -116,14 +116,14 @@ internal fun GenericErrorScreenContent(
         body = { itemPadding ->
             listOf(
                 R.string.holder_generic_error_body_1,
-                R.string.holder_generic_error_body_2,
+                R.string.holder_generic_error_body_2
             ).forEach { resourceId ->
                 item {
                     Text(
                         stringResource(resourceId),
                         modifier = Modifier.padding(horizontal = itemPadding),
                         textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }
@@ -134,7 +134,7 @@ internal fun GenericErrorScreenContent(
                 text = stringResource(R.string.holder_generic_error_button),
                 buttonType = ButtonTypeV2.Primary(),
                 onClick = onGoBackToDocumentsClick,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
             )
         }
     )
@@ -142,7 +142,7 @@ internal fun GenericErrorScreenContent(
 
 @PreviewContent
 @Composable
-fun GenericHolderErrorScreenPreview() {
+private fun GenericHolderErrorScreenPreview() {
     GdsTheme {
         GenericErrorScreenContent(
             modifier = Modifier.fillMaxSize()

@@ -19,7 +19,9 @@ import uk.gov.onelogin.sharing.holder.R
 
 class GenericHolderErrorScreenRule(
     composeTestRule: ComposeContentTestRule = createComposeRule(),
-    private val resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
+    private val resources: Resources = ApplicationProvider
+        .getApplicationContext<Context>()
+        .resources
 ) : ComposeContentTestRule by composeTestRule {
 
     fun assertValidBody1(useUnmergedTree: Boolean = false) = onBody1(useUnmergedTree)

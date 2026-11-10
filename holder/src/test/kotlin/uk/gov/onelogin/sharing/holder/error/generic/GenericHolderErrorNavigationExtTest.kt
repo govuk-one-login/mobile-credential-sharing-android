@@ -22,6 +22,8 @@ import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import io.mockk.every
 import io.mockk.mockk
+import kotlin.test.Test
+import kotlin.test.fail
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -35,8 +37,6 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
-import kotlin.test.Test
-import kotlin.test.fail
 
 @RunWith(AndroidJUnit4::class)
 class GenericHolderErrorNavigationExtTest {
@@ -122,5 +122,4 @@ class GenericHolderErrorNavigationExtTest {
             }
         }
     }
-
 }

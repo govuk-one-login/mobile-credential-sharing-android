@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.error.generic
 
 import app.cash.turbine.test
+import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
@@ -19,7 +20,6 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasStartCo
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
-import kotlin.test.Test
 
 class GenericHolderErrorViewModelTest {
 
@@ -41,7 +41,7 @@ class GenericHolderErrorViewModelTest {
     private val viewModel by lazy {
         GenericHolderErrorViewModel(
             analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
 
@@ -55,7 +55,7 @@ class GenericHolderErrorViewModelTest {
                 allOf(
                     hasCancelCount(0),
                     hasResetCount(1),
-                    hasStartCount(0),
+                    hasStartCount(0)
                 )
             )
 

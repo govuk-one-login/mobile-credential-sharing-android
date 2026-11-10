@@ -10,9 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 object GenericHolderErrorNavigationExt {
-    fun NavController.navigateToGenericHolderError(
-        options: NavOptionsBuilder.() -> Unit = {}
-    ) = navigate(GenericHolderErrorRoute, options)
+    fun NavController.navigateToGenericHolderError(options: NavOptionsBuilder.() -> Unit = {}) =
+        navigate(GenericHolderErrorRoute, options)
 
     internal fun NavGraphBuilder.configureGenericHolderError() {
         composable<GenericHolderErrorRoute> {

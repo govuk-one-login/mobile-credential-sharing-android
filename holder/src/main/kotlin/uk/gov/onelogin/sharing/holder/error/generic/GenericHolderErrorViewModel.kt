@@ -29,7 +29,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 class GenericHolderErrorViewModel(
     private val analyticsLogger: AnalyticsLogger,
-    private val orchestrator: Orchestrator.Holder,
+    private val orchestrator: Orchestrator.Holder
 ) : ViewModel() {
 
     private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()
@@ -43,7 +43,7 @@ class GenericHolderErrorViewModel(
     fun sendButtonEvent(name: String) = viewModelScope.launch {
         TrackEvent.Button(
             text = name,
-            params = walletSharingRequiredParameters,
+            params = walletSharingRequiredParameters
         ).let(analyticsLogger::logEventV3Dot1)
     }
 

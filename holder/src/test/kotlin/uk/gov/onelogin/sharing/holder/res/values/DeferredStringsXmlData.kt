@@ -38,19 +38,19 @@ enum class DeferredStringsXmlData(
     ),
     HOLDER_GENERIC_ERROR_BODY_1(
         defersTo = R.string.your_details_have_not_been_shared,
-        resourceId = R.string.holder_generic_error_body_1,
+        resourceId = R.string.holder_generic_error_body_1
     ),
     HOLDER_GENERIC_ERROR_BODY_2(
         defersTo = R.string.you_may_be_able_to_use_a_physical_document_instead,
-        resourceId = R.string.holder_generic_error_body_2,
+        resourceId = R.string.holder_generic_error_body_2
     ),
     HOLDER_GENERIC_ERROR_BUTTON(
         defersTo = R.string.go_back_to_documents,
-        resourceId = R.string.holder_generic_error_button,
+        resourceId = R.string.holder_generic_error_button
     ),
     HOLDER_GENERIC_ERROR_TITLE(
         defersTo = R.string.sharing_is_currently_unavailable,
-        resourceId = R.string.holder_generic_error_title,
+        resourceId = R.string.holder_generic_error_title
     ),
     HOLDER_PREREQUISITES_NOT_STARTED(
         defersTo = R.string.checking_journey_requirements,
@@ -83,6 +83,5 @@ enum class DeferredStringsXmlData(
     HOLDER_TURN_ON_BLUETOOTH_BUTTON(
         defersTo = R.string.turn_on_bluetooth,
         resourceId = R.string.holder_turn_on_bluetooth_button
-    ),
-    ;
+    )
 }

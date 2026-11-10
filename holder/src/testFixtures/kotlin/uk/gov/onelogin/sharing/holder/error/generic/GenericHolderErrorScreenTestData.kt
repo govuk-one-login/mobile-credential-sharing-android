@@ -11,7 +11,7 @@ object GenericHolderErrorScreenTestData {
     const val BUTTON_TEXT = "Go back to documents"
     val expectedGoBackToDocumentsButtonEvent = TrackEvent.Button(
         text = BUTTON_TEXT,
-        params = walletSharingRequiredParameters,
+        params = walletSharingRequiredParameters
     ).asLegacyEvent()
 
     const val SCREEN_NAME = "Sharing is currently unavailable"
@@ -22,6 +22,6 @@ object GenericHolderErrorScreenTestData {
         endpoint = "",
         reason = reason.message,
         status = "",
-        params = walletSharingRequiredParameters,
+        params = walletSharingRequiredParameters
     ).asLegacyEvent()
 }

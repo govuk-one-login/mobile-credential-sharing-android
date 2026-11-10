@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
+import kotlin.test.Test
+import kotlin.test.fail
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -20,8 +22,6 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
-import kotlin.test.Test
-import kotlin.test.fail
 
 @RunWith(RobolectricTestParameterInjector::class)
 class GenericHolderErrorScreenTest {
@@ -48,7 +48,7 @@ class GenericHolderErrorScreenTest {
     private val viewModel by lazy {
         GenericHolderErrorViewModel(
             analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
 
@@ -163,9 +163,8 @@ class GenericHolderErrorScreenTest {
         GdsTheme {
             GenericHolderErrorScreen(
                 modifier = Modifier.fillMaxSize(),
-                viewModel = viewModel,
+                viewModel = viewModel
             )
         }
     }
 }
-

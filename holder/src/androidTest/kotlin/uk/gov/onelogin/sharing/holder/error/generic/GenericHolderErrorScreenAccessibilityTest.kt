@@ -26,7 +26,7 @@ class GenericHolderErrorScreenAccessibilityTest {
     private fun Render() {
         GdsTheme {
             GenericErrorScreenContent(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
