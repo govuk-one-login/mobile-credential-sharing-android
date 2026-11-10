@@ -23,12 +23,11 @@ import kotlin.test.Test
 
 class GenericHolderErrorViewModelTest {
 
-    private var sessionState = HolderSessionState.Complete.Failed(
-        SessionError(
-            "This is a unit test",
-            SessionErrorReason.UnrecoverablePrerequisite()
-        )
+    val error = SessionError(
+        "This is a unit test",
+        SessionErrorReason.UnrecoverablePrerequisite()
     )
+    private var sessionState = HolderSessionState.Complete.Failed(error)
 
     private val orchestrator by lazy {
         FakeOrchestrator(
@@ -73,7 +72,7 @@ class GenericHolderErrorViewModelTest {
 
         assertThat(
             analyticsLogger,
-            contains(expectedScreenEvent)
+            contains(expectedScreenEvent(error))
         )
     }
 

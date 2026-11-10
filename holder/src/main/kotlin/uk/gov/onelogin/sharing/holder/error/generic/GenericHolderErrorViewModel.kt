@@ -8,14 +8,21 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.logging.api.v3dot1.model.TrackEvent
+import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorAnalyticsEvents.genericHolderErrorScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
 @ViewModelKey
@@ -41,7 +48,9 @@ class GenericHolderErrorViewModel(
     }
 
     fun sendScreenEvent(name: String) = viewModelScope.launch {
-        analyticsLogger.genericHolderErrorScreen(name)
+        val reason = (orchestrator.holderSessionState.value as? HolderSessionState.Complete.Failed)
+            ?.reason ?: ""
+        analyticsLogger.genericHolderErrorScreen(name, reason)
     }
 
     sealed interface NavigationEvent {

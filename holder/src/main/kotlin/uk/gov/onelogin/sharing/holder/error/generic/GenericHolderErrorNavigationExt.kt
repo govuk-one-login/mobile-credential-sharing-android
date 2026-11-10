@@ -14,7 +14,7 @@ import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorScreen
 object GenericHolderErrorNavigationExt {
     fun NavController.navigateToGenericHolderError(
         options: NavOptionsBuilder.() -> Unit = {}
-    ) = navigate(UnrecoverableHolderErrorRoute, options)
+    ) = navigate(GenericHolderErrorRoute, options)
 
     internal fun NavGraphBuilder.configureGenericHolderError() {
         composable<GenericHolderErrorRoute> {

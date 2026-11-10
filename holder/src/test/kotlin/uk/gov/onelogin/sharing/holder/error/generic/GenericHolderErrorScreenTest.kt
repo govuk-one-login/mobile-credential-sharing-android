@@ -29,11 +29,12 @@ class GenericHolderErrorScreenTest {
     @get:Rule
     val composeTestRule = GenericHolderErrorScreenRule()
 
+    val error = SessionError(
+        "This is a unit test",
+        SessionErrorReason.InvalidSessionDataPayload
+    )
     private var initialHolderState: HolderSessionState = HolderSessionState.Complete.Failed(
-        error = SessionError(
-            "This is a unit test",
-            SessionErrorReason.InvalidSessionDataPayload
-        )
+        error = error
     )
 
     private val analyticsLogger = FakeAnalyticsLogger()
@@ -75,7 +76,7 @@ class GenericHolderErrorScreenTest {
             waitForIdle()
 
             waitUntil("Cannot find expected event!: $analyticsLogger") {
-                analyticsLogger.contains(expectedScreenEvent)
+                analyticsLogger.contains(expectedScreenEvent(error))
             }
         }
     }
