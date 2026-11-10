@@ -16,7 +16,7 @@ class LandscapeQrContentTest {
 
     @Test
     fun `Shows screen content horizontally`() = composeTestRule.run {
-        setContent { GdsTheme { LandscapeQrContent(qrData = "QR Data") } }
+        setContent { GdsTheme { LandscapeQrContent(qrPayload = "QR Data") } }
         composeTestRule.assertHeadingIsDisplayed()
         composeTestRule.assertQrCodeIsDisplayed()
         composeTestRule.assertBodyIsDisplayed()

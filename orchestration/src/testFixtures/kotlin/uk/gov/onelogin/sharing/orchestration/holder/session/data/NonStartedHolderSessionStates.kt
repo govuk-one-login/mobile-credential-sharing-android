@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
 
@@ -12,7 +13,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateSt
  */
 class NonStartedHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*> = listOf(
-        HolderSessionState.PresentingEngagement(""),
+        HolderSessionState.PresentingEngagement(EngagementPresentation("")),
         HolderSessionState.AwaitingUserConsent(
             deviceRequestStub,
             HolderSessionStateStubs.consentPresentationStub

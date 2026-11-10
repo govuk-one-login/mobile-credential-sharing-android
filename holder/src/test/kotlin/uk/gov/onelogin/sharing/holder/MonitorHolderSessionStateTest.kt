@@ -22,6 +22,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -109,7 +110,9 @@ class MonitorHolderSessionStateTest {
             convertSessionStateToNavigation(
                 context = context,
                 navController = controller,
-                state = HolderSessionState.PresentingEngagement("qr")
+                state = HolderSessionState.PresentingEngagement(
+                    EngagementPresentation(qrPayload = "qr")
+                )
             ).invoke()
             waitUntil {
                 controller.currentBackStackEntry?.destination
@@ -178,7 +181,9 @@ class MonitorHolderSessionStateTest {
             convertSessionStateToNavigation(
                 context = context,
                 navController = controller,
-                state = HolderSessionState.PresentingEngagement("qr_a")
+                state = HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("qr_a")
+                )
             ).invoke()
             waitUntil {
                 controller.currentBackStackEntry?.destination
@@ -191,7 +196,9 @@ class MonitorHolderSessionStateTest {
             convertSessionStateToNavigation(
                 context = context,
                 navController = controller,
-                state = HolderSessionState.PresentingEngagement("qr_b")
+                state = HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("qr_b")
+                )
             ).invoke()
 
             assert(

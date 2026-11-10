@@ -1,12 +1,9 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +17,7 @@ import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.presentation.component.LandscapeQrContent
 import uk.gov.onelogin.sharing.holder.presentation.component.PortraitQrContent
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 
 @Composable
 fun HolderWelcomeScreen(
@@ -39,35 +37,30 @@ fun HolderWelcomeScreen(
     }
 
     QrContent(
-        contentState = contentState,
+        presentation = contentState,
         modifier = modifier
     )
 }
 
 @Composable
-private fun QrContent(contentState: HolderWelcomeUiState, modifier: Modifier = Modifier) {
-    val qrData = contentState.qrData
-
-    if (qrData == null || !contentState.showQr) {
-        Box(
-            modifier = modifier,
-            contentAlignment = Alignment.Center
-        ) { CircularProgressIndicator() }
-        return
-    }
-
+private fun QrContent(presentation: EngagementPresentation, modifier: Modifier = Modifier) {
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     if (isLandscape) {
-        LandscapeQrContent(qrData, modifier)
+        LandscapeQrContent(presentation.qrPayload, modifier)
     } else {
-        PortraitQrContent(qrData, modifier)
+        PortraitQrContent(presentation.qrPayload, modifier)
     }
 }
 
 @Composable
 @PreviewContent
 internal fun HolderWelcomeScreenPreview() {
-    val contentState = HolderWelcomeUiState(qrData = "QR Data", showQr = true)
-    QrContent(contentState, Modifier)
+    QrContent(
+        presentation = EngagementPresentation(
+            qrPayload = "QR Data",
+            cancelRequiresConfirmation = false
+        ),
+        modifier = Modifier
+    )
 }

@@ -14,19 +14,25 @@ private const val QR_SIZE = 800
 private const val QR_MARGIN = 0
 
 @Composable
-internal fun HolderWelcomeQrCode(qrData: String, modifier: Modifier = Modifier) {
+internal fun HolderWelcomeQrCode(qrPayload: String?, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        QrCodeImage(
-            data = qrData,
-            size = QR_SIZE,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f),
-            margin = QR_MARGIN,
-            contentDescription = stringResource(R.string.holder_welcome_qr_code_alt_text)
-        )
+        val squareModifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+
+        if (qrPayload == null) {
+            Box(modifier = squareModifier)
+        } else {
+            QrCodeImage(
+                data = qrPayload,
+                size = QR_SIZE,
+                modifier = squareModifier,
+                margin = QR_MARGIN,
+                contentDescription = stringResource(R.string.holder_welcome_qr_code_alt_text)
+            )
+        }
     }
 }

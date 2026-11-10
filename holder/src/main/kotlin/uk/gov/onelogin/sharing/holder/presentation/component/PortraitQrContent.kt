@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
 
 @Composable
-internal fun PortraitQrContent(qrData: String, modifier: Modifier = Modifier) {
+internal fun PortraitQrContent(qrPayload: String?, modifier: Modifier = Modifier) {
     LeftAlignedScreen(
         modifier = modifier,
         title = { padding ->
@@ -16,7 +16,7 @@ internal fun PortraitQrContent(qrData: String, modifier: Modifier = Modifier) {
         body = { padding ->
             item {
                 HolderWelcomeQrCode(
-                    qrData = qrData,
+                    qrPayload = qrPayload,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = padding)

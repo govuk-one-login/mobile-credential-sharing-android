@@ -11,7 +11,7 @@ import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
 import uk.gov.android.ui.theme.spacingDouble
 
 @Composable
-internal fun LandscapeQrContent(qrData: String, modifier: Modifier = Modifier) {
+internal fun LandscapeQrContent(qrPayload: String?, modifier: Modifier = Modifier) {
     Surface(modifier = modifier) {
         Row {
             // col 1
@@ -28,7 +28,7 @@ internal fun LandscapeQrContent(qrData: String, modifier: Modifier = Modifier) {
             )
             // col 2
             HolderWelcomeQrCode(
-                qrData = qrData,
+                qrPayload = qrPayload,
                 modifier = Modifier
                     .padding(top = spacingDouble, end = spacingDouble)
                     .size(250.dp)

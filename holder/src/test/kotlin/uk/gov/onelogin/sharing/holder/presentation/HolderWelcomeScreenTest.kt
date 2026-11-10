@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(AndroidJUnit4::class)
@@ -28,7 +29,7 @@ class HolderWelcomeScreenTest {
     val composeTestRule = HolderWelcomeScreenRule(composeTestRule = createComposeRule())
 
     private var initialHolderState: HolderSessionState = HolderSessionState.PresentingEngagement(
-        "This is a unit test"
+        EngagementPresentation("This is a unit test")
     )
 
     private val holderState by lazy { MutableStateFlow(initialHolderState) }
@@ -58,49 +59,101 @@ class HolderWelcomeScreenTest {
     }
 
     @Test
-    fun `Shows a loading spinner before QR code is ready`() =
+    fun `Keeps the screen and hides only the QR before it is ready`() =
         runTest(dispatcherRule.testDispatcher) {
             initialHolderState = HolderSessionState.NotStarted
             composeTestRule.run {
                 setContent { Render() }
-                assertLoadingSpinnerIsDisplayed()
-                assertHeadingDoesNotExist()
-                assertQrCodeDoesNotExist()
-                assertBodyDoesNotExist()
+                assertQrCodeIsHiddenWithinScreen()
             }
         }
 
     @Test
-    fun `Shows a loading spinner while QR is hidden before a refresh`() =
+    fun `Keeps the screen and hides only the QR before it is being renewed`() =
         runTest(dispatcherRule.testDispatcher) {
             initialHolderState = HolderSessionState.PresentingEngagement(
-                "This is a unit test",
-                showQr = false
+                EngagementPresentation(null)
             )
             composeTestRule.run {
                 setContent { Render() }
-                assertLoadingSpinnerIsDisplayed()
-                assertHeadingDoesNotExist()
-                assertQrCodeDoesNotExist()
-                assertBodyDoesNotExist()
+                assertQrCodeIsHiddenWithinScreen()
             }
         }
 
     @Test
-    fun `Closing the journey shows a loading spinner`() = runTest(dispatcherRule.testDispatcher) {
-        composeTestRule.run {
-            setContent { Render() }
-            assertHeadingIsDisplayed()
-            assertQrCodeIsDisplayed()
-            scrollToAndAssertBodyIsDisplayed()
-            holderState.update { HolderSessionState.SendingTermination }
-            waitUntilLoadingSpinnerExists()
-            assertLoadingSpinnerIsDisplayed()
-            assertHeadingDoesNotExist()
-            assertQrCodeDoesNotExist()
-            assertBodyDoesNotExist()
+    fun `Keeps the landscape screen and hides only the QR before it is being renewed`() =
+        runTest(dispatcherRule.testDispatcher) {
+            initialHolderState = HolderSessionState.PresentingEngagement(
+                EngagementPresentation(null)
+            )
+            composeTestRule.run {
+                setContent { Render() }
+                assertHeadingIsDisplayed()
+                assertHeadingAndBodyAreScrollable()
+                assertQrCodeDoesNotExist()
+            }
         }
-    }
+
+    @Test
+    fun `Renewal goes from visible to hidden to a fresh QR on the same screen`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertHeadingIsDisplayed()
+                assertQrCodeIsDisplayed()
+
+                holderState.update {
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation(null)
+                    )
+                }
+                waitUntilQrCodeDoesNotExist()
+                assertQrCodeIsHiddenWithinScreen()
+
+                holderState.update {
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation("Fresh QR")
+                    )
+                }
+                waitUntilQrCodeExists()
+                assertHeadingIsDisplayed()
+                assertQrCodeIsDisplayed()
+            }
+        }
+
+    @Test
+    fun `Renewal that skips the hiding update never re-shows the expired QR`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeIsDisplayed()
+
+                holderState.update { HolderSessionState.ReadyToPresent }
+                waitUntilQrCodeDoesNotExist()
+                assertQrCodeIsHiddenWithinScreen()
+
+                holderState.update {
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation("Fresh QR")
+                    )
+                }
+                waitUntilQrCodeExists()
+                assertQrCodeIsDisplayed()
+            }
+        }
+
+    @Test
+    fun `Closing the journey clears the QR by keeps the screen`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeIsDisplayed()
+
+                holderState.update { HolderSessionState.SendingTermination }
+                waitUntilQrCodeDoesNotExist()
+                assertQrCodeIsHiddenWithinScreen()
+            }
+        }
 
     @Test
     fun `Uses portrait content layout when in portrait orientation`() =
@@ -144,6 +197,12 @@ class HolderWelcomeScreenTest {
             setContent { Render() }
             assertQrCodeIsDisplayed()
         }
+    }
+
+    private fun HolderWelcomeScreenRule.assertQrCodeIsHiddenWithinScreen() {
+        assertHeadingIsDisplayed()
+        assertQrCodeDoesNotExist()
+        assertBodyExists()
     }
 
     @Composable

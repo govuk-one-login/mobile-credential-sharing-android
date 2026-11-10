@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session.data
 import com.google.testing.junit.testparameterinjector.TestParameters
 import com.google.testing.junit.testparameterinjector.TestParametersValuesProvider
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.consentPresentationStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.preflightEmptyPermissions
@@ -49,7 +50,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels whilst generating QR code is shown" to userCancellation,
             "QR generation fails" to userJourneyFailure,
             "Generated QR code gets shown to the User" to
-                HolderSessionState.PresentingEngagement(""),
+                HolderSessionState.PresentingEngagement(EngagementPresentation("")),
             "Ready to present fails and begins termination" to HolderSessionState.SendingTermination
         ).map { (testName, transition) ->
             Triple(
@@ -67,7 +68,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.PresentingEngagement(""),
+                HolderSessionState.PresentingEngagement(EngagementPresentation("")),
                 transition
             )
         }

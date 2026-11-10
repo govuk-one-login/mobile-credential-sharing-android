@@ -21,6 +21,7 @@ import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenAnalytics.holderWelcomeScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -33,24 +34,24 @@ class HolderWelcomeViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
-    val uiState: StateFlow<HolderWelcomeUiState> = orchestrator
+    val uiState: StateFlow<EngagementPresentation> = orchestrator
         .holderSessionState
         .map { sessionState ->
-            when (sessionState) {
-                is HolderSessionState.PresentingEngagement -> HolderWelcomeUiState(
-                    qrData = sessionState.qrData,
-                    showQr = sessionState.showQr
+            (sessionState as? HolderSessionState.PresentingEngagement)?.presentation
+                ?: EngagementPresentation(
+                    qrPayload = null,
+                    cancelRequiresConfirmation = false
                 )
-
-                else -> HolderWelcomeUiState()
-            }
         }
         .distinctUntilChanged()
         .flowOn(dispatcher)
         .stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
-            HolderWelcomeUiState()
+            EngagementPresentation(
+                qrPayload = null,
+                cancelRequiresConfirmation = false
+            )
         )
 
     fun sendScreenEvent(screenName: String) = viewModelScope.launch(dispatcher) {

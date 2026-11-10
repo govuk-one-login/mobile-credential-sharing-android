@@ -17,6 +17,7 @@ import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRou
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
@@ -82,7 +83,7 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
             },
             Triple(
                 "'PresentingEngagement' -> HolderPresentQrRoute",
-                HolderSessionState.PresentingEngagement("")
+                HolderSessionState.PresentingEngagement(EngagementPresentation(""))
             ) {
                 instanceOf<HolderPresentQrRoute>(
                     HolderPresentQrRoute::class.java

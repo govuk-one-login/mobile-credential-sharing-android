@@ -2,8 +2,6 @@ package uk.gov.onelogin.sharing.holder.presentation
 
 import android.content.Context
 import android.content.res.Resources
-import androidx.compose.runtime.snapshots.Snapshot
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHeightIsEqualTo
@@ -11,10 +9,10 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
@@ -41,10 +39,6 @@ class HolderWelcomeScreenRule(
             .assertIsDisplayed()
             .assert(isHeading())
 
-    fun assertHeadingDoesNotExist() =
-        onNodeWithText(resources.getString(R.string.holder_welcome_heading))
-            .assertDoesNotExist()
-
     fun assertQrCodeIsDisplayed() = onNodeWithContentDescription(
         resources.getString(R.string.holder_welcome_qr_code_alt_text)
     )
@@ -69,9 +63,9 @@ class HolderWelcomeScreenRule(
             .assertIsDisplayed()
     }
 
-    fun assertBodyDoesNotExist() = paragraphsIds.forEach {
+    fun assertBodyExists() = paragraphsIds.forEach {
         onNodeWithText(resources.getString(it))
-            .assertDoesNotExist()
+            .assertExists()
     }
 
     fun scrollToAndAssertBodyIsDisplayed() = paragraphsIds.forEach {
@@ -80,15 +74,6 @@ class HolderWelcomeScreenRule(
             .assertIsDisplayed()
     }
 
-    fun assertLoadingSpinnerIsDisplayed() = onNode(
-        hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)
-    ).assertIsDisplayed()
-
-    fun waitUntilLoadingSpinnerExists() = waitUntil {
-        onAllNodes(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate))
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-    }
     fun assertPortraitLayout() {
         val heading = onNodeWithText(
             resources.getString(R.string.holder_welcome_heading)
@@ -131,5 +116,17 @@ class HolderWelcomeScreenRule(
             onNodeWithText(resources.getString(it))
                 .assert(hasAnyAncestor(hasScrollAction()))
         }
+    }
+
+    fun waitUntilQrCodeExists() = waitUntil {
+        onAllNodesWithContentDescription(
+            resources.getString(R.string.holder_welcome_qr_code_alt_text)
+        ).fetchSemanticsNodes().isNotEmpty()
+    }
+
+    fun waitUntilQrCodeDoesNotExist() = waitUntil {
+        onAllNodesWithContentDescription(
+            resources.getString(R.string.holder_welcome_qr_code_alt_text)
+        ).fetchSemanticsNodes().isEmpty()
     }
 }

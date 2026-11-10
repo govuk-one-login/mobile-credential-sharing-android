@@ -19,7 +19,7 @@ class HolderWelcomeQrCodeTest {
     @Test
     fun `QR code fills given space`() {
         composeTestRule.setContent {
-            HolderWelcomeQrCode(qrData = "QR Data", modifier = Modifier.size(250.dp))
+            HolderWelcomeQrCode(qrPayload = "QR Data", modifier = Modifier.size(250.dp))
         }
         val expectedQrCodeSize = 250.dp
         composeTestRule.assertQrCodeIsDisplayed()

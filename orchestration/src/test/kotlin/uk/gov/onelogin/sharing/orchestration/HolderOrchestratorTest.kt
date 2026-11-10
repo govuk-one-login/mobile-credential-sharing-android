@@ -43,6 +43,7 @@ import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
+import uk.gov.onelogin.sharing.cryptoService.engagement.Engagement
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -64,6 +65,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.NoMatchTerminatio
 import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredential
 import uk.gov.onelogin.sharing.orchestration.holder.session.AuthenticatedReaderRequestFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeAuthenticatedReaderRequestFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.FakeHolderSessionTerminator
@@ -601,7 +603,7 @@ class HolderOrchestratorTest {
         orchestrator.holderSessionState.test {
             assertEquals(
                 HolderSessionState.PresentingEngagement(
-                    holderSessionContextStub.qrCode
+                    EngagementPresentation(holderSessionContextStub.qrCode)
                 ),
                 awaitItem()
             )
@@ -2184,7 +2186,9 @@ class HolderOrchestratorTest {
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("qr_code")
+                ),
                 awaitItem()
             )
 
@@ -2212,7 +2216,9 @@ class HolderOrchestratorTest {
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("qr_code")
+                ),
                 awaitItem()
             )
 
@@ -2222,7 +2228,9 @@ class HolderOrchestratorTest {
             engagementTimer.onTimeout?.invoke()
 
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation(null)
+                ),
                 awaitItem()
             )
             assertEquals(1.seconds as Any?, engagementTimer.lastDuration as Any?)
@@ -2247,13 +2255,17 @@ class HolderOrchestratorTest {
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("qr_code")
+                ),
                 awaitItem()
             )
 
             engagementTimer.onTimeout?.invoke()
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation(null)
+                ),
                 awaitItem()
             )
 
@@ -2285,13 +2297,17 @@ class HolderOrchestratorTest {
                 orchestrator.start()
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
                 assertEquals(
-                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation("qr_code")
+                    ),
                     awaitItem()
                 )
 
                 engagementTimer.onTimeout?.invoke()
                 assertEquals(
-                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation(null)
+                    ),
                     awaitItem()
                 )
 
@@ -2301,7 +2317,9 @@ class HolderOrchestratorTest {
                 assertEquals(HolderSessionState.NotStarted, awaitItem())
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
                 assertEquals(
-                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation("qr_code")
+                    ),
                     awaitItem()
                 )
                 assert(transport.stopCalls >= 1)
@@ -2341,14 +2359,18 @@ class HolderOrchestratorTest {
                 orchestrator.start()
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
                 assertEquals(
-                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation("qr_code")
+                    ),
                     awaitItem()
                 )
 
                 // Grace, then refresh at the deadline: prerequisites now fail.
                 engagementTimer.onTimeout?.invoke()
                 assertEquals(
-                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation(null)
+                    ),
                     awaitItem()
                 )
 
@@ -2402,14 +2424,18 @@ class HolderOrchestratorTest {
             orchestrator.start()
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code_first", showQr = true),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("qr_code_first")
+                ),
                 awaitItem()
             )
 
             assert(sessionFactory.getCurrentSession() === firstSession)
             engagementTimer.onTimeout?.invoke()
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code_first", showQr = false),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation(null)
+                ),
                 awaitItem()
             )
             assert(sessionFactory.getCurrentSession() === firstSession)
@@ -2424,14 +2450,18 @@ class HolderOrchestratorTest {
                 firstSession.currentState.value
             )
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code_second", showQr = true),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("qr_code_second")
+                ),
                 secondSession.currentState.value
             )
 
             assertEquals(HolderSessionState.NotStarted, awaitItem())
             assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
             assertEquals(
-                HolderSessionState.PresentingEngagement("qr_code_second", showQr = true),
+                HolderSessionState.PresentingEngagement(
+                    EngagementPresentation("qr_code_second")
+                ),
                 awaitItem()
             )
         }
@@ -2456,13 +2486,17 @@ class HolderOrchestratorTest {
                 orchestrator.start()
                 assertEquals(HolderSessionState.ReadyToPresent, awaitItem())
                 assertEquals(
-                    HolderSessionState.PresentingEngagement("qr_code", showQr = true),
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation("qr_code")
+                    ),
                     awaitItem()
                 )
 
                 engagementTimer.onTimeout?.invoke()
                 assertEquals(
-                    HolderSessionState.PresentingEngagement("qr_code", showQr = false),
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation(null)
+                    ),
                     awaitItem()
                 )
 

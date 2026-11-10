@@ -16,7 +16,7 @@ class PortraitQrContentTest {
 
     @Test
     fun `Shows screen content stack vertically`() = composeTestRule.run {
-        setContent { GdsTheme { PortraitQrContent(qrData = "QR Data") } }
+        setContent { GdsTheme { PortraitQrContent(qrPayload = "QR Data") } }
         composeTestRule.assertHeadingIsDisplayed()
         composeTestRule.assertQrCodeIsDisplayed()
         composeTestRule.scrollToAndAssertBodyIsDisplayed()
