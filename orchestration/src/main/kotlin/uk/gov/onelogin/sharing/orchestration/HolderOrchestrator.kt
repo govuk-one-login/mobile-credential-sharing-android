@@ -298,7 +298,7 @@ class HolderOrchestrator(
                 return
             }
 
-            safeTransitionTo(HolderSessionState.ProcessingResponse)
+            safeTransitionTo(HolderSessionState.ProcessingResponse())
             sendDeviceResponse(document = document, skDevice = submission.skDevice)
         } catch (e: CredentialSigningException.Recoverable) {
             // Neutral outcome: keep the session active on the consent screen.
@@ -348,7 +348,7 @@ class HolderOrchestrator(
         }
 
         if (sent) {
-            safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
+            safeTransitionTo(HolderSessionState.AwaitingVerifierResolution())
         } else {
             failWith(
                 message = "Failed to send DeviceResponse",
@@ -515,7 +515,7 @@ class HolderOrchestrator(
             is PeripheralBluetoothState.Connected -> {
                 sessionTimer.start(INACTIVITY_TIMEOUT) { cancel() }
 
-                safeTransitionTo(HolderSessionState.ProcessingEstablishment)
+                safeTransitionTo(HolderSessionState.ProcessingEstablishment())
                 appCoroutineScope.launch {
                     peripheralBluetoothTransport.stopAdvertising()
                 }

@@ -29,8 +29,7 @@ class HolderSessionStateTest {
         @TestParameter state: HolderSessionState = testValues(
             Preflight(listOf()),
             AwaitingUserConsent(mockk(relaxed = true)),
-            AwaitingVerifierResolution,
-            ProcessingEstablishment,
+            ProcessingEstablishment(),
             Preflight(listOf()),
             PresentingEngagement("unit test")
         )
@@ -48,7 +47,8 @@ class HolderSessionStateTest {
             NotStarted,
             ReadyToPresent,
             Success(),
-            ProcessingResponse,
+            ProcessingResponse(),
+            AwaitingVerifierResolution(),
             HolderSessionState.SendingTermination
         )
     ) {

@@ -21,8 +21,19 @@ sealed class HolderSessionState :
      */
     override fun isComplete(): Boolean = this is Complete
 
-    override fun userCanCancel(): Boolean = this::class in cancellableStates
-    override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
+    override fun userCanCancel(): Boolean = when (this) {
+        is ProcessingEstablishment -> presentation.cancellationAvailable
+        is ProcessingResponse -> presentation.cancellationAvailable
+        is AwaitingVerifierResolution -> presentation.cancellationAvailable
+        else -> this::class in cancellableStates
+    }
+
+    override fun shouldConfirmCancellation(): Boolean = when (this) {
+        is ProcessingEstablishment -> presentation.cancellationAvailable
+        is ProcessingResponse -> presentation.cancellationAvailable
+        is AwaitingVerifierResolution -> presentation.cancellationAvailable
+        else -> this::class in cancelConfirmationRequired
+    }
 
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification
@@ -79,8 +90,13 @@ sealed class HolderSessionState :
      * processing establishment begins.
      *
      * The digital credential transfers between devices during this state.
+     *
+     * @param presentation The loading screen presentation. Defaults to
+     * [ProgressPresentation.GettingDetails] ("Getting list of details", cancellation available).
      */
-    data object ProcessingEstablishment : HolderSessionState()
+    data class ProcessingEstablishment(
+        val presentation: ProgressPresentation = ProgressPresentation.GettingDetails
+    ) : HolderSessionState()
 
     /**
      * State for when a successful connection and processing establishment occurs,
@@ -99,14 +115,28 @@ sealed class HolderSessionState :
     /**
      * State for when the consenting User is generating the proof before completing the
      * Holder User journey.
+     *
+     * @param presentation The loading screen presentation. Defaults to
+     * [ProgressPresentation.SharingDetails] ("Sharing your details", cancellation unavailable).
      */
-    data object ProcessingResponse : HolderSessionState()
+    data class ProcessingResponse(
+        val presentation: ProgressPresentation = ProgressPresentation.SharingDetails
+    ) : HolderSessionState()
 
     /**
      * State for when the Holder has sent the DeviceResponse to the Verifier and is
      * awaiting the Verifier to close the session.
+     *
+     * Carries the same [ProgressPresentation.SharingDetails] as [ProcessingResponse] so the User
+     * continues to see "Sharing your details" with cancellation unavailable; the screen does not
+     * change when the response is sent.
+     *
+     * @param presentation The loading screen presentation. Defaults to
+     * [ProgressPresentation.SharingDetails] ("Sharing your details", cancellation unavailable).
      */
-    data object AwaitingVerifierResolution : HolderSessionState()
+    data class AwaitingVerifierResolution(
+        val presentation: ProgressPresentation = ProgressPresentation.SharingDetails
+    ) : HolderSessionState()
 
     /**
      * State for when the Holder has sent a SessionData(status: 20) termination message
@@ -168,9 +198,7 @@ sealed class HolderSessionState :
     companion object {
         @JvmStatic
         private val cancelConfirmationRequired = listOf(
-            AwaitingUserConsent::class,
-            AwaitingVerifierResolution::class,
-            ProcessingEstablishment::class
+            AwaitingUserConsent::class
         )
 
         @JvmStatic

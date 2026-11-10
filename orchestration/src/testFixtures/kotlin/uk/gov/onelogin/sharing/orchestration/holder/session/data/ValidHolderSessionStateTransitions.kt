@@ -60,7 +60,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val presentingEngagementTransitions = listOf(
             "User cancels from the QR code screen" to userCancellation,
             "QR generation fails" to userJourneyFailure,
-            "QR code handshake completes" to HolderSessionState.ProcessingEstablishment,
+            "QR code handshake completes" to HolderSessionState.ProcessingEstablishment(),
             "Handshake fails and begins termination" to HolderSessionState.SendingTermination,
             "Engagement session expires and is refreshed" to HolderSessionState.Complete.Expired
         ).map { (testName, transition) ->
@@ -81,14 +81,14 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.ProcessingEstablishment,
+                HolderSessionState.ProcessingEstablishment(),
                 transition
             )
         }
         private val awaitingUserConsentTransitions = listOf(
             "User cancels the data transfer request" to userCancellation,
             "Data transfer disconnects before completion" to userJourneyFailure,
-            "Holder device begins processing the response" to HolderSessionState.ProcessingResponse,
+            "Holder device begins processing the response" to HolderSessionState.ProcessingResponse(),
             "Consent fails and begins termination" to HolderSessionState.SendingTermination
         ).map { (testName, transition) ->
             Triple(
@@ -101,14 +101,14 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
             "User cancels the journey whilst validating the response" to userCancellation,
             "Failure occurs when validating the Verifier response" to userJourneyFailure,
             "Holder sends response and awaits verifier resolution" to
-                HolderSessionState.AwaitingVerifierResolution,
+                HolderSessionState.AwaitingVerifierResolution(),
             "Holder begins session termination protocol" to
                 HolderSessionState.SendingTermination,
             "User completes the Holder User journey" to successStub
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.ProcessingResponse,
+                HolderSessionState.ProcessingResponse(),
                 transition
             )
         }
@@ -122,7 +122,7 @@ class ValidHolderSessionStateTransitions : TestParametersValuesProvider() {
         ).map { (testName, transition) ->
             Triple(
                 testName,
-                HolderSessionState.AwaitingVerifierResolution,
+                HolderSessionState.AwaitingVerifierResolution(),
                 transition
             )
         }

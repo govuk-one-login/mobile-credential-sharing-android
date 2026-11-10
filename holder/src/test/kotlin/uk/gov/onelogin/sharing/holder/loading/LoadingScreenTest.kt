@@ -17,8 +17,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,13 +44,7 @@ class LoadingScreenTest {
     }
 
     @Test
-    fun `Only the non-interactive transitional screen blocks back navigation`() {
-        assertTrue(LoadingScreenType.SharingDetails.blocksBackNavigation)
-        assertFalse(LoadingScreenType.GettingDetails.blocksBackNavigation)
-    }
-
-    @Test
-    fun `Back press is swallowed when the type blocks back navigation`() =
+    fun `Back press is swallowed when cancellation is unavailable`() =
         runTest(dispatcherRule.testDispatcher) {
             lateinit var navController: TestNavHostController
             var backDispatcher: OnBackPressedDispatcherOwner? = null
@@ -67,6 +59,7 @@ class LoadingScreenTest {
                     composable("loading") {
                         LoadingScreen(
                             type = LoadingScreenType.SharingDetails,
+                            cancellationAvailable = false,
                             viewModel = viewModel
                         )
                     }
@@ -85,7 +78,7 @@ class LoadingScreenTest {
         }
 
     @Test
-    fun `Back press is not swallowed when the type does not block back navigation`() =
+    fun `Back press is not swallowed when cancellation is available`() =
         runTest(dispatcherRule.testDispatcher) {
             lateinit var navController: TestNavHostController
             var backDispatcher: OnBackPressedDispatcherOwner? = null
@@ -100,6 +93,7 @@ class LoadingScreenTest {
                     composable("loading") {
                         LoadingScreen(
                             type = LoadingScreenType.GettingDetails,
+                            cancellationAvailable = true,
                             viewModel = viewModel
                         )
                     }
@@ -121,7 +115,11 @@ class LoadingScreenTest {
     fun `Label for the type is displayed`(@TestParameter type: LoadingScreenType) =
         runTest(dispatcherRule.testDispatcher) {
             composeTestRule.setContent {
-                LoadingScreen(type = type, viewModel = viewModel)
+                LoadingScreen(
+                    type = type,
+                    cancellationAvailable = false,
+                    viewModel = viewModel
+                )
             }
 
             composeTestRule

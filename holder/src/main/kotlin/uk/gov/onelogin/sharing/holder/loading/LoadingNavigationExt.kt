@@ -9,12 +9,17 @@ import androidx.navigation.toRoute
 object LoadingNavigationExt {
     fun NavController.navigateToLoadingScreen(
         type: LoadingScreenType,
+        cancellationAvailable: Boolean,
         options: NavOptionsBuilder.() -> Unit = {}
-    ) = navigate(LoadingRoute(type), options)
+    ) = navigate(LoadingRoute(type, cancellationAvailable), options)
 
     internal fun NavGraphBuilder.configureLoadingScreen() {
         composable<LoadingRoute> { backStackEntry ->
-            LoadingScreen(type = backStackEntry.toRoute<LoadingRoute>().type)
+            val route = backStackEntry.toRoute<LoadingRoute>()
+            LoadingScreen(
+                type = route.type,
+                cancellationAvailable = route.cancellationAvailable
+            )
         }
     }
 }

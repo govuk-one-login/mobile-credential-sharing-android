@@ -526,7 +526,7 @@ class HolderOrchestratorTest {
     @Test
     fun `transitions to Success when session ends with SUCCESS in AwaitingVerifierResolution`() =
         runTest {
-            initialStates[0] = HolderSessionState.AwaitingVerifierResolution
+            initialStates[0] = HolderSessionState.AwaitingVerifierResolution()
             val sessionFactory = createSessionFactory()
             val peripheralBluetoothTransport = FakePeripheralBluetoothTransport()
             val orchestrator = createOrchestrator(
@@ -611,7 +611,7 @@ class HolderOrchestratorTest {
             )
 
             assertEquals(
-                HolderSessionState.ProcessingEstablishment,
+                HolderSessionState.ProcessingEstablishment(),
                 awaitItem()
             )
 
@@ -1491,7 +1491,7 @@ class HolderOrchestratorTest {
 
     @Test
     fun `sequencing violation in processingResponse sends status 20 and terminates`() = runTest {
-        initialStates[0] = HolderSessionState.ProcessingResponse
+        initialStates[0] = HolderSessionState.ProcessingResponse()
         with(TerminationTestFixture()) {
             backgroundScope.launch { orchestrator.holderSessionState.collect {} }
             advanceUntilIdle()
@@ -1700,9 +1700,9 @@ class HolderOrchestratorTest {
     @Test
     fun `connection loss during active processing results in failure`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Processing establishment" to HolderSessionState.ProcessingEstablishment,
+            "Processing establishment" to HolderSessionState.ProcessingEstablishment(),
             "Awaiting user consent" to HolderSessionState.AwaitingUserConsent(deviceRequestStub),
-            "Processing response" to HolderSessionState.ProcessingResponse
+            "Processing response" to HolderSessionState.ProcessingResponse()
         )
     ) = runTest {
         initialStates[0] = state
@@ -1739,7 +1739,7 @@ class HolderOrchestratorTest {
 
     @Test
     fun `connection loss in AwaitingVerifierResolution results in success`() = runTest {
-        initialStates[0] = HolderSessionState.AwaitingVerifierResolution
+        initialStates[0] = HolderSessionState.AwaitingVerifierResolution()
         val transport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
 
@@ -2165,7 +2165,7 @@ class HolderOrchestratorTest {
 
     private inner class PeerTerminationFixture(
         status: SessionDataStatus,
-        initialState: HolderSessionState = HolderSessionState.AwaitingVerifierResolution
+        initialState: HolderSessionState = HolderSessionState.AwaitingVerifierResolution()
     ) {
         val transport = FakePeripheralBluetoothTransport()
         val terminator = FakeHolderSessionTerminator()
@@ -2310,7 +2310,7 @@ class HolderOrchestratorTest {
 
             transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
 
-            assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
+            assertEquals(HolderSessionState.ProcessingEstablishment(), awaitItem())
 
             assert(engagementTimer.stopCalls > stopCallsBeforeConnect)
             assertEquals(1, transport.startCalls)
@@ -2518,7 +2518,7 @@ class HolderOrchestratorTest {
                 val connectedSession = sessionFactory.getCurrentSession()
 
                 transport.emitState(PeripheralBluetoothState.Connected(DEVICE_ADDRESS))
-                assertEquals(HolderSessionState.ProcessingEstablishment, awaitItem())
+                assertEquals(HolderSessionState.ProcessingEstablishment(), awaitItem())
 
                 val startCallsAfterConnect = transport.startCalls
 
@@ -2527,7 +2527,7 @@ class HolderOrchestratorTest {
 
                 assert(sessionFactory.getCurrentSession() === connectedSession)
                 assertEquals(
-                    HolderSessionState.ProcessingEstablishment,
+                    HolderSessionState.ProcessingEstablishment(),
                     orchestrator.holderSessionState.value
                 )
                 assertEquals(startCallsAfterConnect, transport.startCalls)

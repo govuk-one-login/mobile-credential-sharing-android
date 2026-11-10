@@ -23,11 +23,12 @@ import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 @Composable
 internal fun LoadingScreen(
     type: LoadingScreenType,
+    cancellationAvailable: Boolean,
     viewModel: LoadingViewModel = metroViewModel()
 ) {
     val context = LocalContext.current
     val titleRes = type.labelRes
-    BackHandler(enabled = type.blocksBackNavigation) { }
+    BackHandler(enabled = !cancellationAvailable) { }
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(type) {

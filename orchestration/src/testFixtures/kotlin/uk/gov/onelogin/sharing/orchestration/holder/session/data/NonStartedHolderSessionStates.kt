@@ -14,7 +14,7 @@ class NonStartedHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*> = listOf(
         HolderSessionState.PresentingEngagement(""),
         HolderSessionState.AwaitingUserConsent(deviceRequestStub),
-        HolderSessionState.AwaitingVerifierResolution,
+        HolderSessionState.AwaitingVerifierResolution(),
         HolderSessionStateStubs.userCancellation,
         HolderSessionStateStubs.userJourneyFailure,
         HolderSessionStateStubs.successStub

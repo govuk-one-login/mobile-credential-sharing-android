@@ -135,10 +135,14 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
-        HolderSessionState.AwaitingVerifierResolution -> {
+        is HolderSessionState.AwaitingVerifierResolution -> {
             {
-                navController.navigateToAwaitingVerifierResolutionScreen {
-                    exitJourneyOptions()
+                navController.navigateToLoadingScreen(
+                    type = LoadingScreenType.from(state.presentation.phase),
+                    cancellationAvailable = state.presentation.cancellationAvailable
+                ) {
+                    popUpTo<HolderConsentRoute> { inclusive = true }
+                    launchSingleTop = true
                 }
             }
         }
@@ -161,18 +165,24 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
-        HolderSessionState.ProcessingEstablishment -> {
+        is HolderSessionState.ProcessingEstablishment -> {
             {
-                navController.navigateToLoadingScreen(LoadingScreenType.GettingDetails) {
+                navController.navigateToLoadingScreen(
+                    type = LoadingScreenType.from(state.presentation.phase),
+                    cancellationAvailable = state.presentation.cancellationAvailable
+                ) {
                     popUpTo<HolderPresentQrRoute> { inclusive = true }
                     launchSingleTop = true
                 }
             }
         }
 
-        HolderSessionState.ProcessingResponse -> {
+        is HolderSessionState.ProcessingResponse -> {
             {
-                navController.navigateToLoadingScreen(LoadingScreenType.SharingDetails) {
+                navController.navigateToLoadingScreen(
+                    type = LoadingScreenType.from(state.presentation.phase),
+                    cancellationAvailable = state.presentation.cancellationAvailable
+                ) {
                     popUpTo<HolderConsentRoute> { inclusive = true }
                     launchSingleTop = true
                 }

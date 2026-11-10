@@ -80,7 +80,6 @@ class ShareCredentialTest {
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
             "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
@@ -102,8 +101,7 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button navigates to confirmation dialog for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
+            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true))
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -145,6 +143,28 @@ class ShareCredentialTest {
         composeTestRule.waitUntil(
             "Tapping close should have cancelled the journey!"
         ) { orchestrator.cancelCount == 1 }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Close button doesn't exist while sharing details`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Processing response" to HolderSessionState.ProcessingResponse(),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution()
+        )
+    ) = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(state)
+            )
+        )
+
+        composeTestRule.run {
+            setContent { ShareCredential(component = presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
     }
 
     @Test

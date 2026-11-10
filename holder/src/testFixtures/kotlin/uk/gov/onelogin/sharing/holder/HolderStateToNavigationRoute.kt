@@ -94,28 +94,32 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'AwaitingVerifierResolution' -> AwaitingVerifierResolutionRoute",
-                HolderSessionState.AwaitingVerifierResolution
+                "'AwaitingVerifierResolution' -> LoadingRoute(SharingDetails)",
+                HolderSessionState.AwaitingVerifierResolution()
             ) {
-                instanceOf<AwaitingVerifierResolutionRoute>(
-                    AwaitingVerifierResolutionRoute::class.java
+                equalTo(
+                    LoadingRoute(LoadingScreenType.SharingDetails, cancellationAvailable = false)
                 ).matches(
-                    currentBackStackEntry?.toRoute<AwaitingVerifierResolutionRoute>()
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
                 )
             },
             Triple(
                 "'ProcessingResponse' -> LoadingRoute(SharingDetails)",
-                HolderSessionState.ProcessingResponse
+                HolderSessionState.ProcessingResponse()
             ) {
-                equalTo(LoadingRoute(LoadingScreenType.SharingDetails)).matches(
+                equalTo(
+                    LoadingRoute(LoadingScreenType.SharingDetails, cancellationAvailable = false)
+                ).matches(
                     currentBackStackEntry?.toRoute<LoadingRoute>()
                 )
             },
             Triple(
                 "'ProcessingEstablishment' -> LoadingRoute(GettingDetails)",
-                HolderSessionState.ProcessingEstablishment
+                HolderSessionState.ProcessingEstablishment()
             ) {
-                equalTo(LoadingRoute(LoadingScreenType.GettingDetails)).matches(
+                equalTo(
+                    LoadingRoute(LoadingScreenType.GettingDetails, cancellationAvailable = true)
+                ).matches(
                     currentBackStackEntry?.toRoute<LoadingRoute>()
                 )
             },
