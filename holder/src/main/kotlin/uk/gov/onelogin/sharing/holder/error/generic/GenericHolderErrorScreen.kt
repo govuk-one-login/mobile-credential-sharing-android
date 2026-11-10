@@ -142,7 +142,7 @@ internal fun GenericErrorScreenContent(
 
 @PreviewContent
 @Composable
-private fun GenericHolderErrorScreenPreview() {
+internal fun GenericHolderErrorScreenPreview() {
     GdsTheme {
         GenericErrorScreenContent(
             modifier = Modifier.fillMaxSize()
