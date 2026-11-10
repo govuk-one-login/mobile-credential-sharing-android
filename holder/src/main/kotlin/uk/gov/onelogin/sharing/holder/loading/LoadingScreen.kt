@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.holder.loading
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,6 +16,8 @@ import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicatorState
 import uk.gov.android.ui.componentsv2.progress.ProgressWaitLength
 import uk.gov.android.ui.patterns.centrealignedscreen.CentreAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -50,6 +53,10 @@ internal fun LoadingContent(
         title = {},
         image = {
             GdsProgressIndicator(
+                modifier = Modifier.padding(
+                    horizontal = spacingSingle,
+                    vertical = spacingDouble
+                ),
                 labels = GdsProgressIndicatorDefaults.labels(
                     short = label,
                     long = label,

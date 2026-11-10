@@ -5,10 +5,6 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.binding
-import java.security.cert.X509Certificate
-import java.security.interfaces.ECPrivateKey
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -77,6 +73,10 @@ import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationResult
+import java.security.cert.X509Certificate
+import java.security.interfaces.ECPrivateKey
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
 
 @Keep
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
@@ -492,7 +492,7 @@ class HolderOrchestrator(
     }
 
     @Suppress("LongMethod")
-    private fun handleMdocState(state: PeripheralBluetoothState) {
+    private suspend fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
 
         val currentState = sessionFlow.value.currentState.value
