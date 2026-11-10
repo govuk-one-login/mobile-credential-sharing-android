@@ -22,4 +22,14 @@ interface UserCancellable {
      * digital credential verification journey. Otherwise `false`.
      */
     fun shouldConfirmCancellation(): Boolean
+
+    /**
+     * Whether the toolbar close button should be hidden for this state.
+     *
+     * Used when a state can be cancellable (for example via a back press) while still
+     * hiding the toolbar close button
+     *
+     * @return `true` when the toolbar close button should be hidden. Otherwise `false`.
+     */
+    fun hideCloseButton(): Boolean
 }

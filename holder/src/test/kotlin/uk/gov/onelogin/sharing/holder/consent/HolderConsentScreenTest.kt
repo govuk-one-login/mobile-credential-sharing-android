@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.annotation.Config
+import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.ORGANIZATION_NAME
@@ -45,11 +46,17 @@ class HolderConsentScreenTest {
         HolderSessionState.NotStarted
     )
 
-    private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
+    private var confirmConsentCount = 0
+
+    private val orchestrator = FakeOrchestrator(
+        initialHolderState = holderState,
+        onConfirmConsent = { confirmConsentCount++ }
+    )
 
     private val viewModel by lazy {
         HolderConsentViewModel(
             orchestrator = orchestrator,
+            analyticsLogger = FakeAnalyticsLogger(),
             dispatcher = dispatcherRule.testDispatcher
         )
     }
@@ -100,12 +107,6 @@ class HolderConsentScreenTest {
         )
     )
 
-    private val presentationWithPrivacyPolicy = ConsentPresentation(
-        documents = presentationWithoutRetain.documents,
-        organizationName = ORGANIZATION_NAME,
-        privacyPolicyUrl = "https://verifier.example/privacy"
-    )
-
     @Test
     fun `AC1 - Displays title, elements without IntentToRetain, and buttons`() =
         runTest(dispatcherRule.testDispatcher) {
@@ -119,8 +120,8 @@ class HolderConsentScreenTest {
             composeTestRule.setContent { Render() }
 
             composeTestRule.assertTitleIsDisplayed()
-            composeTestRule.assertAcceptButtonIsDisplayed()
-            composeTestRule.assertDenyButtonIsDisplayed()
+            composeTestRule.assertCancelButtonIsDisplayed()
+            composeTestRule.assertElementsDisplayed("Agree and share")
             composeTestRule.assertElementsDisplayed("Last name")
             composeTestRule.assertElementsDisplayed("Licence number")
             composeTestRule.assertElementsDisplayed("Photo")
@@ -166,6 +167,21 @@ class HolderConsentScreenTest {
         }
 
     @Test
+    fun `Displays the what you will share section heading`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.assertWhatYouShareHeadingIsDisplayed()
+        }
+
+    @Test
     fun `Displays the shared attribute count in the card heading`() =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
@@ -181,72 +197,64 @@ class HolderConsentScreenTest {
         }
 
     @Test
+    fun `Displays the privacy notice link with the organisation name`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.assertPrivacyNoticeLinkIsDisplayed(ORGANIZATION_NAME)
+        }
+
+    @Test
+    fun `Agree button confirms consent on the orchestrator`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.clickAgreeButton()
+            composeTestRule.waitForIdle()
+
+            assertEquals(1, confirmConsentCount)
+        }
+
+    @Test
+    fun `Cancel button does not cancel the orchestrator as it is out of scope`() =
+        runTest(dispatcherRule.testDispatcher) {
+            holderState.update {
+                HolderSessionState.AwaitingUserConsent(
+                    request = DeviceRequestStub.deviceRequestStub,
+                    presentation = presentationWithoutRetain
+                )
+            }
+
+            composeTestRule.setContent { Render() }
+
+            composeTestRule.clickCancelButton()
+            composeTestRule.waitForIdle()
+
+            assertEquals(0, orchestrator.cancelCount)
+        }
+
+    @Test
     fun `Preview renders without errors`() = runTest(dispatcherRule.testDispatcher) {
         composeTestRule.setContent {
             HolderConsentScreenPreview()
         }
 
         composeTestRule.assertTitleIsDisplayed()
-        composeTestRule.assertAcceptButtonIsDisplayed()
-        composeTestRule.assertDenyButtonIsDisplayed()
-    }
-
-    @Test
-    fun `Deny button shows confirmation dialog`() = runTest(dispatcherRule.testDispatcher) {
-        holderState.update {
-            HolderSessionState.AwaitingUserConsent(
-                request = DeviceRequestStub.deviceRequestStub,
-                presentation = presentationWithoutRetain
-            )
-        }
-
-        composeTestRule.setContent { Render() }
-
-        composeTestRule.clickDenyButton()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.assertDenyDialogIsDisplayed()
-    }
-
-    @Test
-    fun `Deny dialog confirm button calls denyConsent`() = runTest(dispatcherRule.testDispatcher) {
-        holderState.update {
-            HolderSessionState.AwaitingUserConsent(
-                request = DeviceRequestStub.deviceRequestStub,
-                presentation = presentationWithoutRetain
-            )
-        }
-
-        composeTestRule.setContent { Render() }
-
-        composeTestRule.clickDenyButton()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.clickDenyDialogConfirm()
-        composeTestRule.waitForIdle()
-
-        assertEquals(1, orchestrator.cancelCount)
-    }
-
-    @Test
-    fun `Deny dialog dismiss button hides dialog`() = runTest(dispatcherRule.testDispatcher) {
-        holderState.update {
-            HolderSessionState.AwaitingUserConsent(
-                request = DeviceRequestStub.deviceRequestStub,
-                presentation = presentationWithoutRetain
-            )
-        }
-
-        composeTestRule.setContent { Render() }
-
-        composeTestRule.clickDenyButton()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.clickDenyDialogDismiss()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.assertDenyDialogIsNotDisplayed()
-        composeTestRule.assertTitleIsDisplayed()
+        composeTestRule.assertCancelButtonIsDisplayed()
     }
 
     @Test
@@ -298,39 +306,6 @@ class HolderConsentScreenTest {
         }
 
     @Test
-    fun `Privacy policy link is displayed when a URL is present`() =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithPrivacyPolicy
-                )
-            }
-
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.assertPrivacyPolicyLinkIsDisplayed()
-        }
-
-    @Test
-    fun `Tapping the privacy policy link opens the embedded web view`() =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithPrivacyPolicy
-                )
-            }
-
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.clickPrivacyPolicyLink()
-            composeTestRule.waitForIdle()
-
-            composeTestRule.assertPrivacyPolicyCloseIsDisplayed()
-        }
-
-    @Test
     fun `User actions aren't enabled when the view model is busy`(
         @TestParameter input: ButtonEnablementTestData
     ) = runTest(
@@ -339,7 +314,7 @@ class HolderConsentScreenTest {
         holderState.update {
             HolderSessionState.AwaitingUserConsent(
                 request = DeviceRequestStub.deviceRequestStub,
-                presentation = presentationWithPrivacyPolicy.copy(
+                presentation = presentationWithoutRetain.copy(
                     isBusy = input.isBusy
                 )
             )
@@ -347,8 +322,8 @@ class HolderConsentScreenTest {
 
         composeTestRule.apply {
             setContent { Render() }
-            input.acceptButtonAssertion(this)
-            input.denyButtonAssertion(this)
+            input.agreeButtonAssertion(this)
+            input.cancelButtonAssertion(this)
         }
     }
 
@@ -359,18 +334,18 @@ class HolderConsentScreenTest {
 
     enum class ButtonEnablementTestData(
         val isBusy: Boolean,
-        val acceptButtonAssertion: HolderConsentScreenRule.() -> Unit,
-        val denyButtonAssertion: HolderConsentScreenRule.() -> Unit
+        val agreeButtonAssertion: HolderConsentScreenRule.() -> Unit,
+        val cancelButtonAssertion: HolderConsentScreenRule.() -> Unit
     ) {
         BUTTONS_ENABLED(
             isBusy = false,
-            acceptButtonAssertion = HolderConsentScreenRule::assertAcceptButtonIsEnabled,
-            denyButtonAssertion = HolderConsentScreenRule::assertDenyButtonIsEnabled
+            agreeButtonAssertion = HolderConsentScreenRule::assertAgreeButtonIsEnabled,
+            cancelButtonAssertion = HolderConsentScreenRule::assertCancelButtonIsEnabled
         ),
         BUTTONS_DISABLED(
             isBusy = true,
-            acceptButtonAssertion = HolderConsentScreenRule::assertAcceptButtonIsNotEnabled,
-            denyButtonAssertion = HolderConsentScreenRule::assertDenyButtonIsNotEnabled
+            agreeButtonAssertion = HolderConsentScreenRule::assertAgreeButtonIsNotEnabled,
+            cancelButtonAssertion = HolderConsentScreenRule::assertCancelButtonIsNotEnabled
         )
     }
 }

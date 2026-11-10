@@ -23,6 +23,7 @@ sealed class HolderSessionState :
 
     override fun userCanCancel(): Boolean = this::class in cancellableStates
     override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
+    override fun hideCloseButton(): Boolean = this::class in hiddenCloseButtonStates
 
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification
@@ -182,5 +183,10 @@ sealed class HolderSessionState :
             Preflight::class,
             PresentingEngagement::class
         ) + cancelConfirmationRequired
+
+        @JvmStatic
+        private val hiddenCloseButtonStates = listOf(
+            AwaitingUserConsent::class
+        )
     }
 }

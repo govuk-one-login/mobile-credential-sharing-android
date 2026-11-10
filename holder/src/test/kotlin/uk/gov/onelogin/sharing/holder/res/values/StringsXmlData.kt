@@ -86,6 +86,10 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "You will not connect with a device yet. You’ll use a QR code to do that next.",
         resourceId = R.string.use_qr_code_to_connect_next
     ),
+    HOLDER_CONSENT_SCREEN_WHAT_YOU_SHARE_HEADING(
+        expected = "What you\u2019ll share",
+        resourceId = R.string.holder_consent_screen_what_you_share_heading
+    ),
     HOLDER_CONSENT_CARD_WILL_KEEP(
         expected = "%1\$s will keep these details as a record of this check:",
         resourceId = R.string.holder_consent_card_will_keep
