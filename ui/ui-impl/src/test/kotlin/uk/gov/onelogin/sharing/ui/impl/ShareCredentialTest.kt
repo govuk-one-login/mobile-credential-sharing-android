@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -79,11 +80,6 @@ class ShareCredentialTest {
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to
-                HolderSessionState.AwaitingUserConsent(
-                    mockk(relaxed = true),
-                    mockk(relaxed = true)
-                ),
             "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
@@ -104,13 +100,30 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
+    fun `Close button is hidden while awaiting user consent`() = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(
+                    HolderSessionState.AwaitingUserConsent(
+                        mockk(relaxed = true),
+                        mockk(relaxed = true)
+                    )
+                )
+            )
+        )
+
+        composeTestRule.run {
+            setContent { ShareCredential(component = presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    @UiThreadTest
     fun `Close button navigates to confirmation dialog for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Awaiting consent" to
-                HolderSessionState.AwaitingUserConsent(
-                    mockk(relaxed = true),
-                    mockk(relaxed = true)
-                ),
             "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
         )
     ) = runTest {
@@ -190,9 +203,7 @@ class ShareCredentialTest {
     fun `Close button sends a button analytics event`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Preflight" to HolderSessionState.Preflight(emptyList()),
-            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to
-                HolderSessionState.AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true))
+            "Presenting QR code" to HolderSessionState.PresentingEngagement("")
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -348,6 +359,42 @@ class ShareCredentialTest {
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progressIndicator").assertDoesNotExist()
         assertEquals(0, orchestrator.startCount)
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Test
+    @UiThreadTest
+    fun `CloseButtonAppBar shows the close icon when showClose is true`() = runTest {
+        composeTestRule.run {
+            setContent { CloseButtonAppBar(showClose = true) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertExists()
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Test
+    @UiThreadTest
+    fun `CloseButtonAppBar hides the close icon when showClose is false`() = runTest {
+        composeTestRule.run {
+            setContent { CloseButtonAppBar(showClose = false) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Test
+    @UiThreadTest
+    fun `CloseButtonAppBar invokes onCancel when the close icon is tapped`() = runTest {
+        var cancelled = false
+        composeTestRule.run {
+            setContent { CloseButtonAppBar(showClose = true, onCancel = { cancelled = true }) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").performClick()
+            waitForIdle()
+        }
+        assertEquals(true, cancelled)
     }
 
     private fun performCloseJourneyViaButton(presenter: FakeCredentialPresenter) {

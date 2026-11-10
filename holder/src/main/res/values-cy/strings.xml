@@ -4,6 +4,7 @@
     <string name="allow_bluetooth_before_sharing_details">Cyn y gallwch rannu manylion o’ch trwydded yrru’r DU, mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth.</string>
     <string name="find_out_how_sharing_works">Darganfyddwch sut mae rhannu yn gweithio</string>
     <string name="get_ready_to_share">Paratoi i rannu</string>
+    <string name="holder_consent_organization_sentence">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap cymeradwy wedi’i bweru gan %1$s</string>
     <string name="you_will_connect_via_qr_later">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny yn nes ymlaen.</string>
     <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>
     <string name="turn_on_bluetooth">Troi Bluetooth ymlaen</string>
@@ -32,6 +33,20 @@
     <string name="consent_card_all_kept">Bydd %1$s yn cadw’r manylion hyn fel cofnod o’r gwiriad hwn.</string>
     <string name="consent_card_none_kept">Dim ond ar gyfer y gwiriad hwn y defnyddir y manylion hyn. Ni fyddant yn cael eu harbed.</string>
     <string name="consent_doc_mdl">trwydded yrru’r DU</string>
+
+    <!-- Agree to Share screen -->
+    <string name="consent_screen_title">Adolygu beth fyddwch yn ei rannu</string>
+    <string name="consent_screen_what_you_share_heading">Beth fyddwch yn ei rannu</string>
+    <string name="consent_screen_privacy_notice_link">Darllenwch am %1$s a’u hysbysiad preifatrwydd</string>
+    <plurals name="consent_screen_agree_button">
+        <item quantity="zero">Cytuno a rhannu %1$d manylion</item>
+        <item quantity="one">Cytuno a rhannu %1$d manylion</item>
+        <item quantity="two">Cytuno a rhannu %1$d manylion</item>
+        <item quantity="few">Cytuno a rhannu %1$d manylion</item>
+        <item quantity="many">Cytuno a rhannu %1$d manylion</item>
+        <item quantity="other">Cytuno a rhannu %1$d manylion</item>
+    </plurals>
+    <string name="consent_screen_cancel_button">Canslo a mynd yn ôl i ddogfennau</string>
     <string name="consent_attr_document_number">Rhif y drwydded</string>
     <string name="consent_attr_portrait">Llun</string>
     <string name="consent_attr_title">Teitl</string>
