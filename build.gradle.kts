@@ -23,6 +23,9 @@ buildscript {
                 "org.apache.httpcomponents" -> if (requested.name == "httpclient") {
                     useVersion(libs.versions.httpclient.get())
                 }
+                "org.jsoup" -> if (requested.name == "jsoup") {
+                    useVersion(libs.versions.jsoup.get())
+                }
             }
         }
     }
@@ -51,6 +54,9 @@ allprojects {
                 "org.jetbrains.kotlin" -> if (requested.name == "kotlin-metadata-jvm") {
                     useVersion(libs.versions.kotlin.asProvider().get())
                 }
+                "org.jsoup" -> if (requested.name == "jsoup") {
+                    useVersion(libs.versions.jsoup.get())
+                }
             }
         }
     }
@@ -77,6 +83,9 @@ subprojects {
                     }
                     "org.apache.httpcomponents" -> if (requested.name == "httpclient") {
                         useVersion(libs.versions.httpclient.get())
+                    }
+                    "org.jsoup" -> if (requested.name == "jsoup") {
+                        useVersion(libs.versions.jsoup.get())
                     }
                 }
             }
