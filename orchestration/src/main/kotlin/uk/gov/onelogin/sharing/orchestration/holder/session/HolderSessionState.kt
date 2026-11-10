@@ -109,7 +109,7 @@ sealed class HolderSessionState :
      */
     data class AwaitingUserConsent(
         val request: DeviceRequest,
-        val presentation: ConsentPresentation = ConsentPresentation(documents = emptyList())
+        val presentation: ConsentPresentation
     ) : HolderSessionState()
 
     /**

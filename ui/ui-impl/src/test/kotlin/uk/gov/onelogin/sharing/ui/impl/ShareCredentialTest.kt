@@ -79,7 +79,12 @@ class ShareCredentialTest {
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true)),
+            "Awaiting consent" to
+                HolderSessionState.AwaitingUserConsent(
+                    mockk(relaxed = true),
+                    mockk(relaxed = true)
+                ),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution(),
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
@@ -101,7 +106,12 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button navigates to confirmation dialog for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true))
+            "Awaiting consent" to
+                HolderSessionState.AwaitingUserConsent(
+                    mockk(relaxed = true),
+                    mockk(relaxed = true)
+                ),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution()
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -203,7 +213,8 @@ class ShareCredentialTest {
         @TestParameter state: HolderSessionState = namedTestValues(
             "Preflight" to HolderSessionState.Preflight(emptyList()),
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting consent" to HolderSessionState.AwaitingUserConsent(mockk(relaxed = true))
+            "Awaiting consent" to
+                HolderSessionState.AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true))
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
