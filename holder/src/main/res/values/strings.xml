@@ -20,6 +20,10 @@
     <string name="turn_on_bluetooth" translatable="true">Turn on Bluetooth</string>
     <string name="turn_on_bluetooth_before_sharing" translatable="true">Before you can share, you need to turn on Bluetooth.</string>
     <string name="use_qr_code_to_connect_next" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
+    <string name="bluetooth_permission_denied_title" translatable="true">You need to allow connection to nearby devices</string>
+    <string name="bluetooth_permission_denied_before_sharing" translatable="true">To be able to share, you need to allow this app to connect to nearby devices.</string>
+    <string name="bluetooth_permission_denied_allow_button" translatable="true">Allow</string>
+    <string name="bluetooth_permission_denied_cancel_button" translatable="true">Cancel and go back to documents</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
