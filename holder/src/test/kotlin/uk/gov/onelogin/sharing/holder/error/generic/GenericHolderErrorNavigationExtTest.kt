@@ -10,6 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.performClick
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
@@ -87,7 +88,37 @@ class GenericHolderErrorNavigationExtTest {
                 .performClick()
 
             waitUntil {
-                controller.currentBackStackEntry?.toRoute<GenericHolderErrorRoute>() != null
+                controller.currentBackStackEntry?.destination
+                    ?.hasRoute<GenericHolderErrorRoute>() ?: false
+            }
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Back press navigates to the previous screen`() = runTest {
+        composeTestRule.run {
+            setContent {
+                controller = prepareController(LocalContext.current)
+                Render()
+            }
+
+            onNodeWithRole(Role.Button)
+                .performClick()
+
+            assertValidUi()
+
+            runOnUiThread {
+                controller.popBackStack()
+            }
+            waitForIdle()
+
+            waitUntil(
+                "Didn't navigate back! Current destination: " +
+                    controller.currentBackStackEntry?.destination?.route
+            ) {
+                controller.currentBackStackEntry?.destination
+                    ?.route?.let { it == "entry" } ?: false
             }
         }
     }

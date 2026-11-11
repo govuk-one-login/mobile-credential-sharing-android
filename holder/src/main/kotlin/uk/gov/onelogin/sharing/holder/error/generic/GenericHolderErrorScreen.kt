@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.error.generic
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
@@ -38,12 +40,17 @@ import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorViewModel.
 @Composable
 internal fun GenericHolderErrorScreen(
     modifier: Modifier = Modifier,
-    viewModel: GenericHolderErrorViewModel = metroViewModel(),
-    onExitJourney: () -> Unit = {}
+    viewModel: GenericHolderErrorViewModel = metroViewModel()
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val currentOnExitJourney by rememberUpdatedState(onExitJourney)
+    val onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
+    val mainScope = rememberCoroutineScope { Dispatchers.Main }
+    val onExitJourney: () -> Unit = {
+        mainScope.launch {
+            onBackPressedDispatcherOwner?.onBackPressedDispatcher?.onBackPressed()
+        }
+    }
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
@@ -73,7 +80,7 @@ internal fun GenericHolderErrorScreen(
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is ViewModelEvent.ExitJourney -> {
-                    currentOnExitJourney()
+                    onExitJourney()
                 }
 
                 else -> {
