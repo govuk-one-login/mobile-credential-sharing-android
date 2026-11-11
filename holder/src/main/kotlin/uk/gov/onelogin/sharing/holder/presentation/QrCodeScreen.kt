@@ -27,9 +27,9 @@ fun QrCodeScreen(modifier: Modifier = Modifier, viewModel: QrCodeViewModel = met
     val context = LocalContext.current
 
     val metrics = rememberMetricsStateHolder()
-    val titleRes = R.string.holder_welcome_heading
+    val titleRes = R.string.holder_qr_code_heading
     LaunchedEffect(Unit) {
-        metrics.putScreenState("HolderWelcomeScreen")
+        metrics.putScreenState("QrCodeScreen")
         viewModel.sendScreenEvent(context.getEnglishString(titleRes))
     }
 

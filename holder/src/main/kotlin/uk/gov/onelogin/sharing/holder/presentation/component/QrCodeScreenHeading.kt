@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.holder.R
 @Composable
 internal fun QrCodeScreenHeading(modifier: Modifier = Modifier) {
     GdsHeading(
-        text = stringResource(R.string.holder_welcome_heading),
+        text = stringResource(R.string.holder_qr_code_heading),
         modifier = modifier,
         textAlign = GdsHeadingAlignment.LeftAligned
     )

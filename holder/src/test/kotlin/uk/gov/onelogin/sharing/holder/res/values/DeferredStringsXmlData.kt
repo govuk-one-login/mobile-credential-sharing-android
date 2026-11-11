@@ -70,22 +70,22 @@ enum class DeferredStringsXmlData(
     ),
     HOLDER_WELCOME_HEADING(
         defersTo = R.string.find_out_which_details_to_share,
-        resourceId = R.string.holder_welcome_heading
+        resourceId = R.string.holder_qr_code_heading
     ),
     HOLDER_WELCOME_BODY_1(
         defersTo = R.string.show_qr_code_person_doing_check,
-        resourceId = R.string.holder_welcome_body_1
+        resourceId = R.string.holder_qr_code_body_1
     ),
     HOLDER_WELCOME_BODY_2(
         defersTo = R.string.qr_code_lets_them_send_list_of_details,
-        resourceId = R.string.holder_welcome_body_2
+        resourceId = R.string.holder_qr_code_body_2
     ),
     HOLDER_WELCOME_BODY_3(
         defersTo = R.string.review_list_before_agreeing_to_share,
-        resourceId = R.string.holder_welcome_body_3
+        resourceId = R.string.holder_qr_code_body_3
     ),
     HOLDER_WELCOME_QR_CODE_ALT_TEXT(
         defersTo = R.string.qr_code_to_get_list_of_details,
-        resourceId = R.string.holder_welcome_qr_code_alt_text
+        resourceId = R.string.holder_qr_code_alt_text
     )
 }

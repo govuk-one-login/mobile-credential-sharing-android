@@ -6,7 +6,7 @@ import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
 /**
- * Analytics identity for the Holder Welcome screen.
+ * Analytics identity for the QR code screen.
  *
  * The screen name and id are owned and declared by this feature module and consumed by
  * [QrCodeViewModel] when sending the screen view event.

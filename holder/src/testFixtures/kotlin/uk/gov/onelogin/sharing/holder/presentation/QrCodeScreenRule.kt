@@ -29,29 +29,29 @@ class QrCodeScreenRule(
 ) : ComposeContentTestRule by composeTestRule {
 
     private val paragraphsIds = listOf(
-        R.string.holder_welcome_body_1,
-        R.string.holder_welcome_body_2,
-        R.string.holder_welcome_body_3
+        R.string.holder_qr_code_body_1,
+        R.string.holder_qr_code_body_2,
+        R.string.holder_qr_code_body_3
     )
 
     fun assertHeadingIsDisplayed() =
-        onNodeWithText(resources.getString(R.string.holder_welcome_heading))
+        onNodeWithText(resources.getString(R.string.holder_qr_code_heading))
             .assertIsDisplayed()
             .assert(isHeading())
 
     fun assertQrCodeIsDisplayed() = onNodeWithContentDescription(
-        resources.getString(R.string.holder_welcome_qr_code_alt_text)
+        resources.getString(R.string.holder_qr_code_alt_text)
     )
         .assertIsDisplayed()
         .assert(SemanticsMatchers.hasRole(Role.Image))
 
     fun assertQrCodeDoesNotExist() = onNodeWithContentDescription(
-        resources.getString(R.string.holder_welcome_qr_code_alt_text)
+        resources.getString(R.string.holder_qr_code_alt_text)
     )
         .assertDoesNotExist()
 
     fun assertQrCodeSizeIs(size: Dp) = onNodeWithContentDescription(
-        resources.getString(R.string.holder_welcome_qr_code_alt_text)
+        resources.getString(R.string.holder_qr_code_alt_text)
     )
         .assertIsDisplayed()
         .assert(SemanticsMatchers.hasRole(Role.Image))
@@ -76,10 +76,10 @@ class QrCodeScreenRule(
 
     fun assertPortraitLayout() {
         val heading = onNodeWithText(
-            resources.getString(R.string.holder_welcome_heading)
+            resources.getString(R.string.holder_qr_code_heading)
         ).getBoundsInRoot()
         val qrCode = onNodeWithContentDescription(
-            resources.getString(R.string.holder_welcome_qr_code_alt_text)
+            resources.getString(R.string.holder_qr_code_alt_text)
         ).getBoundsInRoot()
         val body = onNodeWithText(resources.getString(paragraphsIds.first())).getBoundsInRoot()
 
@@ -88,15 +88,15 @@ class QrCodeScreenRule(
     }
 
     fun assertQrCodeScrollsWithContent() = onNodeWithContentDescription(
-        resources.getString(R.string.holder_welcome_qr_code_alt_text)
+        resources.getString(R.string.holder_qr_code_alt_text)
     ).assert(hasAnyAncestor(hasScrollAction()))
 
     fun assertLandscapeLayout() {
         val heading = onNodeWithText(
-            resources.getString(R.string.holder_welcome_heading)
+            resources.getString(R.string.holder_qr_code_heading)
         ).getBoundsInRoot()
         val qrCode = onNodeWithContentDescription(
-            resources.getString(R.string.holder_welcome_qr_code_alt_text)
+            resources.getString(R.string.holder_qr_code_alt_text)
         ).getBoundsInRoot()
         val body = onNodeWithText(resources.getString(paragraphsIds.first())).getBoundsInRoot()
 
@@ -106,11 +106,11 @@ class QrCodeScreenRule(
     }
 
     fun assertQrCodeIsFixed() = onNodeWithContentDescription(
-        resources.getString(R.string.holder_welcome_qr_code_alt_text)
+        resources.getString(R.string.holder_qr_code_alt_text)
     ).assert(!hasAnyAncestor(hasScrollAction()))
 
     fun assertHeadingAndBodyAreScrollable() {
-        onNodeWithText(resources.getString(R.string.holder_welcome_heading))
+        onNodeWithText(resources.getString(R.string.holder_qr_code_heading))
             .assert(hasAnyAncestor(hasScrollAction()))
         paragraphsIds.forEach {
             onNodeWithText(resources.getString(it))
@@ -120,13 +120,13 @@ class QrCodeScreenRule(
 
     fun waitUntilQrCodeExists() = waitUntil {
         onAllNodesWithContentDescription(
-            resources.getString(R.string.holder_welcome_qr_code_alt_text)
+            resources.getString(R.string.holder_qr_code_alt_text)
         ).fetchSemanticsNodes().isNotEmpty()
     }
 
     fun waitUntilQrCodeDoesNotExist() = waitUntil {
         onAllNodesWithContentDescription(
-            resources.getString(R.string.holder_welcome_qr_code_alt_text)
+            resources.getString(R.string.holder_qr_code_alt_text)
         ).fetchSemanticsNodes().isEmpty()
     }
 }

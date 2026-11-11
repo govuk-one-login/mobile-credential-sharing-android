@@ -31,7 +31,7 @@ enum class TranslatableStringsData(
         )
     ),
     FIND_OUT_WHICH_DETAILS_TO_SHARE(
-        resourceId = R.string.holder_welcome_heading,
+        resourceId = R.string.holder_qr_code_heading,
         translations = mapOf(
             "en" to "Find out which details you need to share",
             "cy" to "Darganfyddwch pa fanylion y mae angen i chi eu rhannu"

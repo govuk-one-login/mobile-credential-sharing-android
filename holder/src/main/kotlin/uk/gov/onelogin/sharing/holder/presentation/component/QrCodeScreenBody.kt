@@ -11,9 +11,9 @@ import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.holder.R
 
 private val paragraphs = listOf(
-    R.string.holder_welcome_body_1,
-    R.string.holder_welcome_body_2,
-    R.string.holder_welcome_body_3
+    R.string.holder_qr_code_body_1,
+    R.string.holder_qr_code_body_2,
+    R.string.holder_qr_code_body_3
 )
 
 @Composable

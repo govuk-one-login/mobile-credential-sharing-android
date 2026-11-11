@@ -31,7 +31,7 @@ internal fun QrCodeScreenImage(qrPayload: String?, modifier: Modifier = Modifier
                 size = QR_SIZE,
                 modifier = squareModifier,
                 margin = QR_MARGIN,
-                contentDescription = stringResource(R.string.holder_welcome_qr_code_alt_text)
+                contentDescription = stringResource(R.string.holder_qr_code_alt_text)
             )
         }
     }
