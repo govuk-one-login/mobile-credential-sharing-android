@@ -79,7 +79,7 @@ class QrCodeScreenTest {
         }
 
     @Test
-    @Config(qualifiers = "+land")
+    @Config(qualifiers = PHONE_LANDSCAPE)
     fun `Keeps the landscape screen and hides only the QR while it is being renewed`() =
         runTest(dispatcherRule.testDispatcher) {
             initialHolderState = HolderSessionStateStubs.presentingHiddenEngagementStub
@@ -158,14 +158,34 @@ class QrCodeScreenTest {
         }
 
     @Test
-    @Config(qualifiers = "+land")
-    fun `Uses landscape content layout when in landscape orientation`() =
+    @Config(qualifiers = PHONE_LANDSCAPE)
+    fun `Uses landscape content layout on a phone in landscape orientation`() =
         runTest(dispatcherRule.testDispatcher) {
             composeTestRule.run {
                 setContent { Render() }
                 assertQrCodeIsFixed()
                 assertQrCodeSizeIs(250.dp)
                 assertHeadingAndBodyAreScrollable()
+            }
+        }
+
+    @Test
+    @Config(qualifiers = UNFOLDED_FOLDABLE)
+    fun `Uses portrait content layout on an unfolded foldable when in landscape orientation`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeScrollsWithContent()
+            }
+        }
+
+    @Test
+    @Config(qualifiers = TABLET_LANDSCAPE)
+    fun `Uses portrait content layout on a tablet when in landscape orientation`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeScrollsWithContent()
             }
         }
 
@@ -201,5 +221,11 @@ class QrCodeScreenTest {
     @Composable
     fun Render() {
         QrCodeScreen(viewModel = viewModel)
+    }
+
+    private companion object {
+        const val PHONE_LANDSCAPE = "w891dp-h411dp-land"
+        const val UNFOLDED_FOLDABLE = "w673dp-h841dp"
+        const val TABLET_LANDSCAPE = "w1280dp-h800dp-land"
     }
 }

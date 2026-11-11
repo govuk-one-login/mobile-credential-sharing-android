@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.presentation
 
 import android.content.res.Configuration
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -10,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.Dispatchers
 import uk.gov.logging.api.analytics.extensions.getEnglishString
@@ -42,9 +44,9 @@ fun QrCodeScreen(modifier: Modifier = Modifier, viewModel: QrCodeViewModel = met
 
 @Composable
 private fun QrContent(uiState: QrCodeUiState, modifier: Modifier = Modifier) {
-    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
-    if (isLandscape) {
+    if (windowSizeClass.usesTwoColumnLayout()) {
         LandscapeQrContent(uiState.qrPayload, modifier)
     } else {
         PortraitQrContent(uiState.qrPayload, modifier)
@@ -61,6 +63,13 @@ internal fun QrCodeScreenPreview(
         modifier = Modifier
     )
 }
+
+/**
+ * Two columns when the window is wide but short, e.g. a landscape phone.
+ */
+internal fun WindowSizeClass.usesTwoColumnLayout(): Boolean =
+    isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) &&
+        !isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)
 
 internal class QrCodeScreenPreviewProvider : PreviewParameterProvider<QrCodeUiState> {
     override val values: Sequence<QrCodeUiState>
