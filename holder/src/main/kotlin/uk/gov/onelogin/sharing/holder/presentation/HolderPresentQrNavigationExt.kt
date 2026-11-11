@@ -15,7 +15,7 @@ object HolderPresentQrNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderPresentQrScreen() {
         composable<HolderPresentQrRoute> {
-            HolderWelcomeScreen(
+            QrCodeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(spacingDouble)

@@ -16,13 +16,13 @@ import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.scanner.FakeQrParser
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeViewModelTestData.SCREEN_NAME
+import uk.gov.onelogin.sharing.holder.presentation.QrCodeViewModelTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(TestParameterInjector::class)
-class HolderWelcomeViewModelTest {
+class QrCodeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
@@ -42,7 +42,7 @@ class HolderWelcomeViewModelTest {
     private val analyticsLogger = StoredAnalyticsLogger()
 
     private val viewModel by lazy {
-        HolderWelcomeViewModel(
+        QrCodeViewModel(
             orchestrator = orchestrator,
             analyticsLogger = analyticsLogger,
             dispatcher = mainDispatcherRule.testDispatcher
@@ -117,7 +117,7 @@ class HolderWelcomeViewModelTest {
         assertThat(
             analyticsLogger,
             hasSentEvents(
-                contains(HolderWelcomeViewModelTestData.expectedScreenEvent)
+                contains(QrCodeViewModelTestData.expectedScreenEvent)
             )
         )
     }

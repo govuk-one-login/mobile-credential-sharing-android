@@ -4,7 +4,7 @@ import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
-object HolderWelcomeViewModelTestData {
+object QrCodeViewModelTestData {
     const val SCREEN_NAME = "Find out which details you need to share"
 
     val expectedScreenEvent = ViewEvent.Screen(

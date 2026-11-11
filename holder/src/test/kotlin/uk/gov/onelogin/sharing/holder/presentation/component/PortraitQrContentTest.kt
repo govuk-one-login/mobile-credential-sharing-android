@@ -6,13 +6,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.android.ui.theme.m3.GdsTheme
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenRule
+import uk.gov.onelogin.sharing.holder.presentation.QrCodeScreenRule
 
 @RunWith(AndroidJUnit4::class)
 class PortraitQrContentTest {
 
     @get:Rule
-    val composeTestRule = HolderWelcomeScreenRule(createComposeRule())
+    val composeTestRule = QrCodeScreenRule(createComposeRule())
 
     @Test
     fun `Shows screen content stack vertically`() = composeTestRule.run {

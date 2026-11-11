@@ -131,7 +131,7 @@ class HolderSessionImplTest {
         }
 
     @Test
-    fun `updateEngagementPresentation is a no-op when the flag already matches`() = runTest {
+    fun `updateEngagementPresentation is a no-op when the presentation matches`() = runTest {
         val state = HolderSessionState.PresentingEngagement(
             EngagementPresentation(qrPayload = null)
         )

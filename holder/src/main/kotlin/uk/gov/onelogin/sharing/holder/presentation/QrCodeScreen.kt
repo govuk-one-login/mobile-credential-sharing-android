@@ -20,10 +20,7 @@ import uk.gov.onelogin.sharing.holder.presentation.component.PortraitQrContent
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 
 @Composable
-fun HolderWelcomeScreen(
-    modifier: Modifier = Modifier,
-    viewModel: HolderWelcomeViewModel = metroViewModel()
-) {
+fun QrCodeScreen(modifier: Modifier = Modifier, viewModel: QrCodeViewModel = metroViewModel()) {
     val contentState by viewModel.uiState.collectAsStateWithLifecycle(
         context = Dispatchers.Default
     )
@@ -55,7 +52,7 @@ private fun QrContent(presentation: EngagementPresentation, modifier: Modifier =
 
 @Composable
 @PreviewContent
-internal fun HolderWelcomeScreenPreview() {
+internal fun QrCodeScreenPreview() {
     QrContent(
         presentation = EngagementPresentation(
             qrPayload = "QR Data",

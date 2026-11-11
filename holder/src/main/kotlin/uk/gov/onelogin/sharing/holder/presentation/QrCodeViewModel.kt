@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
-import uk.gov.onelogin.sharing.holder.presentation.HolderWelcomeScreenAnalytics.holderWelcomeScreen
+import uk.gov.onelogin.sharing.holder.presentation.QrCodeScreenAnalytics.qrCodeScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @Inject
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 @ViewModelKey
-class HolderWelcomeViewModel(
+class QrCodeViewModel(
     orchestrator: Orchestrator.Holder,
     private val analyticsLogger: AnalyticsLogger,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -53,6 +53,6 @@ class HolderWelcomeViewModel(
         )
 
     fun sendScreenEvent(screenName: String) = viewModelScope.launch(dispatcher) {
-        analyticsLogger.holderWelcomeScreen(screenName)
+        analyticsLogger.qrCodeScreen(screenName)
     }
 }

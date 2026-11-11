@@ -17,7 +17,7 @@ private val paragraphs = listOf(
 )
 
 @Composable
-internal fun HolderWelcomeBody(modifier: Modifier = Modifier) {
+internal fun QrCodeScreenBody(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(spacingDouble)

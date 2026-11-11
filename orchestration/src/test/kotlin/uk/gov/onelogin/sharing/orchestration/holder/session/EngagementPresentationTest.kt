@@ -19,7 +19,7 @@ class EngagementPresentationTest {
     }
 
     @Test
-    fun `Engagement presentation cancellation rule matches the EngagementPresentation state`() {
+    fun `Engagement presentation cancellation rule matches the PresentingEngagement state`() {
         val state = HolderSessionState.PresentingEngagement(
             EngagementPresentation("qr")
         )

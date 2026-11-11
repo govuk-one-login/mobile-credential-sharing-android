@@ -9,7 +9,6 @@ import io.mockk.mockk
 import java.security.GeneralSecurityException
 import java.security.cert.X509Certificate
 import java.util.UUID
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,7 +42,6 @@ import uk.gov.onelogin.sharing.cryptoService.FakeSessionSecurity
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestDecodingException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.DeviceRequestValidationException
 import uk.gov.onelogin.sharing.cryptoService.cbor.decoders.credential.AgeOverNNRequestLimitException
-import uk.gov.onelogin.sharing.cryptoService.engagement.Engagement
 import uk.gov.onelogin.sharing.cryptoService.holder.DeviceSignatureException
 import uk.gov.onelogin.sharing.cryptoService.holder.FakeHolderCryptoService
 import uk.gov.onelogin.sharing.cryptoService.holder.HolderCryptoService
@@ -2171,7 +2169,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `presenting engagement arms the display-window timer with showQr true`() = runTest {
+    fun `presenting engagement arms the display-window timer with a visible QR code`() = runTest {
         val engagementTimer = FakeSessionTimer()
         val transport = FakePeripheralBluetoothTransport()
 

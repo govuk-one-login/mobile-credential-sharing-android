@@ -8,7 +8,7 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.onelogin.sharing.holder.R
 
 @Composable
-internal fun HolderWelcomeHeading(modifier: Modifier = Modifier) {
+internal fun QrCodeScreenHeading(modifier: Modifier = Modifier) {
     GdsHeading(
         text = stringResource(R.string.holder_welcome_heading),
         modifier = modifier,

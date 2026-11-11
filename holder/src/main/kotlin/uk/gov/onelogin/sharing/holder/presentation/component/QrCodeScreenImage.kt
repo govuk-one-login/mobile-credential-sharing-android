@@ -14,7 +14,7 @@ private const val QR_SIZE = 800
 private const val QR_MARGIN = 0
 
 @Composable
-internal fun HolderWelcomeQrCode(qrPayload: String?, modifier: Modifier = Modifier) {
+internal fun QrCodeScreenImage(qrPayload: String?, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center

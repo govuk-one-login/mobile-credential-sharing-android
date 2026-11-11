@@ -29,7 +29,7 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.
 class HolderPresentQrNavigationExtTest {
 
     @get:Rule
-    val composeTestRule = HolderWelcomeScreenRule(createComposeRule())
+    val composeTestRule = QrCodeScreenRule(createComposeRule())
 
     private lateinit var controller: TestNavHostController
 

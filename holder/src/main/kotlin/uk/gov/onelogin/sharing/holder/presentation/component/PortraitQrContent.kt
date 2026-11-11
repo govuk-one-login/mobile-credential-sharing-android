@@ -11,11 +11,11 @@ internal fun PortraitQrContent(qrPayload: String?, modifier: Modifier = Modifier
     LeftAlignedScreen(
         modifier = modifier,
         title = { padding ->
-            HolderWelcomeHeading(Modifier.padding(horizontal = padding))
+            QrCodeScreenHeading(Modifier.padding(horizontal = padding))
         },
         body = { padding ->
             item {
-                HolderWelcomeQrCode(
+                QrCodeScreenImage(
                     qrPayload = qrPayload,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -23,7 +23,7 @@ internal fun PortraitQrContent(qrPayload: String?, modifier: Modifier = Modifier
                 )
             }
             item {
-                HolderWelcomeBody(Modifier.padding(horizontal = padding))
+                QrCodeScreenBody(Modifier.padding(horizontal = padding))
             }
         }
     )

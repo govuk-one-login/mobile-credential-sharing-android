@@ -22,7 +22,7 @@ import kotlin.collections.forEach
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers
 import uk.gov.onelogin.sharing.holder.R
 
-class HolderWelcomeScreenRule(
+class QrCodeScreenRule(
     composeTestRule: ComposeContentTestRule,
     private val resources: Resources =
         ApplicationProvider.getApplicationContext<Context>().resources

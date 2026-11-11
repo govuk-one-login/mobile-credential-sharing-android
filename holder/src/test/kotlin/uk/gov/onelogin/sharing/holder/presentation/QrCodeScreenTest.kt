@@ -21,12 +21,12 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentati
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(AndroidJUnit4::class)
-class HolderWelcomeScreenTest {
+class QrCodeScreenTest {
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
     @get:Rule
-    val composeTestRule = HolderWelcomeScreenRule(composeTestRule = createComposeRule())
+    val composeTestRule = QrCodeScreenRule(composeTestRule = createComposeRule())
 
     private var initialHolderState: HolderSessionState = HolderSessionState.PresentingEngagement(
         EngagementPresentation("This is a unit test")
@@ -41,7 +41,7 @@ class HolderWelcomeScreenTest {
     private val analyticsLogger = StoredAnalyticsLogger()
 
     private val viewModel by lazy {
-        HolderWelcomeViewModel(
+        QrCodeViewModel(
             dispatcher = dispatcherRule.testDispatcher,
             analyticsLogger = analyticsLogger,
             orchestrator = orchestrator
@@ -69,7 +69,7 @@ class HolderWelcomeScreenTest {
         }
 
     @Test
-    fun `Keeps the screen and hides only the QR before it is being renewed`() =
+    fun `Keeps the screen and hides only the QR while it is being renewed`() =
         runTest(dispatcherRule.testDispatcher) {
             initialHolderState = HolderSessionState.PresentingEngagement(
                 EngagementPresentation(null)
@@ -82,7 +82,7 @@ class HolderWelcomeScreenTest {
 
     @Test
     @Config(qualifiers = "+land")
-    fun `Keeps the landscape screen and hides only the QR before it is being renewed`() =
+    fun `Keeps the landscape screen and hides only the QR while it is being renewed`() =
         runTest(dispatcherRule.testDispatcher) {
             initialHolderState = HolderSessionState.PresentingEngagement(
                 EngagementPresentation(null)
@@ -144,7 +144,7 @@ class HolderWelcomeScreenTest {
         }
 
     @Test
-    fun `Closing the journey clears the QR by keeps the screen`() =
+    fun `Closing the journey clears the QR but keeps the screen`() =
         runTest(dispatcherRule.testDispatcher) {
             composeTestRule.run {
                 setContent { Render() }
@@ -187,7 +187,7 @@ class HolderWelcomeScreenTest {
             assertThat(
                 analyticsLogger,
                 hasSentEvents(
-                    contains(HolderWelcomeViewModelTestData.expectedScreenEvent)
+                    contains(QrCodeViewModelTestData.expectedScreenEvent)
                 )
             )
         }
@@ -200,7 +200,7 @@ class HolderWelcomeScreenTest {
         }
     }
 
-    private fun HolderWelcomeScreenRule.assertQrCodeIsHiddenWithinScreen() {
+    private fun QrCodeScreenRule.assertQrCodeIsHiddenWithinScreen() {
         assertHeadingIsDisplayed()
         assertQrCodeDoesNotExist()
         assertBodyExists()
@@ -208,6 +208,6 @@ class HolderWelcomeScreenTest {
 
     @Composable
     fun Render() {
-        HolderWelcomeScreen(viewModel = viewModel)
+        QrCodeScreen(viewModel = viewModel)
     }
 }

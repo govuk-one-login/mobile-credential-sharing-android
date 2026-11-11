@@ -18,16 +18,16 @@ internal fun LandscapeQrContent(qrPayload: String?, modifier: Modifier = Modifie
             LeftAlignedScreen(
                 modifier = Modifier.weight(1f),
                 title = { padding ->
-                    HolderWelcomeHeading(Modifier.padding(horizontal = padding))
+                    QrCodeScreenHeading(Modifier.padding(horizontal = padding))
                 },
                 body = { padding ->
                     item {
-                        HolderWelcomeBody(Modifier.padding(horizontal = padding))
+                        QrCodeScreenBody(Modifier.padding(horizontal = padding))
                     }
                 }
             )
             // col 2
-            HolderWelcomeQrCode(
+            QrCodeScreenImage(
                 qrPayload = qrPayload,
                 modifier = Modifier
                     .padding(top = spacingDouble, end = spacingDouble)

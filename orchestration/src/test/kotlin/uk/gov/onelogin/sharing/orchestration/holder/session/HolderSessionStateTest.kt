@@ -78,7 +78,7 @@ class HolderSessionStateTest {
             AwaitingVerifierResolution,
             ProcessingEstablishment,
             Preflight(listOf()),
-            PresentingEngagement("unit test"),
+            PresentingEngagement(EngagementPresentation("unit test")),
             ProcessingResponse
         )
     ) {
