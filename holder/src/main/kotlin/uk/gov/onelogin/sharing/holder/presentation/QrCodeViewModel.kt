@@ -20,7 +20,6 @@ import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.presentation.QrCodeScreenAnalytics.qrCodeScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -32,24 +31,20 @@ class QrCodeViewModel(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
-    val uiState: StateFlow<EngagementPresentation> = orchestrator
+    val uiState: StateFlow<QrCodeUiState> = orchestrator
         .holderSessionState
         .map { sessionState ->
-            (sessionState as? HolderSessionState.PresentingEngagement)?.presentation
-                ?: EngagementPresentation(
-                    qrPayload = null,
-                    cancelRequiresConfirmation = false
-                )
+            (sessionState as? HolderSessionState.PresentingEngagement)
+                ?.presentation
+                ?.let(::QrCodeUiState)
+                ?: QrCodeUiState()
         }
         .distinctUntilChanged()
         .flowOn(dispatcher)
         .stateIn(
             viewModelScope.plus(dispatcher),
             SharingStarted.Eagerly,
-            EngagementPresentation(
-                qrPayload = null,
-                cancelRequiresConfirmation = false
-            )
+            QrCodeUiState()
         )
 
     fun sendScreenEvent(screenName: String) = viewModelScope.launch(dispatcher) {

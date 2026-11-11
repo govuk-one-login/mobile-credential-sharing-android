@@ -19,11 +19,10 @@ import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.presentation.component.LandscapeQrContent
 import uk.gov.onelogin.sharing.holder.presentation.component.PortraitQrContent
-import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 
 @Composable
 fun QrCodeScreen(modifier: Modifier = Modifier, viewModel: QrCodeViewModel = metroViewModel()) {
-    val contentState by viewModel.uiState.collectAsStateWithLifecycle(
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         context = Dispatchers.Default
     )
     val context = LocalContext.current
@@ -36,37 +35,37 @@ fun QrCodeScreen(modifier: Modifier = Modifier, viewModel: QrCodeViewModel = met
     }
 
     QrContent(
-        presentation = contentState,
+        uiState = uiState,
         modifier = modifier
     )
 }
 
 @Composable
-private fun QrContent(presentation: EngagementPresentation, modifier: Modifier = Modifier) {
+private fun QrContent(uiState: QrCodeUiState, modifier: Modifier = Modifier) {
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     if (isLandscape) {
-        LandscapeQrContent(presentation.qrPayload, modifier)
+        LandscapeQrContent(uiState.qrPayload, modifier)
     } else {
-        PortraitQrContent(presentation.qrPayload, modifier)
+        PortraitQrContent(uiState.qrPayload, modifier)
     }
 }
 
 @Composable
 @PreviewContent
 internal fun QrCodeScreenPreview(
-    @PreviewParameter(QrCodeScreenPreviewProvider::class) presentation: EngagementPresentation
+    @PreviewParameter(QrCodeScreenPreviewProvider::class) uiState: QrCodeUiState
 ) {
     QrContent(
-        presentation = presentation,
+        uiState = uiState,
         modifier = Modifier
     )
 }
 
-internal class QrCodeScreenPreviewProvider : PreviewParameterProvider<EngagementPresentation> {
-    override val values: Sequence<EngagementPresentation>
+internal class QrCodeScreenPreviewProvider : PreviewParameterProvider<QrCodeUiState> {
+    override val values: Sequence<QrCodeUiState>
         get() = sequenceOf(
-            EngagementPresentation("QR Data"),
-            EngagementPresentation(null)
+            QrCodeUiState("QR Data"),
+            QrCodeUiState(null)
         )
 }
