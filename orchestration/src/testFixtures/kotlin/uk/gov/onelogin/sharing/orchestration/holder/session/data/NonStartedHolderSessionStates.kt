@@ -13,7 +13,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateSt
  */
 class NonStartedHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*> = listOf(
-        HolderSessionState.PresentingEngagement(EngagementPresentation("")),
+        HolderSessionStateStubs.presentingEngagementStub,
         HolderSessionState.AwaitingUserConsent(
             deviceRequestStub,
             HolderSessionStateStubs.consentPresentationStub

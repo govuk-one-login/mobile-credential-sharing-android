@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
 
 @RunWith(AndroidJUnit4::class)
 class QrCodeScreenTest {
@@ -28,9 +29,8 @@ class QrCodeScreenTest {
     @get:Rule
     val composeTestRule = QrCodeScreenRule(composeTestRule = createComposeRule())
 
-    private var initialHolderState: HolderSessionState = HolderSessionState.PresentingEngagement(
-        EngagementPresentation("This is a unit test")
-    )
+    private var initialHolderState: HolderSessionState =
+        HolderSessionStateStubs.presentingEngagementStub
 
     private val holderState by lazy { MutableStateFlow(initialHolderState) }
 
@@ -71,9 +71,7 @@ class QrCodeScreenTest {
     @Test
     fun `Keeps the screen and hides only the QR while it is being renewed`() =
         runTest(dispatcherRule.testDispatcher) {
-            initialHolderState = HolderSessionState.PresentingEngagement(
-                EngagementPresentation(null)
-            )
+            initialHolderState = HolderSessionStateStubs.presentingHiddenEngagementStub
             composeTestRule.run {
                 setContent { Render() }
                 assertQrCodeIsHiddenWithinScreen()
@@ -84,9 +82,7 @@ class QrCodeScreenTest {
     @Config(qualifiers = "+land")
     fun `Keeps the landscape screen and hides only the QR while it is being renewed`() =
         runTest(dispatcherRule.testDispatcher) {
-            initialHolderState = HolderSessionState.PresentingEngagement(
-                EngagementPresentation(null)
-            )
+            initialHolderState = HolderSessionStateStubs.presentingHiddenEngagementStub
             composeTestRule.run {
                 setContent { Render() }
                 assertHeadingIsDisplayed()
@@ -103,11 +99,7 @@ class QrCodeScreenTest {
                 assertHeadingIsDisplayed()
                 assertQrCodeIsDisplayed()
 
-                holderState.update {
-                    HolderSessionState.PresentingEngagement(
-                        EngagementPresentation(null)
-                    )
-                }
+                holderState.update { HolderSessionStateStubs.presentingHiddenEngagementStub }
                 waitUntilQrCodeDoesNotExist()
                 assertQrCodeIsHiddenWithinScreen()
 

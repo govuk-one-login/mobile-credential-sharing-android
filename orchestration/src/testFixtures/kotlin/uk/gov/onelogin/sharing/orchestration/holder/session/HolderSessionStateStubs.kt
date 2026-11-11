@@ -28,4 +28,17 @@ object HolderSessionStateStubs {
         request = deviceRequestStub,
         presentation = consentPresentationStub
     )
+
+    val engagementPresentationStub: EngagementPresentation = EngagementPresentation(
+        qrPayload = "QR code"
+    )
+
+    val hiddenEngagementPresentationStub: EngagementPresentation =
+        engagementPresentationStub.withoutQr()
+
+    val presentingEngagementStub: HolderSessionState =
+        HolderSessionState.PresentingEngagement(engagementPresentationStub)
+
+    val presentingHiddenEngagementStub: HolderSessionState =
+        HolderSessionState.PresentingEngagement(hiddenEngagementPresentationStub)
 }

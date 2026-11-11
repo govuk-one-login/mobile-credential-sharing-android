@@ -31,7 +31,7 @@ class HolderSessionStateTest {
             AwaitingVerifierResolution,
             ProcessingEstablishment,
             Preflight(listOf()),
-            PresentingEngagement(EngagementPresentation("unit test")),
+            HolderSessionStateStubs.presentingEngagementStub,
             ProcessingResponse
         )
     ) {
@@ -78,7 +78,7 @@ class HolderSessionStateTest {
             AwaitingVerifierResolution,
             ProcessingEstablishment,
             Preflight(listOf()),
-            PresentingEngagement(EngagementPresentation("unit test")),
+            HolderSessionStateStubs.presentingEngagementStub,
             ProcessingResponse
         )
     ) {

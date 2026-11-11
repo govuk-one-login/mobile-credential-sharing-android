@@ -7,6 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.Dispatchers
@@ -52,12 +54,19 @@ private fun QrContent(presentation: EngagementPresentation, modifier: Modifier =
 
 @Composable
 @PreviewContent
-internal fun QrCodeScreenPreview() {
+internal fun QrCodeScreenPreview(
+    @PreviewParameter(QrCodeScreenPreviewProvider::class) presentation: EngagementPresentation
+) {
     QrContent(
-        presentation = EngagementPresentation(
-            qrPayload = "QR Data",
-            cancelRequiresConfirmation = false
-        ),
+        presentation = presentation,
         modifier = Modifier
     )
+}
+
+internal class QrCodeScreenPreviewProvider : PreviewParameterProvider<EngagementPresentation> {
+    override val values: Sequence<EngagementPresentation>
+        get() = sequenceOf(
+            EngagementPresentation("QR Data"),
+            EngagementPresentation(null)
+        )
 }
