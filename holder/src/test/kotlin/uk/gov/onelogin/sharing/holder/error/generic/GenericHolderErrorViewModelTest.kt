@@ -9,6 +9,9 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
 import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
+import uk.gov.logging.api.v3dot1.model.ViewEvent
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.BUTTON_TEXT
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
@@ -27,7 +30,7 @@ class GenericHolderErrorViewModelTest {
         "This is a unit test",
         SessionErrorReason.UnrecoverablePrerequisite()
     )
-    private var sessionState = HolderSessionState.Complete.Failed(error)
+    private var sessionState: HolderSessionState = HolderSessionState.Complete.Failed(error)
 
     private val orchestrator by lazy {
         FakeOrchestrator(
@@ -75,6 +78,28 @@ class GenericHolderErrorViewModelTest {
             contains(expectedScreenEvent(error))
         )
     }
+
+    @Test
+    fun `A screen-level event without a reason occurs when session error is unavailable`() =
+        runTest {
+            sessionState = HolderSessionState.NotStarted
+            viewModel.sendScreenEvent(SCREEN_NAME).join()
+
+            assertThat(
+                analyticsLogger,
+                contains(
+                    ViewEvent.Error(
+                        name = SCREEN_NAME,
+                        id = "9bf821af-e8ff-41cf-a311-4b6cec989315",
+                        endpoint = "",
+                        // malformed reason
+                        reason = "",
+                        status = "",
+                        params = walletSharingRequiredParameters
+                    ).asLegacyEvent()
+                )
+            )
+        }
 
     @Test
     fun `Sends an analytics event for button presses`() = runTest {
