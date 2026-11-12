@@ -121,26 +121,6 @@ internal fun ShareCredential(
         }
     }
 
-//    val onCancel: () -> Unit = {
-//        scope.launch {
-//            if (state.shouldConfirmCancellation()) {
-//                withContext(uiDispatcher) {
-//                    navController.navigateToHolderUserCancellationDialog()
-//                }
-//            } else if (state is HolderSessionState.PresentingEngagement) {
-//                if (!isDismissing) {
-//                    isDismissing = true
-//                    animationScope.launch {
-//                        dismissOffset.animateTo(targetValue = contentHeight.toFloat())
-//                        orchestrator.cancel()
-//                    }
-//                }
-//            } else {
-//                orchestrator.cancel()
-//            }
-//        }
-//    }
-
     MonitorHolderSessionState(
         holderSessionState = holderSessionState,
         navController = navController
