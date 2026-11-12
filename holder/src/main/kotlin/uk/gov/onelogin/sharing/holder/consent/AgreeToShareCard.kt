@@ -275,7 +275,7 @@ internal fun AgreeToShareCardPreview(
         Column(modifier = Modifier.padding(spacingDouble)) {
             AgreeToShareCard(
                 card = card,
-                organizationName = "Example Organisation."
+                organizationName = "Organisation Ltd"
             )
         }
     }

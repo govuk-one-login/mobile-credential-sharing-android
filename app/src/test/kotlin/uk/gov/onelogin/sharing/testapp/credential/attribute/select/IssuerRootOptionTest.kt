@@ -27,4 +27,9 @@ class IssuerRootOptionTest(@TestParameter val option: IssuerRootOption) {
     fun `Display name is not blank`() = runTest {
         assertTrue(option.displayName.isNotBlank())
     }
+
+    @Test
+    fun `Root certificate asset is not blank`() = runTest {
+        assertTrue(option.rootCertificateAsset.isNotBlank())
+    }
 }

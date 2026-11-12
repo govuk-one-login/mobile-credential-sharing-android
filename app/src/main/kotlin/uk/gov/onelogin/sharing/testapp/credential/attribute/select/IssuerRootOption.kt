@@ -20,6 +20,10 @@ enum class IssuerRootOption(internal val rootCertificateAsset: String, val displ
     WALLET_CORE_INTEGRATION(
         rootCertificateAsset = "wallet_core_root_integration_x509_certificate",
         displayName = "Wallet (Integration)"
+    ),
+    DVLA_ROOT_INTEGRATION(
+        rootCertificateAsset = "dvla_integration_x509_certificate",
+        displayName = "DVLA (Integration)"
     );
 
     val certificateAsset: String = "$rootCertificateAsset.der"
