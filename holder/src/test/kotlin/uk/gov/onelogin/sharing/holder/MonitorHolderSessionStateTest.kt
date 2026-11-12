@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.holder.qrcode.QrCodeRoute
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -116,7 +116,7 @@ class MonitorHolderSessionStateTest {
             ).invoke()
             waitUntil {
                 controller.currentBackStackEntry?.destination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                    ?.route == QrCodeRoute::class.qualifiedName
             }
 
             // Refresh emits a transient NotStarted for the new session. While already presenting,
@@ -129,7 +129,7 @@ class MonitorHolderSessionStateTest {
 
             assert(
                 controller.currentBackStackEntry?.destination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                    ?.route == QrCodeRoute::class.qualifiedName
             )
         }
     }
@@ -187,7 +187,7 @@ class MonitorHolderSessionStateTest {
             ).invoke()
             waitUntil {
                 controller.currentBackStackEntry?.destination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                    ?.route == QrCodeRoute::class.qualifiedName
             }
             val backStackSize = controller.currentBackStack.value.size
 
@@ -203,7 +203,7 @@ class MonitorHolderSessionStateTest {
 
             assert(
                 controller.currentBackStackEntry?.destination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                    ?.route == QrCodeRoute::class.qualifiedName
             )
             assert(controller.currentBackStack.value.size == backStackSize)
         }

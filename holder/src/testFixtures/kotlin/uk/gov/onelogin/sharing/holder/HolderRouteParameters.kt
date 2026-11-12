@@ -11,7 +11,7 @@ import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.holder.qrcode.QrCodeRoute
 
 class HolderRouteParameters : TestParametersValuesProvider() {
     private val inputs = listOf<Triple<String, Any, TestNavHostController.() -> Boolean>>(
@@ -47,12 +47,12 @@ class HolderRouteParameters : TestParametersValuesProvider() {
         },
         Triple(
             "Holder present QR route",
-            HolderPresentQrRoute
+            QrCodeRoute
         ) {
-            instanceOf<HolderPresentQrRoute>(
-                HolderPresentQrRoute::class.java
+            instanceOf<QrCodeRoute>(
+                QrCodeRoute::class.java
             ).matches(
-                currentBackStackEntry?.toRoute<HolderPresentQrRoute>()
+                currentBackStackEntry?.toRoute<QrCodeRoute>()
             )
         },
         Triple(

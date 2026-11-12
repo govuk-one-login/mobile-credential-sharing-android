@@ -1,0 +1,231 @@
+package uk.gov.onelogin.sharing.holder.qrcode
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.unit.dp
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
+
+@RunWith(AndroidJUnit4::class)
+class QrCodeScreenTest {
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
+
+    @get:Rule
+    val composeTestRule = QrCodeScreenRule(composeTestRule = createComposeRule())
+
+    private var initialHolderState: HolderSessionState =
+        HolderSessionStateStubs.presentingEngagementStub
+
+    private val holderState by lazy { MutableStateFlow(initialHolderState) }
+
+    private val orchestrator by lazy {
+        FakeOrchestrator(initialHolderState = holderState)
+    }
+
+    private val analyticsLogger = StoredAnalyticsLogger()
+
+    private val viewModel by lazy {
+        QrCodeViewModel(
+            dispatcher = dispatcherRule.testDispatcher,
+            analyticsLogger = analyticsLogger,
+            orchestrator = orchestrator
+        )
+    }
+
+    @Test
+    fun `Shows QR code whilst presenting engagement`() = runTest(dispatcherRule.testDispatcher) {
+        composeTestRule.run {
+            setContent { Render() }
+            assertHeadingIsDisplayed()
+            assertQrCodeIsDisplayed()
+            scrollToAndAssertBodyIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `Keeps the screen and hides only the QR before it is ready`() =
+        runTest(dispatcherRule.testDispatcher) {
+            initialHolderState = HolderSessionState.NotStarted
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeIsHiddenWithinScreen()
+            }
+        }
+
+    @Test
+    fun `Keeps the screen and hides only the QR while it is being renewed`() =
+        runTest(dispatcherRule.testDispatcher) {
+            initialHolderState = HolderSessionStateStubs.presentingHiddenEngagementStub
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeIsHiddenWithinScreen()
+            }
+        }
+
+    @Test
+    @Config(qualifiers = PHONE_LANDSCAPE)
+    fun `Keeps the landscape screen and hides only the QR while it is being renewed`() =
+        runTest(dispatcherRule.testDispatcher) {
+            initialHolderState = HolderSessionStateStubs.presentingHiddenEngagementStub
+            composeTestRule.run {
+                setContent { Render() }
+                assertHeadingIsDisplayed()
+                assertHeadingAndBodyAreScrollable()
+                assertQrCodeDoesNotExist()
+            }
+        }
+
+    @Test
+    fun `Renewal goes from visible to hidden to a fresh QR on the same screen`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertHeadingIsDisplayed()
+                assertQrCodeIsDisplayed()
+
+                holderState.update { HolderSessionStateStubs.presentingHiddenEngagementStub }
+                waitUntilQrCodeDoesNotExist()
+                assertQrCodeIsHiddenWithinScreen()
+
+                holderState.update {
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation("Fresh QR")
+                    )
+                }
+                waitUntilQrCodeExists()
+                assertHeadingIsDisplayed()
+                assertQrCodeIsDisplayed()
+            }
+        }
+
+    @Test
+    fun `Renewal that skips the hiding update never re-shows the expired QR`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeIsDisplayed()
+
+                holderState.update { HolderSessionState.ReadyToPresent }
+                waitUntilQrCodeDoesNotExist()
+                assertQrCodeIsHiddenWithinScreen()
+
+                holderState.update {
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation("Fresh QR")
+                    )
+                }
+                waitUntilQrCodeExists()
+                assertQrCodeIsDisplayed()
+            }
+        }
+
+    @Test
+    fun `Closing the journey clears the QR but keeps the screen`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeIsDisplayed()
+
+                holderState.update { HolderSessionState.SendingTermination }
+                waitUntilQrCodeDoesNotExist()
+                assertQrCodeIsHiddenWithinScreen()
+            }
+        }
+
+    @Test
+    fun `Uses portrait content layout when in portrait orientation`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeScrollsWithContent()
+            }
+        }
+
+    @Test
+    @Config(qualifiers = PHONE_LANDSCAPE)
+    fun `Uses landscape content layout on a phone in landscape orientation`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeIsFixed()
+                assertQrCodeSizeIs(250.dp)
+                assertHeadingAndBodyAreScrollable()
+            }
+        }
+
+    @Test
+    @Config(qualifiers = UNFOLDED_FOLDABLE)
+    fun `Uses portrait content layout on an unfolded foldable when in landscape orientation`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeScrollsWithContent()
+            }
+        }
+
+    @Test
+    @Config(qualifiers = TABLET_LANDSCAPE)
+    fun `Uses portrait content layout on a tablet when in landscape orientation`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeScrollsWithContent()
+            }
+        }
+
+    @Test
+    fun `Displaying the screen sends a screen view event`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                waitUntil { analyticsLogger.sentAnalyticsEvents.isNotEmpty() }
+            }
+            assertThat(
+                analyticsLogger,
+                hasSentEvents(
+                    contains(QrCodeViewModelTestData.expectedScreenEvent)
+                )
+            )
+        }
+
+    @Test
+    fun `Preview only shows QR content`() = runTest(dispatcherRule.testDispatcher) {
+        composeTestRule.run {
+            setContent { Render() }
+            assertQrCodeIsDisplayed()
+        }
+    }
+
+    private fun QrCodeScreenRule.assertQrCodeIsHiddenWithinScreen() {
+        assertHeadingIsDisplayed()
+        assertQrCodeDoesNotExist()
+        assertBodyExists()
+    }
+
+    @Composable
+    fun Render() {
+        QrCodeScreen(viewModel = viewModel)
+    }
+
+    private companion object {
+        const val PHONE_LANDSCAPE = "w891dp-h411dp-land"
+        const val UNFOLDED_FOLDABLE = "w673dp-h841dp"
+        const val TABLET_LANDSCAPE = "w1280dp-h800dp-land"
+    }
+}
