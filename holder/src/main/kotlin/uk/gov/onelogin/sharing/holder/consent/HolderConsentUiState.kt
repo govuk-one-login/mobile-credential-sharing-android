@@ -5,5 +5,6 @@ data class HolderConsentUiState(
     val organizationName: String,
     val privacyPolicyUrl: String,
     val card: ConsentCard? = null,
-    val isBusy: Boolean = false
+    val isBusy: Boolean = false,
+    val showMoreAboutDvs: Boolean = false,
 )

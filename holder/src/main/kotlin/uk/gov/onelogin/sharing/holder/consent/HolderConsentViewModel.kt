@@ -8,8 +8,12 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -22,6 +26,7 @@ import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.conse
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.readPrivacyNoticeButton
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @Inject
@@ -33,42 +38,43 @@ class HolderConsentViewModel(
     dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
-    val presentation: StateFlow<HolderConsentUiState?> = orchestrator
+    private val showMoreAboutDvs = MutableStateFlow(false)
+
+    private val presentation: Flow<ConsentPresentation> = orchestrator
         .holderSessionState
-        .map { state ->
-            state as? HolderSessionState.AwaitingUserConsent
-        }.map { consentState ->
-            consentState?.presentation
-        }.map { presentation ->
-            presentation?.let {
-                HolderConsentUiState(
-                    privacyPolicyUrl = it.privacyPolicyUrl,
-                    card = it.documents.firstOrNull()?.let { document ->
-                        ConsentCard.from(
-                            ConsentAttributeResolver.toDisplayAttributes(
-                                document.namespaces.flatMap(ConsentNamespace::attributes)
-                            )
-                        )
-                    },
-                    normalisedOrganizationName = it.normalisedOrganizationName,
-                    organizationName = it.organizationName,
-                    isBusy = it.isBusy
+        .filterIsInstance<HolderSessionState.AwaitingUserConsent>()
+        .map { it.presentation }
+
+    val uiState: StateFlow<HolderConsentUiState?> = combine(
+        presentation,
+        showMoreAboutDvs
+    ) { presentation, showMoreAboutDvs ->
+        HolderConsentUiState(
+            privacyPolicyUrl = presentation.privacyPolicyUrl,
+            card = presentation.documents.firstOrNull()?.let { document ->
+                ConsentCard.from(
+                    ConsentAttributeResolver.toDisplayAttributes(
+                        document.namespaces.flatMap(ConsentNamespace::attributes)
+                    )
                 )
-            }
-        }.stateIn(
-            viewModelScope.plus(dispatcher),
-            SharingStarted.Eagerly,
-            null
+            },
+            normalisedOrganizationName = presentation.normalisedOrganizationName,
+            organizationName = presentation.organizationName,
+            isBusy = presentation.isBusy,
+            showMoreAboutDvs = showMoreAboutDvs
         )
+    }.stateIn(
+        viewModelScope.plus(dispatcher),
+        SharingStarted.Eagerly,
+        null
+    )
 
     fun sendScreenEvent(screenName: String) = viewModelScope.launch {
         analyticsLogger.consentScreen(screenName)
     }
 
     fun onReadPrivacyNotice() = viewModelScope.launch {
-        presentation.value?.let {
-            analyticsLogger.readPrivacyNoticeButton()
-        }
+        analyticsLogger.readPrivacyNoticeButton()
     }
 
     fun onAccept() = viewModelScope.launch {

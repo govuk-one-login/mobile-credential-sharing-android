@@ -138,7 +138,7 @@ class HolderConsentViewModelTest {
                 privacyPolicyUrl = "https://verifier.example/privacy"
             )
 
-            viewModel.presentation.test {
+            viewModel.uiState.test {
                 assertThat(awaitItem(), nullValue())
 
                 holderState.value = HolderSessionState.AwaitingUserConsent(
@@ -165,7 +165,7 @@ class HolderConsentViewModelTest {
                 privacyPolicyUrl = "https://verifier.example/privacy"
             )
 
-            viewModel.presentation.test {
+            viewModel.uiState.test {
                 assertThat(awaitItem(), nullValue())
 
                 holderState.value = HolderSessionState.AwaitingUserConsent(

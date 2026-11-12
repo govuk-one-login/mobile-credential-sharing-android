@@ -41,7 +41,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
 @Composable
 internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
-    val presentation by viewModel.presentation.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val titleRes = R.string.holder_consent_screen_title
 
@@ -52,7 +52,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
         viewModel.sendScreenEvent(context.getEnglishString(titleRes))
     }
 
-    presentation?.let {
+    uiState?.let {
         HolderConsentContent(
             state = it,
             titleRes = titleRes,
