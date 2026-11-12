@@ -165,7 +165,7 @@ internal fun BluetoothPermissionDeniedContent(
         secondaryButton = {
             GdsButton(
                 text = stringResource(R.string.holder_bluetooth_permission_denied_cancel_button),
-                buttonType = ButtonTypeV2.SecondaryDestructive(),
+                buttonType = ButtonTypeV2.Secondary(),
                 onClick = onCancel,
                 modifier = Modifier.fillMaxWidth()
             )
