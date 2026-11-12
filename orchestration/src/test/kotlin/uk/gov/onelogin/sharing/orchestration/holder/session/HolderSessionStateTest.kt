@@ -194,4 +194,33 @@ class HolderSessionStateTest {
         assertIs<SessionErrorReason.UnrecoverableThrowable>(failed.sessionReason)
         assertFalse { failed.isUnrecoverableBluetoothPrerequisite() }
     }
+
+    @Test
+    fun `Preflight requires Bluetooth permission when permission not granted`() {
+        assertTrue {
+            HolderSessionStateStubs.preflightBluetoothPermissionDenied.requiresBluetoothPermission()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth permission for missing prerequisites`() {
+        assertFalse { Preflight(listOf()).requiresBluetoothPermission() }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth permission when Bluetooth is powered off`() {
+        assertFalse {
+            HolderSessionStateStubs.preflightWithoutBluetooth.requiresBluetoothPermission()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth permission when permission denied permanently`() {
+        assertFalse {
+            HolderSessionStateStubs.preflightWithBluetooth(
+                BluetoothState.PermissionDeniedPermanently
+            )
+                .requiresBluetoothPermission()
+        }
+    }
 }
