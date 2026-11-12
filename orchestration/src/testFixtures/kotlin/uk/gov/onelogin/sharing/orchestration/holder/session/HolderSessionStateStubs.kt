@@ -30,7 +30,8 @@ object HolderSessionStateStubs {
     )
 
     val engagementPresentationStub: EngagementPresentation = EngagementPresentation(
-        qrPayload = "QR code"
+        qrPayload = "QR code",
+        cancelRequiresConfirmation = false
     )
 
     val hiddenEngagementPresentationStub: EngagementPresentation =

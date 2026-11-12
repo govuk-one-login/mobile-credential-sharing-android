@@ -11,6 +11,8 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.hiddenEngagementPresentationStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.InvalidHolderSessionStateTransitions
@@ -111,7 +113,7 @@ class HolderSessionImplTest {
     fun `updateEngagementPresentation hides the QR in place without a validated transition`() =
         runTest {
             initialState = HolderSessionState.PresentingEngagement(
-                EngagementPresentation(qrPayload = "qr")
+                engagementPresentationStub.copy(qrPayload = "qr")
             )
 
             Assert.assertFalse(
@@ -133,7 +135,7 @@ class HolderSessionImplTest {
     @Test
     fun `updateEngagementPresentation is a no-op when the presentation matches`() = runTest {
         val state = HolderSessionState.PresentingEngagement(
-            EngagementPresentation(qrPayload = null)
+            hiddenEngagementPresentationStub
         )
         initialState = state
 

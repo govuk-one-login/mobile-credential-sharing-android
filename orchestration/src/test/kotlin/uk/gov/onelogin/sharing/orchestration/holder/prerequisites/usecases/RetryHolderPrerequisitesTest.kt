@@ -10,6 +10,7 @@ import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
@@ -72,7 +73,7 @@ class RetryHolderPrerequisitesTest {
     @Test
     fun `Presenting engagement states pass prerequisites`() = runTest {
         initialHolderState = HolderSessionState.PresentingEngagement(
-            EngagementPresentation("This is a unit test")
+            engagementPresentationStub.copy(qrPayload = "This is a unit test")
         )
 
         navigator.events.test {

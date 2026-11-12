@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
 
 @RunWith(TestParameterInjector::class)
 class QrCodeViewModelTest {
@@ -72,7 +73,7 @@ class QrCodeViewModelTest {
             assertThat(awaitItem(), equalTo(hiddenQr))
 
             holderState.value = HolderSessionState.PresentingEngagement(
-                EngagementPresentation(FRESH_QR_PAYLOAD)
+                engagementPresentationStub.copy(qrPayload = FRESH_QR_PAYLOAD)
             )
             assertThat(awaitItem(), equalTo(freshQr))
         }
@@ -88,7 +89,7 @@ class QrCodeViewModelTest {
                 assertThat(awaitItem(), equalTo(hiddenQr))
 
                 holderState.value = HolderSessionState.PresentingEngagement(
-                    EngagementPresentation(FRESH_QR_PAYLOAD)
+                    engagementPresentationStub.copy(qrPayload = FRESH_QR_PAYLOAD)
                 )
                 assertThat(awaitItem(), equalTo(freshQr))
             }

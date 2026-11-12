@@ -14,7 +14,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
  */
 data class EngagementPresentation(
     val qrPayload: String?,
-    val cancelRequiresConfirmation: Boolean? = false
+    val cancelRequiresConfirmation: Boolean?
 ) {
     /**
      * @return A copy of this presentation with the QR payload nullified, keeping the cancellation

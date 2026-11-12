@@ -24,6 +24,7 @@ import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.qrcode.QrCodeRoute
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
 
 @RunWith(RobolectricTestParameterInjector::class)
 class MonitorHolderSessionStateTest {
@@ -111,7 +112,7 @@ class MonitorHolderSessionStateTest {
                 context = context,
                 navController = controller,
                 state = HolderSessionState.PresentingEngagement(
-                    EngagementPresentation(qrPayload = "qr")
+                    engagementPresentationStub.copy(qrPayload = "qr")
                 )
             ).invoke()
             waitUntil {
@@ -182,7 +183,7 @@ class MonitorHolderSessionStateTest {
                 context = context,
                 navController = controller,
                 state = HolderSessionState.PresentingEngagement(
-                    EngagementPresentation("qr_a")
+                    engagementPresentationStub.copy(qrPayload = "qr_a")
                 )
             ).invoke()
             waitUntil {
@@ -197,7 +198,7 @@ class MonitorHolderSessionStateTest {
                 context = context,
                 navController = controller,
                 state = HolderSessionState.PresentingEngagement(
-                    EngagementPresentation("qr_b")
+                    engagementPresentationStub.copy(qrPayload = "qr_b")
                 )
             ).invoke()
 

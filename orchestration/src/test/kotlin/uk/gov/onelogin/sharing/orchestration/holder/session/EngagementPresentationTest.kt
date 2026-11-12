@@ -3,6 +3,7 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.junit.Test
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
 
 class EngagementPresentationTest {
 
@@ -21,7 +22,7 @@ class EngagementPresentationTest {
     @Test
     fun `Engagement presentation cancellation rule matches the PresentingEngagement state`() {
         val state = HolderSessionState.PresentingEngagement(
-            EngagementPresentation("qr")
+            engagementPresentationStub.copy(qrPayload = "qr")
         )
 
         assertEquals(

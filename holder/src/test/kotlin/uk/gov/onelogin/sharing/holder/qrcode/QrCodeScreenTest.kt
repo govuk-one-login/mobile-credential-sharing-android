@@ -20,6 +20,7 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
 
 @RunWith(AndroidJUnit4::class)
 class QrCodeScreenTest {
@@ -105,7 +106,7 @@ class QrCodeScreenTest {
 
                 holderState.update {
                     HolderSessionState.PresentingEngagement(
-                        EngagementPresentation("Fresh QR")
+                        engagementPresentationStub.copy(qrPayload = "Fresh QR")
                     )
                 }
                 waitUntilQrCodeExists()
@@ -127,7 +128,7 @@ class QrCodeScreenTest {
 
                 holderState.update {
                     HolderSessionState.PresentingEngagement(
-                        EngagementPresentation("Fresh QR")
+                        engagementPresentationStub.copy(qrPayload = "Fresh QR")
                     )
                 }
                 waitUntilQrCodeExists()
