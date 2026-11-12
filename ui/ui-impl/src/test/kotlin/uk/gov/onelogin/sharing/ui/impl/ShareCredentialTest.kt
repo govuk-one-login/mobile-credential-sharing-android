@@ -123,6 +123,31 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
+    fun `Close button navigates to confirmation dialog for certain states`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Processing establishment" to HolderSessionState.ProcessingEstablishment()
+        )
+    ) = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(state)
+            )
+        )
+
+        performCloseJourneyViaButton(presenter)
+
+        composeTestRule.waitUntil(
+            "Unexpected route found!: ${controller.currentDestination?.route}"
+        ) {
+            controller.currentDestination?.route
+                ?.contains("HolderCancellationDialogRoute")
+                ?: false
+        }
+    }
+
+    @Test
+    @UiThreadTest
     fun `Close button cancels the journey for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
@@ -401,7 +426,6 @@ class ShareCredentialTest {
         backDispatcher!!.onBackPressedDispatcher.onBackPressed()
         composeTestRule.waitForIdle()
 
-        // Back is swallowed: the route is unchanged and the journey is not cancelled.
         assertEquals(routeBeforeBack, controller.currentDestination?.route)
         assertEquals(0, orchestrator.cancelCount)
     }

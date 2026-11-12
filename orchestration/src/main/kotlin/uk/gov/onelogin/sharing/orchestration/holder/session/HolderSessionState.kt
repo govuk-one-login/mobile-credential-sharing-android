@@ -28,6 +28,7 @@ sealed class HolderSessionState :
         else -> this::class in cancellableStates
     }
     override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
+
     override fun hideCloseButton(): Boolean = when (this) {
         is ProcessingEstablishment -> !presentation.showCloseButton
         is ProcessingResponse -> !presentation.showCloseButton
@@ -213,10 +214,6 @@ sealed class HolderSessionState :
     }
 
     companion object {
-        // Confirmation is still governed by this set. The loading-screen states
-        // (ProcessingEstablishment, ProcessingResponse, AwaitingVerifierResolution) are included so
-        // that cancelling them prompts for confirmation; their cancellability and close-button
-        // visibility are driven by the ProgressPresentation they carry (see the overrides above).
         @JvmStatic
         private val cancelConfirmationRequired = listOf(
             AwaitingUserConsent::class,
@@ -225,17 +222,13 @@ sealed class HolderSessionState :
             AwaitingVerifierResolution::class
         )
 
-        // Cancellability for the loading-screen states is presentation-driven (see userCanCancel);
-        // this set only covers the states that are not presentation-driven.
         @JvmStatic
         private val cancellableStates = listOf(
             Preflight::class,
             PresentingEngagement::class,
             AwaitingUserConsent::class
-        )
+        ) + cancelConfirmationRequired
 
-        // Close-button visibility for the loading-screen states is presentation-driven (see
-        // hideCloseButton); this set only covers the states that are not presentation-driven.
         @JvmStatic
         private val hiddenCloseButtonStates = listOf(
             AwaitingUserConsent::class

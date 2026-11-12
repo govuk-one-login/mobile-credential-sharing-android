@@ -65,6 +65,21 @@ class HolderSessionStateTest {
     }
 
     @Test
+    fun `Cancellable states other than AwaitingUserConsent do not hide the close button`(
+        @TestParameter state: HolderSessionState = testValues(
+            AwaitingVerifierResolution(),
+            ProcessingEstablishment(),
+            Preflight(listOf()),
+            PresentingEngagement("unit test"),
+            ProcessingResponse()
+        )
+    ) {
+        assertFalse {
+            state.hideCloseButton()
+        }
+    }
+
+    @Test
     fun `AwaitingUserConsent is cancellable but hides the close button`() {
         val state = AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true))
 
