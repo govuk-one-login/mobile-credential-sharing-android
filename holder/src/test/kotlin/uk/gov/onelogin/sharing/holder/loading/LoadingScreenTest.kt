@@ -1,22 +1,13 @@
 package uk.gov.onelogin.sharing.holder.loading
 
 import android.content.Context
-import androidx.activity.OnBackPressedDispatcherOwner
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.navigation.compose.ComposeNavigator
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,82 +35,10 @@ class LoadingScreenTest {
     }
 
     @Test
-    fun `Back press is swallowed when cancellation is unavailable`() =
-        runTest(dispatcherRule.testDispatcher) {
-            lateinit var navController: TestNavHostController
-            var backDispatcher: OnBackPressedDispatcherOwner? = null
-
-            composeTestRule.setContent {
-                backDispatcher = LocalOnBackPressedDispatcherOwner.current
-                navController = TestNavHostController(LocalContext.current).apply {
-                    navigatorProvider.addNavigator(ComposeNavigator())
-                }
-                NavHost(navController = navController, startDestination = "previous") {
-                    composable("previous") {}
-                    composable("loading") {
-                        LoadingScreen(
-                            type = LoadingScreenType.SharingDetails,
-                            cancellationAvailable = false,
-                            viewModel = viewModel
-                        )
-                    }
-                }
-            }
-
-            composeTestRule.runOnUiThread { navController.navigate("loading") }
-            composeTestRule.waitForIdle()
-
-            composeTestRule.runOnUiThread {
-                backDispatcher!!.onBackPressedDispatcher.onBackPressed()
-            }
-            composeTestRule.waitForIdle()
-
-            assertThat(navController.currentDestination?.route, equalTo("loading"))
-        }
-
-    @Test
-    fun `Back press is not swallowed when cancellation is available`() =
-        runTest(dispatcherRule.testDispatcher) {
-            lateinit var navController: TestNavHostController
-            var backDispatcher: OnBackPressedDispatcherOwner? = null
-
-            composeTestRule.setContent {
-                backDispatcher = LocalOnBackPressedDispatcherOwner.current
-                navController = TestNavHostController(LocalContext.current).apply {
-                    navigatorProvider.addNavigator(ComposeNavigator())
-                }
-                NavHost(navController = navController, startDestination = "previous") {
-                    composable("previous") {}
-                    composable("loading") {
-                        LoadingScreen(
-                            type = LoadingScreenType.GettingDetails,
-                            cancellationAvailable = true,
-                            viewModel = viewModel
-                        )
-                    }
-                }
-            }
-
-            composeTestRule.runOnUiThread { navController.navigate("loading") }
-            composeTestRule.waitForIdle()
-
-            composeTestRule.runOnUiThread {
-                backDispatcher!!.onBackPressedDispatcher.onBackPressed()
-            }
-            composeTestRule.waitForIdle()
-
-            assertThat(navController.currentDestination?.route, equalTo("previous"))
-        }
-
-    @Test
     fun `Label for the type is displayed`(@TestParameter type: LoadingScreenType) =
         runTest(dispatcherRule.testDispatcher) {
             composeTestRule.setContent {
-                LoadingScreen(
-                    type = type,
-                    cancellationAvailable = false,
-                    viewModel = viewModel
-                )
+                LoadingScreen(type = type, viewModel = viewModel)
             }
 
             composeTestRule

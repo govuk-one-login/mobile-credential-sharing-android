@@ -10,9 +10,10 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ProgressPresentation
  *
  * Both variants render an identical loading UI (spinner + centred label); only the label text and
  * the GA4 identity differ. The variant is derived from the [ProgressPresentation.Phase] carried on
- * the transitional [uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState]; the
- * cancellation rule (Back / Close) is driven separately by
- * [ProgressPresentation.cancellationAvailable], not by this type.
+ * the transitional [uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState]. The
+ * cancellation and toolbar close-button rules are driven separately by the
+ * [uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState] itself, not by this
+ * type.
  *
  * @property labelRes the centred label shown beneath the spinner.
  * @property screenName the GA4 screenView name.

@@ -97,7 +97,7 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 HolderSessionState.AwaitingVerifierResolution()
             ) {
                 equalTo(
-                    LoadingRoute(LoadingScreenType.SharingDetails, cancellationAvailable = false)
+                    LoadingRoute(LoadingScreenType.SharingDetails)
                 ).matches(
                     currentBackStackEntry?.toRoute<LoadingRoute>()
                 )
@@ -107,7 +107,7 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 HolderSessionState.ProcessingResponse()
             ) {
                 equalTo(
-                    LoadingRoute(LoadingScreenType.SharingDetails, cancellationAvailable = false)
+                    LoadingRoute(LoadingScreenType.SharingDetails)
                 ).matches(
                     currentBackStackEntry?.toRoute<LoadingRoute>()
                 )
@@ -117,7 +117,7 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 HolderSessionState.ProcessingEstablishment()
             ) {
                 equalTo(
-                    LoadingRoute(LoadingScreenType.GettingDetails, cancellationAvailable = true)
+                    LoadingRoute(LoadingScreenType.GettingDetails)
                 ).matches(
                     currentBackStackEntry?.toRoute<LoadingRoute>()
                 )

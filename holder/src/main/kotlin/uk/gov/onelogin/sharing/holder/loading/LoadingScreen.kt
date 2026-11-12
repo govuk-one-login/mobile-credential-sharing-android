@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.loading
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
@@ -26,12 +25,10 @@ import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 @Composable
 internal fun LoadingScreen(
     type: LoadingScreenType,
-    cancellationAvailable: Boolean,
     viewModel: LoadingViewModel = metroViewModel()
 ) {
     val context = LocalContext.current
     val titleRes = type.labelRes
-    BackHandler(enabled = !cancellationAvailable) { }
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(type) {

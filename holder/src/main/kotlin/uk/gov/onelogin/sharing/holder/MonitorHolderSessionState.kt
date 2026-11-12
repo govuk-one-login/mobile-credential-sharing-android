@@ -138,8 +138,7 @@ internal suspend fun convertSessionStateToNavigation(
         is HolderSessionState.AwaitingVerifierResolution -> {
             {
                 navController.navigateToLoadingScreen(
-                    type = LoadingScreenType.from(state.presentation.phase),
-                    cancellationAvailable = state.presentation.cancellationAvailable
+                    type = LoadingScreenType.from(state.presentation.phase)
                 ) {
                     popUpTo<HolderConsentRoute> { inclusive = true }
                     launchSingleTop = true
@@ -168,8 +167,7 @@ internal suspend fun convertSessionStateToNavigation(
         is HolderSessionState.ProcessingEstablishment -> {
             {
                 navController.navigateToLoadingScreen(
-                    type = LoadingScreenType.from(state.presentation.phase),
-                    cancellationAvailable = state.presentation.cancellationAvailable
+                    type = LoadingScreenType.from(state.presentation.phase)
                 ) {
                     popUpTo<HolderPresentQrRoute> { inclusive = true }
                     launchSingleTop = true
@@ -180,8 +178,7 @@ internal suspend fun convertSessionStateToNavigation(
         is HolderSessionState.ProcessingResponse -> {
             {
                 navController.navigateToLoadingScreen(
-                    type = LoadingScreenType.from(state.presentation.phase),
-                    cancellationAvailable = state.presentation.cancellationAvailable
+                    type = LoadingScreenType.from(state.presentation.phase)
                 ) {
                     popUpTo<HolderConsentRoute> { inclusive = true }
                     launchSingleTop = true

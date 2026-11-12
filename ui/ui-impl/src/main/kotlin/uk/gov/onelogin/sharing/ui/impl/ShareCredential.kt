@@ -134,6 +134,7 @@ internal fun ShareCredential(
             ) {
                 if (state.userCanCancel()) {
                     CloseButtonAppBar(
+                        showClose = !state.hideCloseButton(),
                         onCancel = {
                             scope.launch { logCloseButtonEvent(analyticsLogger) }
                             onCancel()
@@ -153,11 +154,16 @@ internal fun ShareCredential(
     }
 
     BackHandler(state.userCanCancel(), onBack = onCancel)
+
+    // Non-cancellable loading phases (for example "Sharing your details") must not navigate back;
+    // swallow the system back press while on these screens.
+    BackHandler(state.blocksSystemBack()) { }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CloseButtonAppBar(
+    showClose: Boolean,
     modifier: Modifier = Modifier,
     scrollBehaviour: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
     onCancel: () -> Unit = {}
@@ -166,12 +172,14 @@ internal fun CloseButtonAppBar(
         title = {},
         modifier = modifier,
         navigationIcon = {
-            IconButton(onCancel) {
-                Icon(
-                    painter = painterResource(R.drawable.filled_close),
-                    contentDescription = "Close",
-                    tint = GdsLocalColorScheme.current.topBarIcon
-                )
+            if (showClose) {
+                IconButton(onCancel) {
+                    Icon(
+                        painter = painterResource(R.drawable.filled_close),
+                        contentDescription = "Close",
+                        tint = GdsLocalColorScheme.current.topBarIcon
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
