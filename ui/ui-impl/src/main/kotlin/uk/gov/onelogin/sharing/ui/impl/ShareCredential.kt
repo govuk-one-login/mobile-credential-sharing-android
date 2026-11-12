@@ -106,24 +106,40 @@ internal fun ShareCredential(
     var isDismissing by remember { mutableStateOf(false) }
 
     val onCancel: () -> Unit = {
-        scope.launch {
-            if (state.shouldConfirmCancellation()) {
+        if (state.shouldConfirmCancellation()) {
+            scope.launch {
                 withContext(uiDispatcher) {
                     navController.navigateToHolderUserCancellationDialog()
                 }
-            } else if (state is HolderSessionState.PresentingEngagement) {
-                if (!isDismissing) {
-                    isDismissing = true
-                    animationScope.launch {
-                        dismissOffset.animateTo(targetValue = contentHeight.toFloat())
-                        orchestrator.cancel()
-                    }
-                }
-            } else {
+            }
+        } else if (!isDismissing) {
+            isDismissing = true
+            animationScope.launch {
+                dismissOffset.animateTo(targetValue = contentHeight.toFloat())
                 orchestrator.cancel()
             }
         }
     }
+
+//    val onCancel: () -> Unit = {
+//        scope.launch {
+//            if (state.shouldConfirmCancellation()) {
+//                withContext(uiDispatcher) {
+//                    navController.navigateToHolderUserCancellationDialog()
+//                }
+//            } else if (state is HolderSessionState.PresentingEngagement) {
+//                if (!isDismissing) {
+//                    isDismissing = true
+//                    animationScope.launch {
+//                        dismissOffset.animateTo(targetValue = contentHeight.toFloat())
+//                        orchestrator.cancel()
+//                    }
+//                }
+//            } else {
+//                orchestrator.cancel()
+//            }
+//        }
+//    }
 
     MonitorHolderSessionState(
         holderSessionState = holderSessionState,
