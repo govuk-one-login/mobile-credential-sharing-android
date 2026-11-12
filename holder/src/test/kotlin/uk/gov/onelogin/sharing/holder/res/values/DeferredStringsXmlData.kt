@@ -99,5 +99,25 @@ enum class DeferredStringsXmlData(
     HOLDER_STOP_CHECK_DIALOG_CONTINUE_BUTTON(
         defersTo = R.string.stop_check_dialog_continue_button,
         resourceId = R.string.holder_stop_check_dialog_continue_button
+    ),
+    HOLDER_BLUETOOTH_PERMISSION_DENIED_TITLE(
+        defersTo = R.string.bluetooth_permission_denied_title,
+        resourceId = R.string.holder_bluetooth_permission_denied_title
+    ),
+    HOLDER_BLUETOOTH_PERMISSION_DENIED_BODY_1(
+        defersTo = R.string.bluetooth_permission_denied_before_sharing,
+        resourceId = R.string.holder_bluetooth_permission_denied_body_1
+    ),
+    HOLDER_BLUETOOTH_PERMISSION_DENIED_BODY_2(
+        defersTo = R.string.you_will_connect_via_qr_later,
+        resourceId = R.string.holder_bluetooth_permission_denied_body_2
+    ),
+    HOLDER_BLUETOOTH_PERMISSION_DENIED_ALLOW_BUTTON(
+        defersTo = R.string.bluetooth_permission_denied_allow_button,
+        resourceId = R.string.holder_bluetooth_permission_denied_allow_button
+    ),
+    HOLDER_BLUETOOTH_PERMISSION_DENIED_CANCEL_BUTTON(
+        defersTo = R.string.bluetooth_permission_denied_cancel_button,
+        resourceId = R.string.holder_bluetooth_permission_denied_cancel_button
     )
 }

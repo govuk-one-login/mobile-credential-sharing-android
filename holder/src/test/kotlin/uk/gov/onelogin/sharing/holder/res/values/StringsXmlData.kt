@@ -73,6 +73,22 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "You will not connect with a device yet. You’ll use a QR code to do that next.",
         resourceId = R.string.use_qr_code_to_connect_next
     ),
+    BLUETOOTH_PERMISSION_DENIED_TITLE(
+        expected = "You need to allow connection to nearby devices",
+        resourceId = R.string.bluetooth_permission_denied_title
+    ),
+    BLUETOOTH_PERMISSION_DENIED_BEFORE_SHARING(
+        expected = "To be able to share, you need to allow this app to connect to nearby devices.",
+        resourceId = R.string.bluetooth_permission_denied_before_sharing
+    ),
+    BLUETOOTH_PERMISSION_DENIED_ALLOW_BUTTON(
+        expected = "Allow",
+        resourceId = R.string.bluetooth_permission_denied_allow_button
+    ),
+    BLUETOOTH_PERMISSION_DENIED_CANCEL_BUTTON(
+        expected = "Cancel and go back to documents",
+        resourceId = R.string.bluetooth_permission_denied_cancel_button
+    ),
     HOLDER_CONSENT_SCREEN_WHAT_YOU_SHARE_HEADING(
         expected = "What you\u2019ll share",
         resourceId = R.string.holder_consent_screen_what_you_share_heading
