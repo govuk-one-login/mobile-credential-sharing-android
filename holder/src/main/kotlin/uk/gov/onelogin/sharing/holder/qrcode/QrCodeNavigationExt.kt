@@ -10,10 +10,10 @@ import androidx.navigation.compose.composable
 import uk.gov.android.ui.theme.spacingDouble
 
 object QrCodeNavigationExt {
-    fun NavController.navigateToHolderPresentQrScreen(options: NavOptionsBuilder.() -> Unit = {}) =
+    fun NavController.navigateToQrCodeScreen(options: NavOptionsBuilder.() -> Unit = {}) =
         navigate(QrCodeRoute, options)
 
-    internal fun NavGraphBuilder.configureHolderPresentQrScreen() {
+    internal fun NavGraphBuilder.configureQrCodeScreen() {
         composable<QrCodeRoute> {
             QrCodeScreen(
                 modifier = Modifier

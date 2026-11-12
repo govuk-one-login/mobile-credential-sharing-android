@@ -81,7 +81,7 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'PresentingEngagement' -> HolderPresentQrRoute",
+                "'PresentingEngagement' -> QrCodeRoute",
                 HolderSessionStateStubs.presentingEngagementStub
             ) {
                 instanceOf<QrCodeRoute>(
