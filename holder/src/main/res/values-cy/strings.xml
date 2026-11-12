@@ -34,7 +34,7 @@
     <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>
     <string name="your_details_have_not_been_shared">Nid yw eich manylion wedi’u rhannu.</string>
     <string name="bluetooth_permission_denied_title">Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos</string>
-    <string name="bluetooth_permission_denied_before_sharing">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\'r ap hwn gysylltu â dyfeisiau cyfagos.</string>
+    <string name="bluetooth_permission_denied_before_sharing">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\’r ap hwn gysylltu â dyfeisiau cyfagos.</string>
     <string name="bluetooth_permission_denied_allow_button">Caniatáu</string>
 
     <string name="cancel_and_go_back_to_documents">Canslo a mynd yn ôl i ddogfennau</string>
