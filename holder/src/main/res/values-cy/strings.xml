@@ -13,7 +13,8 @@
     <string name="bluetooth_permission_denied_title">Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos</string>
     <string name="bluetooth_permission_denied_before_sharing">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\'r ap hwn gysylltu â dyfeisiau cyfagos.</string>
     <string name="bluetooth_permission_denied_allow_button">Caniatáu</string>
-    <string name="bluetooth_permission_denied_cancel_button">Canslo a mynd yn ôl i ddogfennau</string>
+
+    <string name="cancel_and_go_back_to_documents">Canslo a mynd yn ôl i ddogfennau</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
@@ -50,7 +51,6 @@
         <item quantity="many">Cytuno a rhannu %1$d manylion</item>
         <item quantity="other">Cytuno a rhannu %1$d manylion</item>
     </plurals>
-    <string name="consent_screen_cancel_button">Canslo a mynd yn ôl i ddogfennau</string>
     <string name="consent_attr_document_number">Rhif y drwydded</string>
     <string name="consent_attr_portrait">Llun</string>
     <string name="consent_attr_title">Teitl</string>

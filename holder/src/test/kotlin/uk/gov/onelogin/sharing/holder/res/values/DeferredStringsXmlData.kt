@@ -85,7 +85,7 @@ enum class DeferredStringsXmlData(
         resourceId = R.string.holder_bluetooth_permission_denied_allow_button
     ),
     HOLDER_BLUETOOTH_PERMISSION_DENIED_CANCEL_BUTTON(
-        defersTo = R.string.bluetooth_permission_denied_cancel_button,
+        defersTo = R.string.cancel_and_go_back_to_documents,
         resourceId = R.string.holder_bluetooth_permission_denied_cancel_button
     )
 }

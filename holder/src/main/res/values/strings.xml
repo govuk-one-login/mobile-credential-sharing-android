@@ -23,7 +23,8 @@
     <string name="bluetooth_permission_denied_title" translatable="true">You need to allow connection to nearby devices</string>
     <string name="bluetooth_permission_denied_before_sharing" translatable="true">To be able to share, you need to allow this app to connect to nearby devices.</string>
     <string name="bluetooth_permission_denied_allow_button" translatable="true">Allow</string>
-    <string name="bluetooth_permission_denied_cancel_button" translatable="true">Cancel and go back to documents</string>
+
+    <string name="cancel_and_go_back_to_documents" translatable="true">Cancel and go back to documents</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
@@ -48,7 +49,6 @@
         <item quantity="one">Agree and share %1$d detail</item>
         <item quantity="other">Agree and share %1$d details</item>
     </plurals>
-    <string name="consent_screen_cancel_button">Cancel and go back to documents</string>
     <string name="consent_attr_document_number">Licence number</string>
     <string name="consent_attr_portrait">Photo</string>
     <string name="consent_attr_title">Title</string>
