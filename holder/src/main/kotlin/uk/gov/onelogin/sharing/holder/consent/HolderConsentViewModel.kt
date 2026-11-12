@@ -45,28 +45,34 @@ class HolderConsentViewModel(
         .filterIsInstance<HolderSessionState.AwaitingUserConsent>()
         .map { it.presentation }
 
-    val uiState: StateFlow<HolderConsentUiState?> = combine(
+    val uiState: StateFlow<HolderConsentUiState> = combine(
         presentation,
         showMoreAboutDvs
     ) { presentation, showMoreAboutDvs ->
-        HolderConsentUiState(
-            privacyPolicyUrl = presentation.privacyPolicyUrl,
-            card = presentation.documents.firstOrNull()?.let { document ->
-                ConsentCard.from(
-                    ConsentAttributeResolver.toDisplayAttributes(
-                        document.namespaces.flatMap(ConsentNamespace::attributes)
+        if (showMoreAboutDvs) {
+            HolderConsentUiState.MoreAboutDvs(
+                normalisedOrganizationName = presentation.normalisedOrganizationName,
+                privacyPolicyUrl = presentation.privacyPolicyUrl,
+            )
+        } else {
+            HolderConsentUiState.ConfirmConsent(
+                privacyPolicyUrl = presentation.privacyPolicyUrl,
+                card = presentation.documents.firstOrNull()?.let { document ->
+                    ConsentCard.from(
+                        ConsentAttributeResolver.toDisplayAttributes(
+                            document.namespaces.flatMap(ConsentNamespace::attributes)
+                        )
                     )
-                )
-            },
-            normalisedOrganizationName = presentation.normalisedOrganizationName,
-            organizationName = presentation.organizationName,
-            isBusy = presentation.isBusy,
-            showMoreAboutDvs = showMoreAboutDvs
-        )
+                },
+                normalisedOrganizationName = presentation.normalisedOrganizationName,
+                organizationName = presentation.organizationName,
+                isBusy = presentation.isBusy,
+            )
+        }
     }.stateIn(
         viewModelScope.plus(dispatcher),
         SharingStarted.Eagerly,
-        null
+        HolderConsentUiState.Loading
     )
 
     fun sendScreenEvent(screenName: String) = viewModelScope.launch {

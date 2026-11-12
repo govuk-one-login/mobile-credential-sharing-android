@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.holder.consent
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -11,7 +13,9 @@ object HolderConsentNavigationExt {
 
     internal fun NavGraphBuilder.configureHolderConsentScreen() {
         composable<HolderConsentRoute> {
-            HolderConsentScreen()
+            HolderConsentScreen(
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

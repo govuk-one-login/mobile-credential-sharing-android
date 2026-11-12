@@ -24,17 +24,24 @@ data class ConsentPresentation(
      */
     val normalisedOrganizationName: String
         get() = organizationName.trim().trimEnd('.').trimEnd() + "."
+
+    val attributeCount: Int
+        get() = documents.sumOf(ConsentDocument::attributeCount)
 }
 
 /**
  * A single requested document type and its filtered namespaces.
  */
-data class ConsentDocument(val docType: String, val namespaces: List<ConsentNamespace>)
+data class ConsentDocument(val docType: String, val namespaces: List<ConsentNamespace>) {
+    val attributeCount: Int get() = namespaces.sumOf(ConsentNamespace::attributeCount)
+}
 
 /**
  * A single namespace and the filtered attributes retained within it.
  */
-data class ConsentNamespace(val nameSpace: String, val attributes: List<ConsentAttribute>)
+data class ConsentNamespace(val nameSpace: String, val attributes: List<ConsentAttribute>) {
+    val attributeCount: Int get() = attributes.count()
+}
 
 /**
  * A single attribute that will be shared with the Verifier.

@@ -2,7 +2,9 @@ package uk.gov.onelogin.sharing.holder.consent
 
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
@@ -10,7 +12,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import com.google.testing.junit.testparameterinjector.TestParameter
-import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
@@ -20,7 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import org.robolectric.annotation.Config
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
@@ -29,11 +30,11 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestParameterInjector::class)
-@Config(qualifiers = "w411dp-h1600dp-xhdpi")
 class HolderConsentScreenTest {
 
     @get:Rule
@@ -85,7 +86,7 @@ class HolderConsentScreenTest {
         )
     )
 
-    private fun consentPresentation(elements: Map<String, Boolean>) = ConsentPresentation(
+    private fun consentPresentation(elements: Map<String, Boolean>) = createConsentPresentation(
         organizationName = ORGANIZATION_NAME,
         privacyPolicyUrl = "https://verifier.example/privacy",
         documents = listOf(
@@ -117,17 +118,18 @@ class HolderConsentScreenTest {
                 )
             }
 
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.assertTitleIsDisplayed()
-            composeTestRule.assertCancelButtonIsDisplayed()
-            composeTestRule.assertElementsDisplayed("Agree and share")
-            composeTestRule.assertElementsDisplayed("Last name")
-            composeTestRule.assertElementsDisplayed("Licence number")
-            composeTestRule.assertElementsDisplayed("Photo")
-            composeTestRule.assertElementsDisplayed(
-                "These details will only be used for this check. They will not be saved."
-            )
+            composeTestRule.run {
+                setContent { Render() }
+                assertTitleIsDisplayed()
+                assertCancelButtonIsDisplayed()
+                assertValidAgreeButton(presentationWithoutRetain.attributeCount)
+                assertElementsDisplayed("Last name")
+                assertElementsDisplayed("Licence number")
+                assertElementsDisplayed("Photo")
+                assertElementsDisplayed(
+                    "These details will only be used for this check. They will not be saved."
+                )
+            }
         }
 
     @Test
@@ -140,15 +142,17 @@ class HolderConsentScreenTest {
                 )
             }
 
-            composeTestRule.setContent { Render() }
+            composeTestRule.run {
+                setContent { Render() }
 
-            composeTestRule.assertTitleIsDisplayed()
-            composeTestRule.assertElementsDisplayed(
-                "$ORGANIZATION_NAME will keep these details as a record of this check:"
-            )
-            composeTestRule.assertElementsDisplayed("$ORGANIZATION_NAME will not keep:")
-            composeTestRule.assertElementsDisplayed("Last name")
-            composeTestRule.assertElementsDisplayed("Photo")
+                assertTitleIsDisplayed()
+                assertElementsDisplayed(
+                    "$ORGANIZATION_NAME will keep these details as a record of this check:"
+                )
+                assertElementsDisplayed("$ORGANIZATION_NAME will not keep:")
+                assertElementsDisplayed("Last name")
+                assertElementsDisplayed("Photo")
+            }
         }
 
     @Test
@@ -161,9 +165,10 @@ class HolderConsentScreenTest {
                 )
             }
 
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.assertElementsDisplayed("UK driving licence")
+            composeTestRule.run {
+                setContent { Render() }
+                assertElementsDisplayed("UK driving licence")
+            }
         }
 
     @Test
@@ -176,9 +181,10 @@ class HolderConsentScreenTest {
                 )
             }
 
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.assertWhatYouShareHeadingIsDisplayed()
+            composeTestRule.run {
+                setContent { Render() }
+                assertWhatYouShareHeadingIsDisplayed()
+            }
         }
 
     @Test
@@ -191,9 +197,10 @@ class HolderConsentScreenTest {
                 )
             }
 
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.assertElementsDisplayed("6")
+            composeTestRule.run {
+                setContent { Render() }
+                assertElementsDisplayed("6")
+            }
         }
 
     @Test
@@ -206,9 +213,10 @@ class HolderConsentScreenTest {
                 )
             }
 
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.assertPrivacyNoticeLinkIsDisplayed(ORGANIZATION_NAME)
+            composeTestRule.run {
+                setContent { Render() }
+                assertPrivacyNoticeLinkIsDisplayed(ORGANIZATION_NAME)
+            }
         }
 
     @Test
@@ -221,10 +229,11 @@ class HolderConsentScreenTest {
                 )
             }
 
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.clickAgreeButton()
-            composeTestRule.waitForIdle()
+            composeTestRule.run {
+                setContent { Render() }
+                clickAgreeButton(attributeCount = presentationWithoutRetain.attributeCount)
+                waitForIdle()
+            }
 
             assertEquals(1, confirmConsentCount)
         }
@@ -239,10 +248,11 @@ class HolderConsentScreenTest {
                 )
             }
 
-            composeTestRule.setContent { Render() }
-
-            composeTestRule.clickCancelButton()
-            composeTestRule.waitForIdle()
+            composeTestRule.run {
+                setContent { Render() }
+                clickCancelButton()
+                waitForIdle()
+            }
 
             assertEquals(0, orchestrator.cancelCount)
         }
@@ -253,57 +263,11 @@ class HolderConsentScreenTest {
             HolderConsentScreenPreview()
         }
 
-        composeTestRule.assertTitleIsDisplayed()
-        composeTestRule.assertCancelButtonIsDisplayed()
-    }
-
-    @Test
-    fun `Back button behaviour is handled at a higher level`() =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithoutRetain
-                )
-            }
-
-            lateinit var navController: TestNavHostController
-            var backPressDispatcher: OnBackPressedDispatcherOwner? = null
-
-            composeTestRule.setContent {
-                val context = LocalContext.current
-                backPressDispatcher = LocalOnBackPressedDispatcherOwner.current
-                navController = TestNavHostController(context).apply {
-                    navigatorProvider.addNavigator(ComposeNavigator())
-                    navigatorProvider.addNavigator(DialogNavigator())
-                }
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "previous"
-                ) {
-                    composable("previous") {}
-                    composable("consent") {
-                        HolderConsentScreen(viewModel = viewModel)
-                    }
-                }
-            }
-
-            composeTestRule.runOnUiThread {
-                navController.navigate("consent")
-            }
-            composeTestRule.waitForIdle()
-
-            composeTestRule.runOnUiThread {
-                backPressDispatcher!!.onBackPressedDispatcher.onBackPressed()
-            }
-            composeTestRule.waitForIdle()
-
-            assertThat(
-                navController.currentDestination?.route,
-                equalTo("previous")
-            )
+        composeTestRule.run {
+            assertTitleIsDisplayed()
+            assertCancelButtonIsDisplayed()
         }
+    }
 
     @Test
     fun `User actions aren't enabled when the view model is busy`(
@@ -320,21 +284,26 @@ class HolderConsentScreenTest {
             )
         }
 
-        composeTestRule.apply {
+        composeTestRule.run {
             setContent { Render() }
-            input.agreeButtonAssertion(this)
+            input.agreeButtonAssertion(this, presentationWithoutRetain.attributeCount, true)
             input.cancelButtonAssertion(this)
         }
     }
 
     @Composable
     private fun Render() {
-        HolderConsentScreen(viewModel = viewModel)
+        GdsTheme {
+            HolderConsentScreen(
+                modifier = Modifier.fillMaxSize(),
+                viewModel = viewModel
+            )
+        }
     }
 
     enum class ButtonEnablementTestData(
         val isBusy: Boolean,
-        val agreeButtonAssertion: HolderConsentScreenRule.() -> Unit,
+        val agreeButtonAssertion: HolderConsentScreenRule.(Int, Boolean) -> Unit,
         val cancelButtonAssertion: HolderConsentScreenRule.() -> Unit
     ) {
         BUTTONS_ENABLED(

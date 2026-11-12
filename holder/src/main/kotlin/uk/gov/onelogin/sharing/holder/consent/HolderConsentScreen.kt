@@ -8,15 +8,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +28,7 @@ import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.componentsv2.heading.GdsHeading
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
+import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicator
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
@@ -37,11 +39,16 @@ import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.cryptoService.verifier.DocRequestBuilderImpl.Companion.NAMESPACE_ISO
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsContent
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
 @Composable
-internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewModel()) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+internal fun HolderConsentScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HolderConsentViewModel = metroViewModel()
+) {
+    val uiState: HolderConsentUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val titleRes = R.string.holder_consent_screen_title
 
@@ -52,21 +59,43 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
         viewModel.sendScreenEvent(context.getEnglishString(titleRes))
     }
 
-    uiState?.let {
-        HolderConsentContent(
-            state = it,
-            titleRes = titleRes,
-            onAgree = viewModel::onAccept,
-            onReadPrivacyNotice = viewModel::onReadPrivacyNotice,
-            onCancel = viewModel::onCancelAndGoBack
-        )
-    } ?: CircularProgressIndicator()
+    when (uiState) {
+        HolderConsentUiState.Loading -> {
+            Column(
+                modifier = modifier,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                GdsProgressIndicator()
+            }
+        }
+        is HolderConsentUiState.ConfirmConsent -> {
+            val state: HolderConsentUiState.ConfirmConsent =
+                uiState as HolderConsentUiState.ConfirmConsent
+
+            HolderConsentContent(
+                modifier = modifier,
+                state = state,
+                titleRes = titleRes,
+                onAgree = viewModel::onAccept,
+                onReadPrivacyNotice = viewModel::onReadPrivacyNotice,
+                onCancel = viewModel::onCancelAndGoBack
+            )
+        }
+        is HolderConsentUiState.MoreAboutDvs -> {
+            val state: HolderConsentUiState.MoreAboutDvs =
+                uiState as HolderConsentUiState.MoreAboutDvs
+
+            // do nothing for now
+        }
+    }
 }
 
 @Composable
 internal fun HolderConsentContent(
-    state: HolderConsentUiState,
+    state: HolderConsentUiState.ConfirmConsent,
     @StringRes titleRes: Int,
+    modifier: Modifier = Modifier,
     onAgree: () -> Unit = {},
     onReadPrivacyNotice: () -> Unit = {},
     onCancel: () -> Unit = {}
@@ -74,7 +103,7 @@ internal fun HolderConsentContent(
     val attributeCount = state.card?.attributeCount ?: 0
 
     LeftAlignedScreen(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         title = { horizontalPadding ->
             GdsHeading(
                 text = stringResource(titleRes),
@@ -95,7 +124,9 @@ internal fun HolderConsentContent(
                 buttonType = ButtonTypeV2.Primary(),
                 onClick = onAgree,
                 enabled = !state.isBusy,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("confirmConsent")
             )
         },
         secondaryButton = {
@@ -105,13 +136,14 @@ internal fun HolderConsentContent(
                 onClick = onCancel,
                 enabled = !state.isBusy,
                 modifier = Modifier.fillMaxWidth()
+                    .testTag("denyConsent")
             )
         }
     )
 }
 
 private fun LazyListScope.consentBody(
-    state: HolderConsentUiState,
+    state: HolderConsentUiState.ConfirmConsent,
     horizontalPadding: Dp,
     onReadPrivacyNotice: () -> Unit
 ) {
@@ -181,7 +213,8 @@ internal fun HolderConsentScreenPreview() {
     GdsTheme {
         Surface {
             HolderConsentContent(
-                state = HolderConsentUiState(
+                modifier = Modifier.fillMaxSize(),
+                state = HolderConsentUiState.ConfirmConsent(
                     card = card,
                     privacyPolicyUrl = "https://verifier.example/privacy",
                     normalisedOrganizationName = "Organisation Ltd.",

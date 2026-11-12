@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.nullValue
 import org.junit.Rule
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
@@ -125,7 +124,7 @@ class HolderConsentViewModelTest {
                 organizationName = "Organisation Ltd",
                 privacyPolicyUrl = "https://verifier.example/privacy"
             )
-            val expected = HolderConsentUiState(
+            val expected = HolderConsentUiState.ConfirmConsent(
                 card = ConsentCard.from(
                     ConsentAttributeResolver.toDisplayAttributes(
                         listOf(
@@ -139,7 +138,10 @@ class HolderConsentViewModelTest {
             )
 
             viewModel.uiState.test {
-                assertThat(awaitItem(), nullValue())
+                assertThat(
+                    awaitItem(),
+                    equalTo(HolderConsentUiState.Loading)
+                )
 
                 holderState.value = HolderSessionState.AwaitingUserConsent(
                     request = deviceRequestStub,
@@ -158,7 +160,7 @@ class HolderConsentViewModelTest {
                 organizationName = "Organisation Ltd",
                 privacyPolicyUrl = "https://verifier.example/privacy"
             )
-            val expectedState = HolderConsentUiState(
+            val expectedState = HolderConsentUiState.ConfirmConsent(
                 card = null,
                 normalisedOrganizationName = "Organisation Ltd.",
                 organizationName = "Organisation Ltd",
@@ -166,7 +168,10 @@ class HolderConsentViewModelTest {
             )
 
             viewModel.uiState.test {
-                assertThat(awaitItem(), nullValue())
+                assertThat(
+                    awaitItem(),
+                    equalTo(HolderConsentUiState.Loading)
+                )
 
                 holderState.value = HolderSessionState.AwaitingUserConsent(
                     request = deviceRequestStub,

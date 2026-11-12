@@ -22,6 +22,7 @@ import org.junit.runner.RunWith
 import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.configureGetReadyToShare
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
+import uk.gov.onelogin.sharing.holder.navigation.TestNavHostControllerHelper.prepareController
 
 @RunWith(AndroidJUnit4::class)
 class GetReadyToShareNavigationTest {
@@ -48,12 +49,6 @@ class GetReadyToShareNavigationTest {
             }
         }
     }
-
-    private fun prepareController(context: Context): TestNavHostController =
-        TestNavHostController(context).apply {
-            navigatorProvider.addNavigator(ComposeNavigator())
-            navigatorProvider.addNavigator(DialogNavigator())
-        }
 
     @Test
     fun `Navigates back a screen by default`() = runTest {
