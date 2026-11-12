@@ -85,9 +85,9 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Allow",
         resourceId = R.string.bluetooth_permission_denied_allow_button
     ),
-    BLUETOOTH_PERMISSION_DENIED_CANCEL_BUTTON(
+    CANCEL_AND_GO_BACK_TO_DOCUMENTS(
         expected = "Cancel and go back to documents",
-        resourceId = R.string.bluetooth_permission_denied_cancel_button
+        resourceId = R.string.cancel_and_go_back_to_documents
     ),
     HOLDER_CONSENT_SCREEN_WHAT_YOU_SHARE_HEADING(
         expected = "What you\u2019ll share",
