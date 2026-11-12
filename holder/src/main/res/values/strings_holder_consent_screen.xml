@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="holder_consent_title">Confirm the credential attributes to share</string>
     <string name="holder_consent_accept">Accept</string>
     <string name="holder_consent_deny">Deny</string>
@@ -11,5 +11,5 @@
     <string name="holder_consent_screen_title">@string/consent_screen_title</string>
     <string name="holder_consent_screen_what_you_share_heading">@string/consent_screen_what_you_share_heading</string>
     <string name="holder_consent_screen_privacy_notice_link">@string/consent_screen_privacy_notice_link</string>
-    <string name="holder_consent_screen_cancel_button">@string/cancel_and_go_back_to_documents</string>
+    <string name="holder_consent_screen_cancel_button" tools:ignore="DuplicateStrings">@string/cancel_and_go_back_to_documents</string>
 </resources>

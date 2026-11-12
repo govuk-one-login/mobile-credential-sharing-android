@@ -5,5 +5,5 @@
     <string name="holder_bluetooth_permission_denied_body_1">@string/bluetooth_permission_denied_before_sharing</string>
     <string name="holder_bluetooth_permission_denied_body_2">@string/you_will_connect_via_qr_later</string>
     <string name="holder_bluetooth_permission_denied_allow_button">@string/bluetooth_permission_denied_allow_button</string>
-    <string name="holder_bluetooth_permission_denied_cancel_button">@string/cancel_and_go_back_to_documents</string>
+    <string name="holder_bluetooth_permission_denied_cancel_button" tools:ignore="DuplicateStrings">@string/cancel_and_go_back_to_documents</string>
 </resources>
