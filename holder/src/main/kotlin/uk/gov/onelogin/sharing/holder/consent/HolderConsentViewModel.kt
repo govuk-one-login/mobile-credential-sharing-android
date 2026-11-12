@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.cance
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.consentScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.readPrivacyNoticeButton
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -55,15 +56,15 @@ class HolderConsentViewModel(
                 privacyPolicyUrl = presentation.privacyPolicyUrl,
             )
         } else {
+            presentation.firstDocumentAttributes
+                ?.let(ConsentAttributeResolver::toDisplayAttributes)
+                ?.let(ConsentCard::from)
             HolderConsentUiState.ConfirmConsent(
                 privacyPolicyUrl = presentation.privacyPolicyUrl,
-                card = presentation.documents.firstOrNull()?.let { document ->
-                    ConsentCard.from(
-                        ConsentAttributeResolver.toDisplayAttributes(
-                            document.namespaces.flatMap(ConsentNamespace::attributes)
-                        )
-                    )
-                },
+                card = presentation.documents.firstOrNull()
+                    ?.let(ConsentDocument::namespaceAttributes)
+                    ?.let(ConsentAttributeResolver::toDisplayAttributes)
+                    ?.let(ConsentCard::from),
                 normalisedOrganizationName = presentation.normalisedOrganizationName,
                 organizationName = presentation.organizationName,
                 isBusy = presentation.isBusy,

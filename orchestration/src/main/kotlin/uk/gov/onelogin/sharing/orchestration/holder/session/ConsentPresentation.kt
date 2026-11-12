@@ -27,13 +27,19 @@ data class ConsentPresentation(
 
     val attributeCount: Int
         get() = documents.sumOf(ConsentDocument::attributeCount)
+
+    val firstDocumentAttributes: List<ConsentAttribute>?
+        get() = documents.firstOrNull()?.let(ConsentDocument::namespaceAttributes)
 }
 
 /**
  * A single requested document type and its filtered namespaces.
  */
 data class ConsentDocument(val docType: String, val namespaces: List<ConsentNamespace>) {
-    val attributeCount: Int get() = namespaces.sumOf(ConsentNamespace::attributeCount)
+    val attributeCount: Int
+        get() = namespaces.sumOf(ConsentNamespace::attributeCount)
+    val namespaceAttributes: List<ConsentAttribute>
+        get() = namespaces.flatMap(ConsentNamespace::attributes)
 }
 
 /**

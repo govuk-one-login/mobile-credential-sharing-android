@@ -44,8 +44,11 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentDocumentSingleton
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentNamespaces
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
@@ -83,40 +86,24 @@ class HolderConsentNavigationExtTest {
         )
     )
 
-    private val presentationWithoutRetain = consentPresentation(
-        mapOf(
-            "family_name" to false,
-            "document_number" to false,
-            "driving_privileges" to false,
-            "issue_date" to false,
-            "expiry_date" to false,
-            "portrait" to false
+    private val attributesWithoutRetain = listOf(
+        MdlAttribute.FamilyName,
+        MdlAttribute.DocumentNumber,
+        MdlAttribute.DrivingPrivileges,
+        MdlAttribute.IssueDate,
+        MdlAttribute.ExpiryDate,
+        MdlAttribute.Portrait,
+    ).associateWith { false }
+
+    private val presentationWithoutRetain = createConsentPresentation(
+        documents = createConsentDocumentSingleton(
+            namespaces = createConsentNamespaces(
+                elements = attributesWithoutRetain
+            )
         )
     )
 
     private lateinit var navController: TestNavHostController
-
-    private fun consentPresentation(elements: Map<String, Boolean>) = createConsentPresentation(
-        organizationName = ORGANIZATION_NAME,
-        privacyPolicyUrl = "https://verifier.example/privacy",
-        documents = listOf(
-            ConsentDocument(
-                docType = "org.iso.18013.5.1.mDL",
-                namespaces = listOf(
-                    ConsentNamespace(
-                        nameSpace = "org.iso.18013.5.1",
-                        attributes = elements.map { (id, retain) ->
-                            ConsentAttribute(
-                                elementIdentifier = id,
-                                intentToRetain = retain,
-                                nameSpace = "org.iso.18013.5.1"
-                            )
-                        }
-                    )
-                )
-            )
-        )
-    )
 
     @Test
     fun `Back button behaviour is handled at a higher level`() =
@@ -131,16 +118,13 @@ class HolderConsentNavigationExtTest {
             composeTestRule.run {
                 setContent {
                     navController = prepareController(LocalContext.current)
-
                     Render()
                 }
 
                 onNodeWithRole(Role.Button).performClick()
-                waitForIdle()
+                assertValidUi(presentationWithoutRetain)
 
-                runOnUiThread {
-                    navController.popBackStack()
-                }
+                runOnUiThread { navController.popBackStack() }
                 waitForIdle()
 
                 assertThat(

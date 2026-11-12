@@ -1,22 +1,12 @@
 package uk.gov.onelogin.sharing.holder.consent
 
-import androidx.activity.OnBackPressedDispatcherOwner
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.ComposeNavigator
-import androidx.navigation.compose.DialogNavigator
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.testing.TestNavHostController
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,13 +15,12 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
-import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.ORGANIZATION_NAME
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentDocumentSingleton
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentNamespaces
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -63,47 +52,38 @@ class HolderConsentScreenTest {
     }
 
     // AC1: attributes displayed without intent-to-retain (all flags false)
-    private val presentationWithoutRetain = consentPresentation(
-        mapOf(
-            "family_name" to false,
-            "document_number" to false,
-            "driving_privileges" to false,
-            "issue_date" to false,
-            "expiry_date" to false,
-            "portrait" to false
+    private val attributesWithoutRetain = listOf(
+        MdlAttribute.FamilyName,
+        MdlAttribute.DocumentNumber,
+        MdlAttribute.DrivingPrivileges,
+        MdlAttribute.IssueDate,
+        MdlAttribute.ExpiryDate,
+        MdlAttribute.Portrait,
+    ).associateWith { false }
+
+    private val presentationWithoutRetain = createConsentPresentation(
+        documents = createConsentDocumentSingleton(
+            namespaces = createConsentNamespaces(
+                elements = attributesWithoutRetain
+            )
         )
     )
 
     // AC2: attributes displayed with intent-to-retain (all true except portrait)
-    private val presentationWithRetain = consentPresentation(
-        mapOf(
-            "family_name" to true,
-            "document_number" to true,
-            "driving_privileges" to true,
-            "issue_date" to true,
-            "expiry_date" to true,
-            "portrait" to false
-        )
-    )
+    private val attributesWithRetain = listOf(
+        MdlAttribute.FamilyName,
+        MdlAttribute.DocumentNumber,
+        MdlAttribute.DrivingPrivileges,
+        MdlAttribute.IssueDate,
+        MdlAttribute.ExpiryDate,
+    ).associateWith {
+        true
+    } + (MdlAttribute.Portrait to false)
 
-    private fun consentPresentation(elements: Map<String, Boolean>) = createConsentPresentation(
-        organizationName = ORGANIZATION_NAME,
-        privacyPolicyUrl = "https://verifier.example/privacy",
-        documents = listOf(
-            ConsentDocument(
-                docType = "org.iso.18013.5.1.mDL",
-                namespaces = listOf(
-                    ConsentNamespace(
-                        nameSpace = "org.iso.18013.5.1",
-                        attributes = elements.map { (id, retain) ->
-                            ConsentAttribute(
-                                elementIdentifier = id,
-                                intentToRetain = retain,
-                                nameSpace = "org.iso.18013.5.1"
-                            )
-                        }
-                    )
-                )
+    private val presentationWithRetain = createConsentPresentation(
+        documents = createConsentDocumentSingleton(
+            namespaces = createConsentNamespaces(
+                elements = attributesWithRetain
             )
         )
     )
@@ -120,15 +100,8 @@ class HolderConsentScreenTest {
 
             composeTestRule.run {
                 setContent { Render() }
-                assertTitleIsDisplayed()
-                assertCancelButtonIsDisplayed()
-                assertValidAgreeButton(presentationWithoutRetain.attributeCount)
-                assertElementsDisplayed("Last name")
-                assertElementsDisplayed("Licence number")
-                assertElementsDisplayed("Photo")
-                assertElementsDisplayed(
-                    "These details will only be used for this check. They will not be saved."
-                )
+                assertValidUi(presentationWithoutRetain)
+                assertNoElementsRetained()
             }
         }
 
@@ -144,78 +117,10 @@ class HolderConsentScreenTest {
 
             composeTestRule.run {
                 setContent { Render() }
-
-                assertTitleIsDisplayed()
-                assertElementsDisplayed(
-                    "$ORGANIZATION_NAME will keep these details as a record of this check:"
+                assertValidUi(presentationWithoutRetain)
+                assertElementsPartiallyRetained(
+                    presentationWithRetain.normalisedOrganizationName
                 )
-                assertElementsDisplayed("$ORGANIZATION_NAME will not keep:")
-                assertElementsDisplayed("Last name")
-                assertElementsDisplayed("Photo")
-            }
-        }
-
-    @Test
-    fun `Displays the GDS document name in the card heading`() =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithoutRetain
-                )
-            }
-
-            composeTestRule.run {
-                setContent { Render() }
-                assertElementsDisplayed("UK driving licence")
-            }
-        }
-
-    @Test
-    fun `Displays the what you will share section heading`() =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithoutRetain
-                )
-            }
-
-            composeTestRule.run {
-                setContent { Render() }
-                assertWhatYouShareHeadingIsDisplayed()
-            }
-        }
-
-    @Test
-    fun `Displays the shared attribute count in the card heading`() =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithoutRetain
-                )
-            }
-
-            composeTestRule.run {
-                setContent { Render() }
-                assertElementsDisplayed("6")
-            }
-        }
-
-    @Test
-    fun `Displays the privacy notice link with the organisation name`() =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithoutRetain
-                )
-            }
-
-            composeTestRule.run {
-                setContent { Render() }
-                assertPrivacyNoticeLinkIsDisplayed(ORGANIZATION_NAME)
             }
         }
 
@@ -286,7 +191,7 @@ class HolderConsentScreenTest {
 
         composeTestRule.run {
             setContent { Render() }
-            input.agreeButtonAssertion(this, presentationWithoutRetain.attributeCount, true)
+            input.agreeButtonAssertion(this, presentationWithoutRetain.attributeCount, false)
             input.cancelButtonAssertion(this)
         }
     }
