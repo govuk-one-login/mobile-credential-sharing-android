@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.screenshottesting
 
-import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -45,9 +44,6 @@ abstract class BaseRoborazziScreenshotTest(
     private val preview: ComposablePreview<AndroidPreviewInfo>
 ) {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
-
     /**
      * Simple names of `*Kt` preview-holder classes whose previews must be captured with the Compose
      * clock paused (`mainClock.autoAdvance = false`) rather than waiting for idle.
@@ -62,15 +58,23 @@ abstract class BaseRoborazziScreenshotTest(
      */
     protected open val manualClockPreviewClassSimpleNames: Set<String> = emptySet()
 
+    private val useManualClock: Boolean
+        get() = preview.declaringClass.substringAfterLast('.') in manualClockPreviewClassSimpleNames
+
+    /**
+     * A [ComposeContentTestRule] is only required for the manual-clock capture path. It is applied
+     * conditionally so that the default (idle-wait) capture path — used by every non-opt-in preview
+     * — runs in exactly the same environment as before, keeping those baselines unchanged.
+     */
+    @get:Rule
+    val composeRule = ConditionalComposeRule { useManualClock }
+
     @Test
     fun screenshot() {
-        val useManualClock = preview.declaringClass.substringAfterLast('.') in
-            manualClockPreviewClassSimpleNames
-
         val composeOptions = if (useManualClock) {
             preview.toRoborazziComposeOptions()
                 .builder()
-                .manualAdvance(composeTestRule, advanceTimeMillis = MANUAL_CLOCK_ADVANCE_MS)
+                .manualAdvance(composeRule.delegate, advanceTimeMillis = MANUAL_CLOCK_ADVANCE_MS)
                 .build()
         } else {
             preview.toRoborazziComposeOptions()
