@@ -125,6 +125,20 @@ class HolderSessionStateTest {
     }
 
     @Test
+    fun `Failed is not an unrecoverable Bluetooth prerequisite when Bluetooth is recoverable`() {
+        val failed = Failed(
+            SessionError(
+                "Device cannot perform journey",
+                SessionErrorReason.UnrecoverablePrerequisite(
+                    MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+                )
+            )
+        )
+        assertIs<SessionErrorReason.UnrecoverablePrerequisite>(failed.sessionReason)
+        assertFalse { failed.isUnrecoverableBluetoothPrerequisite() }
+    }
+
+    @Test
     fun `A Camera prerequisite failure emits Failed`() {
         val failed = Failed(
             SessionError(

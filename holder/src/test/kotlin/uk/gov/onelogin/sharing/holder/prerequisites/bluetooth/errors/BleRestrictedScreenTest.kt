@@ -101,6 +101,32 @@ class BleRestrictedScreenTest {
     }
 
     @Test
+    fun `Tapping Go back with default callback resets the journey without crashing`() = runTest {
+        screenRule.run {
+            setContent {
+                GdsTheme {
+                    BleRestrictedScreen(viewModel = viewModel)
+                }
+            }
+            waitUntil { analyticsLogger.size == 1 }
+
+            performGoBackClick()
+
+            waitUntil { analyticsLogger.size == 2 }
+            waitUntil { orchestrator.resetCount == 1 }
+        }
+
+        assertThat(orchestrator.resetCount, equalTo(1))
+        assertThat(
+            analyticsLogger,
+            contains(
+                BleRestrictedViewModelTestData.expectedScreenEvent,
+                BleRestrictedViewModelTestData.expectedGoBackEvent
+            )
+        )
+    }
+
+    @Test
     fun `System back resets the journey and dismisses resets state`() = runTest {
         var dismissed = false
         var backPressedDispatcher: OnBackPressedDispatcherOwner? = null
