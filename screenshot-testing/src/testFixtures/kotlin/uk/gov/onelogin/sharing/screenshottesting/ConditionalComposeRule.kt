@@ -17,9 +17,7 @@ import org.junit.runners.model.Statement
  * @param enabled Evaluated at apply time; when `false` the wrapped Compose rule is never applied
  * and the base statement runs unchanged.
  */
-class ConditionalComposeRule(
-    private val enabled: () -> Boolean
-) : TestRule {
+class ConditionalComposeRule(private val enabled: () -> Boolean) : TestRule {
 
     private val composeRule: ComposeContentTestRule = createComposeRule()
 
