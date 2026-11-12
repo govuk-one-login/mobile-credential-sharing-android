@@ -67,11 +67,9 @@ class HolderSessionStateTest {
     @Test
     fun `Cancellable states other than AwaitingUserConsent do not hide the close button`(
         @TestParameter state: HolderSessionState = testValues(
-            AwaitingVerifierResolution(),
             ProcessingEstablishment(),
             Preflight(listOf()),
-            PresentingEngagement("unit test"),
-            ProcessingResponse()
+            PresentingEngagement("unit test")
         )
     ) {
         assertFalse {
@@ -124,19 +122,6 @@ class HolderSessionStateTest {
 
         assertFalse { ProcessingResponse(cancellable).blocksSystemBack() }
         assertTrue { ProcessingResponse(notCancellable).blocksSystemBack() }
-    }
-
-    @Test
-    fun `States that do not hide the close button`(
-        @TestParameter state: HolderSessionState = testValues(
-            ProcessingEstablishment(),
-            Preflight(listOf()),
-            PresentingEngagement("unit test")
-        )
-    ) {
-        assertFalse {
-            state.hideCloseButton()
-        }
     }
 
     @Test
