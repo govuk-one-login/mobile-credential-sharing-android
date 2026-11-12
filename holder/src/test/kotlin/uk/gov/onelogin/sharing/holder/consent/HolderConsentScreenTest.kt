@@ -15,6 +15,7 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreenPreviewParameters.Companion.confirmConsentPreviewState
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentDocumentSingleton
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentNamespaces
@@ -165,7 +166,7 @@ class HolderConsentScreenTest {
     @Test
     fun `Preview renders without errors`() = runTest(dispatcherRule.testDispatcher) {
         composeTestRule.setContent {
-            HolderConsentScreenPreview()
+            HolderConsentScreenPreview(confirmConsentPreviewState)
         }
 
         composeTestRule.run {

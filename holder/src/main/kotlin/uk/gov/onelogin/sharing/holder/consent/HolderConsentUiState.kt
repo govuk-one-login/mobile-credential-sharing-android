@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.holder.consent
 
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
+
 sealed interface HolderConsentUiState {
     data object Loading : HolderConsentUiState
     data class ConfirmConsent(

@@ -16,6 +16,8 @@ import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
@@ -199,7 +201,7 @@ class HolderConsentViewModelTest {
     @Test
     fun `sendScreenEvent logs a screen view for the consent screen id`() =
         runTest(dispatcherRule.testDispatcher) {
-            viewModel.sendScreenEvent("Review what you’ll share").join()
+            viewModel.sendReviewWhatYouWillShareScreenEvent("Review what you’ll share").join()
 
             assertThat(
                 analyticsLogger,

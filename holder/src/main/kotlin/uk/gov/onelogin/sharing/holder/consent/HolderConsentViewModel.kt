@@ -22,11 +22,12 @@ import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.agreeAndShareButton
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.cancelAndGoBackButton
-import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.consentScreen
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.reviewWhatYouWillShareScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.readPrivacyNoticeButton
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -76,8 +77,8 @@ class HolderConsentViewModel(
         HolderConsentUiState.Loading
     )
 
-    fun sendScreenEvent(screenName: String) = viewModelScope.launch {
-        analyticsLogger.consentScreen(screenName)
+    fun sendReviewWhatYouWillShareScreenEvent(screenName: String) = viewModelScope.launch {
+        analyticsLogger.reviewWhatYouWillShareScreen(screenName)
     }
 
     fun onReadPrivacyNotice() = viewModelScope.launch {
