@@ -187,6 +187,30 @@ class QrCodeScreenTest {
             composeTestRule.run {
                 setContent { Render() }
                 assertQrCodeScrollsWithContent()
+                scrollToQrCode()
+                assertQrCodeFitsOnScreen()
+            }
+        }
+
+    @Test
+    @Config(qualifiers = SHORT_NARROW_LANDSCAPE)
+    fun `The whole QR code fits on a short screen`() = runTest(dispatcherRule.testDispatcher) {
+        composeTestRule.run {
+            setContent { Render() }
+            assertQrCodeScrollsWithContent()
+            scrollToQrCode()
+            assertQrCodeFitsOnScreen()
+        }
+    }
+
+    @Test
+    @Config(qualifiers = SHORT_WIDE_LANDSCAPE)
+    fun `The whole QR code fits on a short two column screen`() =
+        runTest(dispatcherRule.testDispatcher) {
+            composeTestRule.run {
+                setContent { Render() }
+                assertQrCodeIsFixed()
+                assertQrCodeFitsOnScreen()
             }
         }
 
@@ -228,5 +252,7 @@ class QrCodeScreenTest {
         const val PHONE_LANDSCAPE = "w891dp-h411dp-land"
         const val UNFOLDED_FOLDABLE = "w673dp-h841dp"
         const val TABLET_LANDSCAPE = "w1280dp-h800dp-land"
+        const val SHORT_NARROW_LANDSCAPE = "w560dp-h300dp-land"
+        const val SHORT_WIDE_LANDSCAPE = "w891dp-h250dp-land"
     }
 }

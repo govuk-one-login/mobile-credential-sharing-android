@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -17,14 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -100,22 +94,13 @@ internal fun ShareCredential(
     val scope = rememberCoroutineScope { defaultDispatcher }
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
-    val animationScope = rememberCoroutineScope()
-    val dismissOffset = remember { Animatable(0f) }
-    var contentHeight by remember { mutableIntStateOf(0) }
-    var isDismissing by remember { mutableStateOf(false) }
-
     val onCancel: () -> Unit = {
-        if (state.shouldConfirmCancellation()) {
-            scope.launch {
+        scope.launch {
+            if (state.shouldConfirmCancellation()) {
                 withContext(uiDispatcher) {
                     navController.navigateToHolderUserCancellationDialog()
                 }
-            }
-        } else if (!isDismissing) {
-            isDismissing = true
-            animationScope.launch {
-                dismissOffset.animateTo(targetValue = contentHeight.toFloat())
+            } else {
                 orchestrator.cancel()
             }
         }
@@ -137,11 +122,7 @@ internal fun ShareCredential(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides viewModelFactory
     ) {
-        Surface(
-            modifier = modifier
-                .onSizeChanged { contentHeight = it.height }
-                .graphicsLayer { translationY = dismissOffset.value }
-        ) {
+        Surface(modifier = modifier) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()

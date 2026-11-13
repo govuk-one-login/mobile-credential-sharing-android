@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.isHeading
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.Dp
 import androidx.test.core.app.ApplicationProvider
@@ -129,4 +131,19 @@ class QrCodeScreenRule(
             resources.getString(R.string.holder_qr_code_alt_text)
         ).fetchSemanticsNodes().isEmpty()
     }
+
+    fun assertQrCodeFitsOnScreen() {
+        val screen = onRoot().getUnclippedBoundsInRoot()
+        val qrCode = onNodeWithContentDescription(
+            resources.getString(R.string.holder_qr_code_alt_text)
+        ).getUnclippedBoundsInRoot()
+
+        assert(qrCode.top >= screen.top && qrCode.bottom <= screen.bottom) {
+            "QR code does not fit on screen"
+        }
+    }
+
+    fun scrollToQrCode() = onNodeWithContentDescription(
+        resources.getString(R.string.holder_qr_code_alt_text)
+    ).performScrollTo()
 }

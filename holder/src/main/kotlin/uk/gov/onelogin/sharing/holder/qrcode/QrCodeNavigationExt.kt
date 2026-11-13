@@ -16,9 +16,7 @@ object QrCodeNavigationExt {
     internal fun NavGraphBuilder.configureQrCodeScreen() {
         composable<QrCodeRoute> {
             QrCodeScreen(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(spacingDouble)
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
