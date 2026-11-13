@@ -10,6 +10,11 @@
     <string name="turn_on_bluetooth">Troi Bluetooth ymlaen</string>
     <string name="turn_on_bluetooth_before_sharing">Cyn y gallwch rannu, mae angen i chi droi Bluetooth ymlaen.</string>
     <string name="use_qr_code_to_connect_next">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf.</string>
+    <string name="you_need_to_allow_connection_to_nearby_devices">Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos</string>
+    <string name="allow_app_to_connect_to_nearby_devices_to_share">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\’r ap hwn gysylltu â dyfeisiau cyfagos.</string>
+    <string name="allow">Caniatáu</string>
+
+    <string name="cancel_and_go_back_to_documents">Canslo a mynd yn ôl i ddogfennau</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
@@ -46,7 +51,6 @@
         <item quantity="many">Cytuno a rhannu %1$d manylion</item>
         <item quantity="other">Cytuno a rhannu %1$d manylion</item>
     </plurals>
-    <string name="consent_screen_cancel_button">Canslo a mynd yn ôl i ddogfennau</string>
     <string name="consent_attr_document_number">Rhif y drwydded</string>
     <string name="consent_attr_portrait">Llun</string>
     <string name="consent_attr_title">Teitl</string>
