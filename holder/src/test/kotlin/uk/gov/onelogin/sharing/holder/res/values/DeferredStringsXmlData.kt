@@ -69,11 +69,11 @@ enum class DeferredStringsXmlData(
         resourceId = R.string.holder_turn_on_bluetooth_button
     ),
     HOLDER_BLUETOOTH_PERMISSION_DENIED_TITLE(
-        defersTo = R.string.bluetooth_permission_denied_title,
+        defersTo = R.string.you_need_to_allow_connection_to_nearby_devices,
         resourceId = R.string.holder_bluetooth_permission_denied_title
     ),
     HOLDER_BLUETOOTH_PERMISSION_DENIED_BODY_1(
-        defersTo = R.string.bluetooth_permission_denied_before_sharing,
+        defersTo = R.string.allow_app_to_connect_to_nearby_devices_to_share,
         resourceId = R.string.holder_bluetooth_permission_denied_body_1
     ),
     HOLDER_BLUETOOTH_PERMISSION_DENIED_BODY_2(
@@ -81,7 +81,7 @@ enum class DeferredStringsXmlData(
         resourceId = R.string.holder_bluetooth_permission_denied_body_2
     ),
     HOLDER_BLUETOOTH_PERMISSION_DENIED_ALLOW_BUTTON(
-        defersTo = R.string.bluetooth_permission_denied_allow_button,
+        defersTo = R.string.allow,
         resourceId = R.string.holder_bluetooth_permission_denied_allow_button
     ),
     HOLDER_BLUETOOTH_PERMISSION_DENIED_CANCEL_BUTTON(
