@@ -114,6 +114,7 @@ internal fun GenericErrorScreenContent(
             GdsHeading(
                 text = stringResource(R.string.holder_generic_error_title),
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = horizontalPadding),
                 textAlign = GdsHeadingAlignment.CenterAligned
             )
@@ -126,7 +127,9 @@ internal fun GenericErrorScreenContent(
                 item {
                     Text(
                         stringResource(resourceId),
-                        modifier = Modifier.padding(horizontal = itemPadding),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = itemPadding),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyLarge
                     )
