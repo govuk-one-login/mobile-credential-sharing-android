@@ -30,6 +30,7 @@ import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigat
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
+import uk.gov.onelogin.sharing.orchestration.holder.session.ProgressPresentation
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 /**
@@ -90,6 +91,20 @@ internal suspend fun convertSessionStateToNavigation(
         navController.currentDestination?.route == HolderPresentQrRoute::class.qualifiedName
     }
 
+    val loadingNavigation: (
+        ProgressPresentation,
+        NavOptionsBuilder.() -> Unit
+    ) -> () -> Unit = { presentation, popUpToOptions ->
+        {
+            navController.navigateToLoadingScreen(
+                type = LoadingScreenType.from(presentation.phase)
+            ) {
+                popUpToOptions()
+                launchSingleTop = true
+            }
+        }
+    }
+
     when (state) {
         HolderSessionState.NotStarted -> {
             {
@@ -136,13 +151,8 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.AwaitingVerifierResolution -> {
-            {
-                navController.navigateToLoadingScreen(
-                    type = LoadingScreenType.from(state.presentation.phase)
-                ) {
-                    popUpTo<HolderConsentRoute> { inclusive = true }
-                    launchSingleTop = true
-                }
+            loadingNavigation(state.presentation) {
+                popUpTo<HolderConsentRoute> { inclusive = true }
             }
         }
 
@@ -165,24 +175,14 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.ProcessingEstablishment -> {
-            {
-                navController.navigateToLoadingScreen(
-                    type = LoadingScreenType.from(state.presentation.phase)
-                ) {
-                    popUpTo<HolderPresentQrRoute> { inclusive = true }
-                    launchSingleTop = true
-                }
+            loadingNavigation(state.presentation) {
+                popUpTo<HolderPresentQrRoute> { inclusive = true }
             }
         }
 
         is HolderSessionState.ProcessingResponse -> {
-            {
-                navController.navigateToLoadingScreen(
-                    type = LoadingScreenType.from(state.presentation.phase)
-                ) {
-                    popUpTo<HolderConsentRoute> { inclusive = true }
-                    launchSingleTop = true
-                }
+            loadingNavigation(state.presentation) {
+                popUpTo<HolderConsentRoute> { inclusive = true }
             }
         }
 
