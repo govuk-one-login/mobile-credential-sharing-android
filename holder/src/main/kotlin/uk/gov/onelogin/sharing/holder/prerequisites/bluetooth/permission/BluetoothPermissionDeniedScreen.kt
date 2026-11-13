@@ -108,6 +108,7 @@ internal fun BluetoothPermissionDeniedScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 internal fun BluetoothPermissionDeniedContent(
     onAllow: () -> Unit,
@@ -140,7 +141,9 @@ internal fun BluetoothPermissionDeniedContent(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = horizontalPadding)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = horizontalPadding)
                 )
             }
             item {
@@ -149,7 +152,9 @@ internal fun BluetoothPermissionDeniedContent(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = horizontalPadding)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = horizontalPadding)
                 )
             }
         },
