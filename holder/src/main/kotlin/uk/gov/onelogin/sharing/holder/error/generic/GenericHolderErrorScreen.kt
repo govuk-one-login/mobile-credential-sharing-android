@@ -57,9 +57,6 @@ internal fun GenericHolderErrorScreen(
 
     val buttonBehaviour: () -> Unit = {
         scope.launch {
-            R.string.holder_generic_error_button
-                .let(context::getEnglishString)
-                .let(viewModel::sendButtonEvent)
             viewModel.reset()
         }
     }
@@ -78,6 +75,9 @@ internal fun GenericHolderErrorScreen(
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 is ViewModelEvent.ExitJourney -> {
+                    R.string.holder_generic_error_button
+                        .let(context::getEnglishString)
+                        .let(viewModel::sendButtonEvent)
                     onExitJourney()
                 }
 
