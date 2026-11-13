@@ -17,6 +17,7 @@ object AnalyticsLoggerHelper {
         params = params
     ).let(this::logEventV3Dot1)
 
+    @Suppress("LongParameterList")
     fun AnalyticsLogger.errorScreenEvent(
         name: String,
         id: String,
