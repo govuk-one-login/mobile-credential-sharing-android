@@ -95,16 +95,16 @@ internal fun ShareCredential(
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
     val onCancel: () -> Unit = {
-            scope.launch {
-                if (state.shouldConfirmCancellation()) {
-                    withContext(uiDispatcher) {
-                        navController.navigateToHolderUserCancellationDialog()
-                    }
-                } else {
-                    orchestrator.cancel()
+        scope.launch {
+            if (state.shouldConfirmCancellation()) {
+                withContext(uiDispatcher) {
+                    navController.navigateToHolderUserCancellationDialog()
                 }
+            } else {
+                orchestrator.cancel()
             }
         }
+    }
 
     MonitorHolderSessionState(
         holderSessionState = holderSessionState,
