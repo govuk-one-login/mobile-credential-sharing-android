@@ -182,6 +182,7 @@ internal suspend fun convertSessionStateToNavigation(
 
         is HolderSessionState.ProcessingResponse -> {
             loadingNavigation(state.presentation) {
+                launchSingleTop = true
                 popUpTo<HolderConsentRoute> { inclusive = true }
             }
         }
