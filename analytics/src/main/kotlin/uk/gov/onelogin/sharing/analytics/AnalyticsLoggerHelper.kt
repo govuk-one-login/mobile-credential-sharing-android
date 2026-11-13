@@ -4,8 +4,8 @@ import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.logging.api.v3dot1.model.RequiredParameters
 import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
-import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.logging.api.v3dot1.model.ViewEvent.Error as ViewError
+import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
 object AnalyticsLoggerHelper {
@@ -40,6 +40,6 @@ object AnalyticsLoggerHelper {
     ) = Screen(
         name = title,
         id = id,
-        params = params,
+        params = params
     ).let(this::logEventV3Dot1)
 }
