@@ -30,22 +30,22 @@ enum class TranslatableStringsData(
             "cy" to "Darganfyddwch sut mae rhannu yn gweithio"
         )
     ),
-    BLUETOOTH_RESTRICTED_TITLE(
-        resourceId = R.string.bluetooth_restricted_title,
+    BLUETOOTH_IS_RESTRICTED(
+        resourceId = R.string.bluetooth_is_restricted,
         translations = mapOf(
             "en" to "Bluetooth is restricted",
             "cy" to "Mae Bluetooth wedi’i gyfyngu"
         )
     ),
-    BLUETOOTH_RESTRICTED_BODY_1(
-        resourceId = R.string.bluetooth_restricted_body_1,
+    YOU_CANNOT_SHARE_YOUR_DETAILS(
+        resourceId = R.string.you_cannot_share_your_details,
         translations = mapOf(
             "en" to "This means you cannot share your details.",
             "cy" to "Mae hyn yn golygu na allwch rannu eich manylion."
         )
     ),
-    BLUETOOTH_RESTRICTED_BODY_2(
-        resourceId = R.string.bluetooth_restricted_body_2,
+    TURN_OFF_PARENTAL_CONTROLS_RESTRICTING_BLUETOOTH(
+        resourceId = R.string.turn_off_parental_controls_restricting_bluetooth,
         translations = mapOf(
             "en" to "If this phone has parental controls restricting Bluetooth, " +
                 "turn them off in your phone settings.",
@@ -53,8 +53,8 @@ enum class TranslatableStringsData(
                 "diffoddwch nhw yng ngosodiadau eich ffôn."
         )
     ),
-    BLUETOOTH_RESTRICTED_BODY_3(
-        resourceId = R.string.bluetooth_restricted_body_3,
+    ASK_ADMINISTRATOR_TO_ALLOW_BLUETOOTH(
+        resourceId = R.string.ask_administrator_to_allow_bluetooth,
         translations = mapOf(
             "en" to "If an organisation manages this phone, " +
                 "ask an administrator to allow Bluetooth.",
@@ -62,8 +62,8 @@ enum class TranslatableStringsData(
                 "gofynnwch i weinyddwr ganiatáu Bluetooth."
         )
     ),
-    BLUETOOTH_RESTRICTED_GO_BACK_TO_DOCUMENTS(
-        resourceId = R.string.bluetooth_restricted_go_back_to_documents,
+    GO_BACK_TO_DOCUMENTS(
+        resourceId = R.string.go_back_to_documents,
         translations = mapOf(
             "en" to "Go back to documents",
             "cy" to "Ewch yn ôl i ddogfennau"

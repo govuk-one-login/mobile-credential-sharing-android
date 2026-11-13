@@ -7,11 +7,11 @@
     <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
     <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>
     <string name="bluetooth_turned_off_holder">Bluetooth was turned off on holder device during session</string>
-    <string name="bluetooth_restricted_title" translatable="true">Bluetooth is restricted</string>
-    <string name="bluetooth_restricted_body_1" translatable="true">This means you cannot share your details.</string>
-    <string name="bluetooth_restricted_body_2" translatable="true">If this phone has parental controls restricting Bluetooth, turn them off in your phone settings.</string>
-    <string name="bluetooth_restricted_body_3" translatable="true">If an organisation manages this phone, ask an administrator to allow Bluetooth.</string>
-    <string name="bluetooth_restricted_go_back_to_documents" translatable="true">Go back to documents</string>
+    <string name="bluetooth_is_restricted">Bluetooth is restricted</string>
+    <string name="you_cannot_share_your_details">This means you cannot share your details.</string>
+    <string name="turn_off_parental_controls_restricting_bluetooth">If this phone has parental controls restricting Bluetooth, turn them off in your phone settings.</string>
+    <string name="ask_administrator_to_allow_bluetooth">If an organisation manages this phone, ask an administrator to allow Bluetooth.</string>
+    <string name="go_back_to_documents">Go back to documents</string>
     <string name="checking_journey_requirements">Checking journey requirements...</string>
     <string name="creating_qr_code">Creating QR code...</string>
     <string name="find_out_how_sharing_works" translatable="true">Find out how sharing works</string>

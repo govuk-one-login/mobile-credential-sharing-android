@@ -59,9 +59,7 @@ class BleRestrictedScreenTest {
     private fun verifyUiState(content: @Composable () -> Unit) = runTest {
         screenRule.run {
             setContent { content() }
-            assertTitleIsDisplayed()
-            assertBodyIsDisplayed()
-            assertGoBackButtonIsDisplayed()
+            assertValidUi()
         }
     }
 

@@ -13,23 +13,23 @@ enum class DeferredStringsXmlData(
     @param:StringRes val resourceId: Int
 ) {
     HOLDER_BLE_RESTRICTED_TITLE(
-        defersTo = R.string.bluetooth_restricted_title,
+        defersTo = R.string.bluetooth_is_restricted,
         resourceId = R.string.holder_ble_restricted_title
     ),
     HOLDER_BLE_RESTRICTED_BODY_1(
-        defersTo = R.string.bluetooth_restricted_body_1,
+        defersTo = R.string.you_cannot_share_your_details,
         resourceId = R.string.holder_ble_restricted_body_1
     ),
     HOLDER_BLE_RESTRICTED_BODY_2(
-        defersTo = R.string.bluetooth_restricted_body_2,
+        defersTo = R.string.turn_off_parental_controls_restricting_bluetooth,
         resourceId = R.string.holder_ble_restricted_body_2
     ),
     HOLDER_BLE_RESTRICTED_BODY_3(
-        defersTo = R.string.bluetooth_restricted_body_3,
+        defersTo = R.string.ask_administrator_to_allow_bluetooth,
         resourceId = R.string.holder_ble_restricted_body_3
     ),
     HOLDER_BLE_RESTRICTED_BUTTON(
-        defersTo = R.string.bluetooth_restricted_go_back_to_documents,
+        defersTo = R.string.go_back_to_documents,
         resourceId = R.string.holder_ble_restricted_button
     ),
     GET_READY_TO_SHARE_ALLOW_BLUETOOTH(
