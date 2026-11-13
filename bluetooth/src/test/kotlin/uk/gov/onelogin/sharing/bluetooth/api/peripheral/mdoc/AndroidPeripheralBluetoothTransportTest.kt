@@ -242,6 +242,8 @@ class AndroidPeripheralBluetoothTransportTest {
             gattServerManager.disconnectCalls,
             equalTo(1)
         )
+
+        assertEquals(PeripheralBluetoothState.Idle, transport.state.value)
     }
 
     @Test
@@ -313,6 +315,7 @@ class AndroidPeripheralBluetoothTransportTest {
     fun `gatt Connected event triggers mdoc session Connected`() =
         runTest(testScope.coroutineContext) {
             transport.monitoringJob.start()
+            transport.isServiceReady = true
 
             transport.state.test {
                 assertEquals(PeripheralBluetoothState.Idle, awaitItem())
@@ -352,6 +355,7 @@ class AndroidPeripheralBluetoothTransportTest {
     fun `gatt Disconnected event triggers mdoc session Disconnected`() =
         runTest(testScope.coroutineContext) {
             transport.monitoringJob.start()
+            transport.isServiceReady = true
             gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
             advanceUntilIdle()
 
@@ -383,6 +387,7 @@ class AndroidPeripheralBluetoothTransportTest {
     fun `duplicate gatt Connected for same device does not emit duplicate Connected state`() =
         runTest(testScope.coroutineContext) {
             transport.monitoringJob.start()
+            transport.isServiceReady = true
 
             gattServerManager.emitEvent(GattServerEvent.Connected(DEVICE_ADDRESS))
             advanceUntilIdle()

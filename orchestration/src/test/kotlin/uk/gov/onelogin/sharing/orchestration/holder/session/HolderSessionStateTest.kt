@@ -28,11 +28,9 @@ class HolderSessionStateTest {
     fun `Certain states are cancellable by the User`(
         @TestParameter state: HolderSessionState = testValues(
             AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true)),
-            AwaitingVerifierResolution,
-            ProcessingEstablishment,
+            ProcessingEstablishment(),
             Preflight(listOf()),
-            PresentingEngagement("unit test"),
-            ProcessingResponse
+            PresentingEngagement("unit test")
         )
     ) {
         assertTrue {
@@ -48,6 +46,8 @@ class HolderSessionStateTest {
             NotStarted,
             ReadyToPresent,
             Success(),
+            ProcessingResponse(),
+            AwaitingVerifierResolution(),
             HolderSessionState.SendingTermination
         )
     ) {
@@ -65,6 +65,19 @@ class HolderSessionStateTest {
     }
 
     @Test
+    fun `Cancellable states other than AwaitingUserConsent do not hide the close button`(
+        @TestParameter state: HolderSessionState = testValues(
+            ProcessingEstablishment(),
+            Preflight(listOf()),
+            PresentingEngagement("unit test")
+        )
+    ) {
+        assertFalse {
+            state.hideCloseButton()
+        }
+    }
+
+    @Test
     fun `AwaitingUserConsent is cancellable but hides the close button`() {
         val state = AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true))
 
@@ -73,18 +86,70 @@ class HolderSessionStateTest {
     }
 
     @Test
-    fun `Cancellable states other than AwaitingUserConsent do not hide the close button`(
+    fun `Sharing details states have no cancel behaviour and hide the close button`(
         @TestParameter state: HolderSessionState = testValues(
-            AwaitingVerifierResolution,
-            ProcessingEstablishment,
-            Preflight(listOf()),
-            PresentingEngagement("unit test"),
-            ProcessingResponse
+            ProcessingResponse(),
+            AwaitingVerifierResolution()
         )
     ) {
-        assertFalse {
-            state.hideCloseButton()
-        }
+        assertFalse { state.userCanCancel() }
+        assertTrue { state.hideCloseButton() }
+        assertTrue { state.blocksSystemBack() }
+    }
+
+    @Test
+    fun `Cancellable and non-loading states do not block system back`(
+        @TestParameter state: HolderSessionState = testValues(
+            ProcessingEstablishment(),
+            Preflight(listOf()),
+            PresentingEngagement("unit test"),
+            AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true)),
+            NotStarted,
+            Success()
+        )
+    ) {
+        assertFalse { state.blocksSystemBack() }
+    }
+
+    @Test
+    fun `blocksSystemBack is driven by the ProgressPresentation`() {
+        val cancellable = ProgressPresentation(
+            phase = ProgressPresentation.Phase.SharingDetails,
+            isCancellable = true,
+            showCloseButton = false
+        )
+        val notCancellable = cancellable.copy(isCancellable = false)
+
+        assertFalse { ProcessingResponse(cancellable).blocksSystemBack() }
+        assertTrue { ProcessingResponse(notCancellable).blocksSystemBack() }
+    }
+
+    @Test
+    fun `Loading-screen cancellability is driven by the ProgressPresentation`() {
+        val cancellable = ProgressPresentation(
+            phase = ProgressPresentation.Phase.SharingDetails,
+            isCancellable = true,
+            showCloseButton = false
+        )
+        val notCancellable = cancellable.copy(isCancellable = false)
+
+        assertTrue { ProcessingResponse(cancellable).userCanCancel() }
+        assertTrue { AwaitingVerifierResolution(cancellable).userCanCancel() }
+        assertFalse { ProcessingResponse(notCancellable).userCanCancel() }
+        assertFalse { AwaitingVerifierResolution(notCancellable).userCanCancel() }
+    }
+
+    @Test
+    fun `Loading-screen close-button visibility is driven by the ProgressPresentation`() {
+        val closeShown = ProgressPresentation(
+            phase = ProgressPresentation.Phase.GettingDetails,
+            isCancellable = true,
+            showCloseButton = true
+        )
+        val closeHidden = closeShown.copy(showCloseButton = false)
+
+        assertFalse { ProcessingEstablishment(closeShown).hideCloseButton() }
+        assertTrue { ProcessingEstablishment(closeHidden).hideCloseButton() }
     }
 
     @Test
