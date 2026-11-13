@@ -2,6 +2,11 @@
 <resources>
     <string name="allow_bluetooth">Caniatáu Bluetooth</string>
     <string name="allow_bluetooth_before_sharing_details">Cyn y gallwch rannu manylion o’ch trwydded yrru’r DU, mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth.</string>
+    <string name="bluetooth_is_restricted">Mae Bluetooth wedi’i gyfyngu</string>
+    <string name="you_cannot_share_your_details">Mae hyn yn golygu na allwch rannu eich manylion.</string>
+    <string name="turn_off_parental_controls_restricting_bluetooth">Os oes gan y ffôn hwn reolaethau rhieni sy’n cyfyngu ar Bluetooth, diffoddwch nhw yng ngosodiadau eich ffôn.</string>
+    <string name="ask_administrator_to_allow_bluetooth">Os yw sefydliad yn rheoli’r ffôn hwn, gofynnwch i weinyddwr ganiatáu Bluetooth.</string>
+    <string name="go_back_to_documents">Ewch yn ôl i ddogfennau</string>
     <string name="find_out_how_sharing_works">Darganfyddwch sut mae rhannu yn gweithio</string>
     <string name="get_ready_to_share">Paratoi i rannu</string>
     <string name="holder_consent_organization_sentence">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap cymeradwy wedi’i bweru gan %1$s</string>

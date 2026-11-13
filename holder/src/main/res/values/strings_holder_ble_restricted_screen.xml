@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources >
+    <string name="holder_ble_restricted_title" translatable="false">@string/bluetooth_is_restricted</string>
+    <string name="holder_ble_restricted_body_1" translatable="false">@string/you_cannot_share_your_details</string>
+    <string name="holder_ble_restricted_body_2" translatable="false">@string/turn_off_parental_controls_restricting_bluetooth</string>
+    <string name="holder_ble_restricted_body_3" translatable="false">@string/ask_administrator_to_allow_bluetooth</string>
+    <string name="holder_ble_restricted_button" translatable="false">@string/go_back_to_documents</string>
+</resources>
