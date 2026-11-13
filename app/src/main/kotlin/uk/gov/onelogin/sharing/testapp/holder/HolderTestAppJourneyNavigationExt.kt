@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.testapp.holder
 
 import android.util.Log
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,8 +45,7 @@ object HolderTestAppJourneyNavigationExt {
         composable<HolderTestAppJourney>(
             typeMap = mapOf(
                 typeOf<MockCredentialState>() to MockCredentialStateType
-            ),
-            popExitTransition = { slideOutVertically(targetOffsetY = { it }) }
+            )
         ) { navBackStackEntry ->
             val arguments: HolderTestAppJourney = navBackStackEntry.toRoute()
             val context = LocalContext.current
