@@ -8,17 +8,9 @@ import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
-import uk.gov.logging.api.v3dot1.model.TrackEvent
-import uk.gov.logging.api.v3dot1.model.ViewEvent
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
+import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorAnalyticsEvents.genericHolderErrorScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -41,10 +33,7 @@ class GenericHolderErrorViewModel(
     }
 
     fun sendButtonEvent(name: String) = viewModelScope.launch {
-        TrackEvent.Button(
-            text = name,
-            params = walletSharingRequiredParameters
-        ).let(analyticsLogger::logEventV3Dot1)
+        analyticsLogger.buttonEvent(name)
     }
 
     fun sendScreenEvent(name: String) = viewModelScope.launch {
