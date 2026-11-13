@@ -19,6 +19,8 @@ import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
 private typealias InputParameters = Triple<
@@ -91,16 +93,6 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'AwaitingVerifierResolution' -> AwaitingVerifierResolutionRoute",
-                HolderSessionState.AwaitingVerifierResolution
-            ) {
-                instanceOf<AwaitingVerifierResolutionRoute>(
-                    AwaitingVerifierResolutionRoute::class.java
-                ).matches(
-                    currentBackStackEntry?.toRoute<AwaitingVerifierResolutionRoute>()
-                )
-            },
-            Triple(
                 "Failure: Bluetooth connection error -> BtConnectionErrorRoute",
                 HolderSessionState.Complete.Failed(
                     SessionError(
@@ -168,7 +160,8 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
             Triple(
                 "'Complete.Success(Approved)' -> AwaitingVerifierResolutionRoute",
                 HolderSessionState.Complete.Success(
-                    HolderSessionState.Complete.SuccessReason.Approved
+                    HolderSessionState.Complete.SuccessReason.Approved,
+                    ResolutionPresentation(ResolutionResult.DetailsShared)
                 )
             ) {
                 instanceOf<AwaitingVerifierResolutionRoute>(
