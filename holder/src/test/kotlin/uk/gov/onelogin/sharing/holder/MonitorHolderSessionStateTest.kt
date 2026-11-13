@@ -21,8 +21,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.holder.qrcode.QrCodeRoute
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
 
 @RunWith(RobolectricTestParameterInjector::class)
 class MonitorHolderSessionStateTest {
@@ -109,11 +111,13 @@ class MonitorHolderSessionStateTest {
             convertSessionStateToNavigation(
                 context = context,
                 navController = controller,
-                state = HolderSessionState.PresentingEngagement("qr")
+                state = HolderSessionState.PresentingEngagement(
+                    engagementPresentationStub.copy(qrPayload = "qr")
+                )
             ).invoke()
             waitUntil {
                 controller.currentBackStackEntry?.destination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                    ?.route == QrCodeRoute::class.qualifiedName
             }
 
             // Refresh emits a transient NotStarted for the new session. While already presenting,
@@ -126,7 +130,7 @@ class MonitorHolderSessionStateTest {
 
             assert(
                 controller.currentBackStackEntry?.destination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                    ?.route == QrCodeRoute::class.qualifiedName
             )
         }
     }
@@ -178,11 +182,13 @@ class MonitorHolderSessionStateTest {
             convertSessionStateToNavigation(
                 context = context,
                 navController = controller,
-                state = HolderSessionState.PresentingEngagement("qr_a")
+                state = HolderSessionState.PresentingEngagement(
+                    engagementPresentationStub.copy(qrPayload = "qr_a")
+                )
             ).invoke()
             waitUntil {
                 controller.currentBackStackEntry?.destination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                    ?.route == QrCodeRoute::class.qualifiedName
             }
             val backStackSize = controller.currentBackStack.value.size
 
@@ -191,12 +197,14 @@ class MonitorHolderSessionStateTest {
             convertSessionStateToNavigation(
                 context = context,
                 navController = controller,
-                state = HolderSessionState.PresentingEngagement("qr_b")
+                state = HolderSessionState.PresentingEngagement(
+                    engagementPresentationStub.copy(qrPayload = "qr_b")
+                )
             ).invoke()
 
             assert(
                 controller.currentBackStackEntry?.destination
-                    ?.route == HolderPresentQrRoute::class.qualifiedName
+                    ?.route == QrCodeRoute::class.qualifiedName
             )
             assert(controller.currentBackStack.value.size == backStackSize)
         }

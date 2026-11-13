@@ -8,7 +8,9 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.api.usecases.RetryPrerequisitesNavigator.NavigationEvent
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
@@ -70,7 +72,9 @@ class RetryHolderPrerequisitesTest {
 
     @Test
     fun `Presenting engagement states pass prerequisites`() = runTest {
-        initialHolderState = HolderSessionState.PresentingEngagement("This is a unit test")
+        initialHolderState = HolderSessionState.PresentingEngagement(
+            engagementPresentationStub.copy(qrPayload = "This is a unit test")
+        )
 
         navigator.events.test {
             assertThat(
