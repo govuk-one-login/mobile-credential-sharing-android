@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.analytics
 
+import java.util.UUID
+import kotlin.test.Test
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import uk.gov.logging.analytics.FakeAnalyticsLogger
@@ -13,8 +15,6 @@ import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
 import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.errorScreenEvent
 import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.screenEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
-import java.util.UUID
-import kotlin.test.Test
 
 class AnalyticsLoggerHelperTest {
 
@@ -43,7 +43,7 @@ class AnalyticsLoggerHelperTest {
             name = text,
             params = requiredParameters,
             reason = reason,
-            status = status,
+            status = status
         ).asLegacyEvent()
     }
 
@@ -58,7 +58,7 @@ class AnalyticsLoggerHelperTest {
     @Test
     fun `Button events with default parameters defer to wallet sharing parameters`() {
         analytics.buttonEvent(
-            text = text,
+            text = text
         )
 
         assertThat(
@@ -89,7 +89,7 @@ class AnalyticsLoggerHelperTest {
         analytics.errorScreenEvent(
             name = text,
             id = id,
-            reason = reason,
+            reason = reason
         )
 
         assertThat(
@@ -155,7 +155,7 @@ class AnalyticsLoggerHelperTest {
     fun `Screen events with default parameters defer to wallet sharing parameters`() {
         analytics.screenEvent(
             title = text,
-            id = id,
+            id = id
         )
 
         assertThat(
@@ -181,5 +181,4 @@ class AnalyticsLoggerHelperTest {
             contains(expectedScreenEvent)
         )
     }
-
 }
