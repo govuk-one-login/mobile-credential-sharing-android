@@ -24,33 +24,62 @@ class BluetoothPermissionDeniedScreenRule(
         ApplicationProvider.getApplicationContext<Context>().resources
 ) : ComposeContentTestRule by composeTestRule {
 
-    fun onTitle() = onAllNodes(
+    fun onTitle(useUnmergedTree: Boolean = false) = onAllNodes(
         hasText(resources.getString(R.string.holder_bluetooth_permission_denied_title))
-            and isHeading()
+            and isHeading(),
+        useUnmergedTree = useUnmergedTree
     ).onFirst()
 
-    fun onFirstParagraph() = onAllNodesWithText(
-        resources.getString(R.string.holder_bluetooth_permission_denied_body_1)
+    fun onFirstParagraph(useUnmergedTree: Boolean = false) = onAllNodesWithText(
+        resources.getString(R.string.holder_bluetooth_permission_denied_body_1),
+        useUnmergedTree = useUnmergedTree
     ).onFirst()
 
-    fun onSecondParagraph() = onAllNodesWithText(
-        resources.getString(R.string.holder_bluetooth_permission_denied_body_2)
+    fun onSecondParagraph(useUnmergedTree: Boolean = false) = onAllNodesWithText(
+        resources.getString(R.string.holder_bluetooth_permission_denied_body_2),
+        useUnmergedTree = useUnmergedTree
     ).onFirst()
 
-    fun onAllowButton() = onAllNodes(
+    fun onAllowButton(useUnmergedTree: Boolean = false) = onAllNodes(
         hasText(resources.getString(R.string.holder_bluetooth_permission_denied_allow_button))
-            and hasRole(Role.Button)
+            and hasRole(Role.Button),
+        useUnmergedTree = useUnmergedTree
     ).onFirst()
 
-    fun onCancelButton() = onAllNodes(
+    fun onCancelButton(useUnmergedTree: Boolean = false) = onAllNodes(
         hasText(resources.getString(R.string.holder_bluetooth_permission_denied_cancel_button))
-            and hasRole(Role.Button)
+            and hasRole(Role.Button),
+        useUnmergedTree = useUnmergedTree
     ).onFirst()
 
     private val loadingSpinner = hasTestTag(BLUETOOTH_PERMISSION_DENIED_SPINNER_TEST_TAG)
     fun onLoadingSpinner() = onNode(loadingSpinner)
 
-    fun assertTitleIsDisplayed() = onTitle().assertIsDisplayed()
+    // assertions
+    fun assertValidTitle(useUnmergedTree: Boolean = false) =
+        onTitle(useUnmergedTree).assertIsDisplayed()
+
+    fun assertValidBody1(useUnmergedTree: Boolean = false) =
+        onFirstParagraph(useUnmergedTree).assertIsDisplayed()
+
+    fun assertValidBody2(useUnmergedTree: Boolean = false) =
+        onSecondParagraph(useUnmergedTree).assertIsDisplayed()
+
+    fun assertValidAllowButton(useUnmergedTree: Boolean = false) = onAllowButton(useUnmergedTree)
+        .assertHasClickAction()
+        .assertIsDisplayed()
+
+    fun assertValidCancelButton(useUnmergedTree: Boolean = false) = onCancelButton(useUnmergedTree)
+        .assertHasClickAction()
+        .assertIsDisplayed()
+
+    fun assertValidUi(useUnmergedTree: Boolean = false) {
+        assertValidTitle(useUnmergedTree)
+        assertValidBody1(useUnmergedTree)
+        assertValidBody2(useUnmergedTree)
+        assertValidAllowButton(useUnmergedTree)
+        assertValidCancelButton(useUnmergedTree)
+    }
 
     fun assertWelshTitleIsDisplayed() = onAllNodes(
         hasText("Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos") and isHeading()
@@ -66,19 +95,6 @@ class BluetoothPermissionDeniedScreenRule(
     fun waitUntilLoadingSpinnerExists() = waitUntil {
         onAllNodes(loadingSpinner).fetchSemanticsNodes().isNotEmpty()
     }
-
-    fun assertBodyIsDisplayed() {
-        onFirstParagraph().assertIsDisplayed()
-        onSecondParagraph().assertIsDisplayed()
-    }
-
-    fun assertAllowButtonIsDisplayed() = onAllowButton()
-        .assertHasClickAction()
-        .assertIsDisplayed()
-
-    fun assertCancelButtonIsDisplayed() = onCancelButton()
-        .assertHasClickAction()
-        .assertIsDisplayed()
 
     fun performAllowClick() = onAllowButton().performClick()
 

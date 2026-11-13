@@ -123,10 +123,7 @@ class BluetoothPermissionDeniedScreenTest {
             setContent {
                 BluetoothPermissionDeniedContent(onAllow = {}, onCancel = {})
             }
-            assertTitleIsDisplayed()
-            assertBodyIsDisplayed()
-            assertAllowButtonIsDisplayed()
-            assertCancelButtonIsDisplayed()
+            assertValidUi()
         }
     }
 
@@ -240,7 +237,7 @@ class BluetoothPermissionDeniedScreenTest {
     fun `Closing the journey shows a loading spinner`() = runTest {
         composeTestRule.run {
             setContent { BluetoothPermissionDeniedScreen(viewModel = viewModel) }
-            assertTitleIsDisplayed()
+            assertValidTitle()
             holderState.update { HolderSessionState.SendingTermination }
             waitUntilLoadingSpinnerExists()
             assertLoadingSpinnerIsDisplayed()
@@ -311,7 +308,7 @@ class BluetoothPermissionDeniedScreenTest {
                 }
             }
 
-            assertTitleIsDisplayed()
+            assertValidTitle()
             waitUntil { analyticsLogger.size != 0 }
         }
 
@@ -325,10 +322,7 @@ class BluetoothPermissionDeniedScreenTest {
     fun `Content preview renders the screen content`() = runTest {
         composeTestRule.run {
             setContent { BluetoothPermissionDeniedContentPreview() }
-            assertTitleIsDisplayed()
-            assertBodyIsDisplayed()
-            assertAllowButtonIsDisplayed()
-            assertCancelButtonIsDisplayed()
+            assertValidUi()
         }
     }
 

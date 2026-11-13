@@ -5,7 +5,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
@@ -47,7 +46,7 @@ class BluetoothPermissionDeniedNavigationExtTest {
     val dispatcherRule = MainDispatcherRule()
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = BluetoothPermissionDeniedScreenRule()
 
     private lateinit var controller: TestNavHostController
 
@@ -134,6 +133,8 @@ class BluetoothPermissionDeniedNavigationExtTest {
             onNodeWithText("Navigate").onParent().performClick()
 
             waitUntil { hasNavigatedToBluetoothPermissionDenied }
+
+            assertValidUi()
         }
     }
 
