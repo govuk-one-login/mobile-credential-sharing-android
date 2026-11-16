@@ -1,28 +1,28 @@
 package uk.gov.onelogin.sharing.holder.consent
 
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicator
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
-import uk.gov.onelogin.sharing.cryptoService.verifier.DocRequestBuilderImpl.Companion.NAMESPACE_ISO
-import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsPreviewParameters
-import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsViewModel
+import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsContent
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.ReviewWhatYouWillShareContent
-import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
-import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 
 @Composable
 internal fun HolderConsentScreen(
@@ -36,8 +36,11 @@ internal fun HolderConsentScreen(
         state = uiState,
         onAgree = viewModel::onAccept,
         onLoadReviewWhatYouWillShare = viewModel::sendReviewWhatYouWillShareScreenEvent,
+        onLoadMoreAboutDvs = viewModel::sendMoreAboutDvsScreenEvent,
+        onOpenDvsPrivacyPolicyLink = viewModel::onOpenDvsPrivacyPolicy,
         onReadPrivacyNotice = viewModel::onReadPrivacyNotice,
-        onCancel = viewModel::onCancelAndGoBack
+        onCancel = viewModel::onCancelAndGoBack,
+        onDismissMoreAboutDvsScreen = viewModel::dismissMoreAboutDvsScreen
     )
 }
 
@@ -46,10 +49,16 @@ internal fun HolderConsentContent(
     state: HolderConsentUiState,
     modifier: Modifier = Modifier,
     onLoadReviewWhatYouWillShare: (String) -> Unit = {},
+    onLoadMoreAboutDvs: (String) -> Unit = {},
     onAgree: () -> Unit = {},
     onReadPrivacyNotice: () -> Unit = {},
+    onDismissMoreAboutDvsScreen: (String) -> Unit = {},
+    onOpenDvsPrivacyPolicyLink: (String) -> Unit = {},
     onCancel: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     when (state) {
         HolderConsentUiState.Loading -> {
             Column(
@@ -73,10 +82,35 @@ internal fun HolderConsentContent(
         }
 
         is HolderConsentUiState.MoreAboutDvs -> {
-            // do nothing for now
+            MoreAboutDvsContent(
+                state = state,
+                onScreenLoad = onLoadMoreAboutDvs,
+                modifier = modifier,
+                onCancelScreen = onDismissMoreAboutDvsScreen,
+            ) { privacyPolicyUrl ->
+                scope.launch {
+                    context.getEnglishString(
+                        R.string.more_about_dvs_privacy_policy_link,
+                        "DVS"
+                    ).let(onOpenDvsPrivacyPolicyLink)
+
+                    val intent = CustomTabsIntent.Builder()
+                        .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+                        .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                        .setDownloadButtonEnabled(false)
+                        .build()
+
+                    privacyPolicyUrl
+                        .let(Uri::parse)
+                        .let { uri ->
+                            intent.launchUrl(context, uri)
+                        }
+                }
+            }
         }
     }
 }
+
 @PreviewContent
 @Composable
 internal fun HolderConsentScreenPreview(
@@ -90,38 +124,5 @@ internal fun HolderConsentScreenPreview(
                 state = state,
             )
         }
-    }
-}
-
-internal class HolderConsentScreenPreviewParameters(
-    private val inputs: List<HolderConsentUiState> = listOf(
-        HolderConsentUiState.Loading,
-        confirmConsentPreviewState,
-        HolderConsentUiState.MoreAboutDvs(
-            normalisedOrganizationName = "Organisation Ltd.",
-            privacyPolicyUrl = "https://verifier.example/privacy"
-        )
-    )
-) : PreviewParameterProvider<HolderConsentUiState> {
-    override val values: Sequence<HolderConsentUiState>
-        get() = inputs.asSequence()
-
-    override fun getDisplayName(index: Int): String? = inputs[index]::class.java.simpleName
-
-    internal companion object {
-        internal val confirmConsentPreviewState = HolderConsentUiState.ConfirmConsent(
-            card = ConsentCard.from(
-                ConsentAttributeResolver.toDisplayAttributes(
-                    listOf(
-                        ConsentAttribute("family_name", false, NAMESPACE_ISO),
-                        ConsentAttribute("document_number", false, NAMESPACE_ISO),
-                        ConsentAttribute("age_over_21", true, NAMESPACE_ISO)
-                    )
-                )
-            ),
-            privacyPolicyUrl = "https://verifier.example/privacy",
-            normalisedOrganizationName = "Organisation Ltd.",
-            organizationName = "Organisation Ltd"
-        )
     }
 }

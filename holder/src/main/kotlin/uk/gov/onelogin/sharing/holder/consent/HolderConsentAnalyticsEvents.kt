@@ -2,6 +2,7 @@ package uk.gov.onelogin.sharing.holder.consent
 
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
+import uk.gov.logging.api.v3dot1.model.TrackEvent
 import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
 import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.screenEvent
@@ -31,4 +32,9 @@ internal object HolderConsentAnalyticsEvents {
         text = "Cancel and go back to documents",
         params = walletSharingRequiredParameters
     ).let(this::logEventV3Dot1)
+
+    internal fun AnalyticsLogger.moreAboutDvsScreen(name: String) = screenEvent(
+        title = name,
+        id = "288470f5-8bdb-43cf-8cd7-38bcd241413b",
+    )
 }

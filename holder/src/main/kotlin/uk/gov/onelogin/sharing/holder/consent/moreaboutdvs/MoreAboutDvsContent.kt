@@ -1,8 +1,5 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
-import android.net.Uri
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,144 +8,90 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.launch
-import uk.gov.android.ui.componentsv2.camera.R as cameraR
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
-import uk.gov.android.ui.componentsv2.progress.GdsProgressIndicator
 import uk.gov.android.ui.componentsv2.topappbar.GdsTopAppBarDefaults.scrollBehaviour
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
-import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.logging.api.analytics.extensions.getEnglishString
-import uk.gov.onelogin.sharing.core.R as coreR
-import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
+import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
-
-@Composable
-internal fun MoreAboutDvsScreen(
-    modifier: Modifier = Modifier,
-    viewModel: MoreAboutDvsViewModel = metroViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        context.getEnglishString(
-            R.string.more_about_dvs_title,
-            "DVS"
-        ).let(viewModel::sendScreenEvent)
-    }
-
-    MoreAboutDvsContent(
-        state = uiState,
-        modifier = modifier,
-        onCancelScreen = {
-            context.getEnglishString(
-                cameraR.string.close_icon_button
-            ).let(viewModel::sendButtonEvent)
-        }
-    ) { privacyPolicyUrl ->
-        scope.launch {
-            context.getEnglishString(
-                R.string.more_about_dvs_privacy_policy_link,
-                "DVS"
-            ).let(viewModel::sendButtonEvent)
-
-            val intent = CustomTabsIntent.Builder()
-                .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
-                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                .setDownloadButtonEnabled(false)
-                .build()
-
-            privacyPolicyUrl
-                .let(Uri::parse)
-                .let { uri ->
-                    intent.launchUrl(context, uri)
-                }
-        }
-    }
-}
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @Composable
 internal fun MoreAboutDvsContent(
-    state: MoreAboutDvsViewModel.MoreAboutDvsUiState,
+    state: HolderConsentUiState.MoreAboutDvs,
     modifier: Modifier = Modifier,
-    onCancelScreen: () -> Unit = {},
+    onScreenLoad: (String) -> Unit = {},
+    onCancelScreen: (String) -> Unit = {},
     onPrivacyPolicyLinkClick: (String) -> Unit = {}
 ) {
-    when (state) {
-        is MoreAboutDvsViewModel.MoreAboutDvsUiState.Loading -> {
-            Column(
-                modifier = modifier,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                GdsProgressIndicator()
-            }
-        }
+    val context = LocalContext.current
+    val metrics = rememberMetricsStateHolder()
+    val latestOnScreenLoad by rememberUpdatedState(onScreenLoad)
 
-        is MoreAboutDvsViewModel.MoreAboutDvsUiState.Loaded -> {
-            Column(modifier = modifier) {
-                DismissScreenButton(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    onCancelScreen = onCancelScreen
-                )
+    LaunchedEffect(Unit) {
+        metrics.putScreenState("MoreAboutDvsScreen")
+        context.getEnglishString(
+            R.string.more_about_dvs_title,
+            "DVS"
+        ).let(latestOnScreenLoad)
+    }
 
-                LeftAlignedScreenV2(
-                    modifier = Modifier.fillMaxSize(),
-                    title = stringResource(
-                        R.string.more_about_dvs_title,
-                        state.organizationName
-                    ),
-                    body = state.organizationName.moreAboutDvsBodyContent(
-                        onPrivacyPolicyLinkClick = {
-                            onPrivacyPolicyLinkClick(state.privacyPolicyUrl)
-                        }
-                    ),
-                    forceScroll = true
-                )
-            }
-        }
+    Column(modifier = modifier) {
+        DismissScreenButton(
+            modifier = Modifier
+                .fillMaxWidth(),
+            onCancelScreen = onCancelScreen
+        )
+
+        LeftAlignedScreenV2(
+            modifier = Modifier.fillMaxSize(),
+            title = stringResource(
+                R.string.more_about_dvs_title,
+                state.normalisedOrganizationName
+            ),
+            body = state.normalisedOrganizationName.moreAboutDvsBodyContent(
+                onPrivacyPolicyLinkClick = {
+                    onPrivacyPolicyLinkClick(state.privacyPolicyUrl)
+                }
+            ),
+            forceScroll = true
+        )
     }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DismissScreenButton(modifier: Modifier = Modifier, onCancelScreen: () -> Unit = {}) {
+private fun DismissScreenButton(
+    modifier: Modifier = Modifier,
+    onCancelScreen: (String) -> Unit = {}
+) {
     TopAppBar(
         title = {},
         modifier = modifier,
         navigationIcon = {
             IconButton(
-                onCancelScreen,
+                { onCancelScreen("Close") },
                 modifier = Modifier
                     .testTag("closeButton")
                     .minimumInteractiveComponentSize()
@@ -173,15 +116,15 @@ private fun DismissScreenButton(modifier: Modifier = Modifier, onCancelScreen: (
 private fun String.moreAboutDvsBodyContent(
     onPrivacyPolicyLinkClick: () -> Unit
 ): PersistentList<LeftAlignedScreenBodyV2> = (
-    introductionTexts() +
-        introductionBullets() +
-        privacyNoticeSubheading() +
-        privacyNoticeBody() +
-        privacyNoticeBullets() +
-        privacyNoticeButton(
-            onClick = onPrivacyPolicyLinkClick
-        )
-    ).toPersistentList()
+        introductionTexts() +
+                introductionBullets() +
+                privacyNoticeSubheading() +
+                privacyNoticeBody() +
+                privacyNoticeBullets() +
+                privacyNoticeButton(
+                    onClick = onPrivacyPolicyLinkClick
+                )
+        ).toPersistentList()
 
 @Composable
 private fun String.introductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
@@ -249,38 +192,4 @@ internal fun String.removeDoubleFullStop(): String = let { text ->
     } else {
         text
     }
-}
-
-@PreviewContent
-@Composable
-internal fun MoreAboutDvsPreview(
-    @PreviewParameter(provider = MoreAboutDvsPreviewParameters::class)
-    state: MoreAboutDvsViewModel.MoreAboutDvsUiState
-) {
-    GdsTheme {
-        Surface {
-            MoreAboutDvsContent(
-                state = state,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-}
-
-internal class MoreAboutDvsPreviewParameters(
-    private val inputs: List<MoreAboutDvsViewModel.MoreAboutDvsUiState> = listOf(
-        MoreAboutDvsViewModel.MoreAboutDvsUiState.Loaded(
-            ConsentPresentation(
-                documents = emptyList(),
-                organizationName = "Stub-DVS Ltd.",
-                privacyPolicyUrl = "https://www.more.about.dvs/preview"
-            )
-        ),
-        MoreAboutDvsViewModel.MoreAboutDvsUiState.Loading
-    )
-) : PreviewParameterProvider<MoreAboutDvsViewModel.MoreAboutDvsUiState> {
-    override val values: Sequence<MoreAboutDvsViewModel.MoreAboutDvsUiState>
-        get() = inputs.asSequence()
-
-    override fun getDisplayName(index: Int): String? = inputs[index]::class.java.simpleName
 }

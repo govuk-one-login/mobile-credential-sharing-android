@@ -16,12 +16,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
 import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.agreeAndShareButton
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.cancelAndGoBackButton
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.moreAboutDvsScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.reviewWhatYouWillShareScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.readPrivacyNoticeButton
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
@@ -37,10 +40,9 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val analyticsLogger: AnalyticsLogger,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
+    private val showMoreAboutDvs: MutableStateFlow<Boolean> = MutableStateFlow(false),
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
-
-    private val showMoreAboutDvs = MutableStateFlow(false)
 
     private val presentation: Flow<ConsentPresentation> = orchestrator
         .holderSessionState
@@ -81,6 +83,10 @@ class HolderConsentViewModel(
         analyticsLogger.reviewWhatYouWillShareScreen(screenName)
     }
 
+    fun sendMoreAboutDvsScreenEvent(name: String) = viewModelScope.launch {
+        analyticsLogger.moreAboutDvsScreen(name)
+    }
+
     fun onReadPrivacyNotice() = viewModelScope.launch {
         analyticsLogger.readPrivacyNoticeButton()
     }
@@ -94,7 +100,16 @@ class HolderConsentViewModel(
         analyticsLogger.cancelAndGoBackButton()
     }
 
+    fun onOpenDvsPrivacyPolicy(buttonText: String) = viewModelScope.launch {
+        analyticsLogger.buttonEvent(buttonText)
+    }
+
     fun onDeny() = viewModelScope.launch {
         orchestrator.denyConsent()
+    }
+
+    fun dismissMoreAboutDvsScreen(buttonText: String) = viewModelScope.launch {
+        analyticsLogger.buttonEvent(buttonText)
+        showMoreAboutDvs.update { false }
     }
 }

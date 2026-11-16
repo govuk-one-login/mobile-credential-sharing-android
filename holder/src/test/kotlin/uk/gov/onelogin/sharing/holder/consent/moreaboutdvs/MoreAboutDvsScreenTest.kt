@@ -1,16 +1,20 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import android.content.Intent
+import android.net.Uri
+import android.net.Uri.parse
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import io.mockk.mockk
-import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.Matchers.allOf
 import org.junit.Rule
@@ -18,9 +22,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.logging.api.analytics.extensions.getEnglishString
+import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreen
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import kotlin.test.Test
 
 @RunWith(RobolectricTestParameterInjector::class)
 class MoreAboutDvsScreenTest {
@@ -51,15 +61,12 @@ class MoreAboutDvsScreenTest {
     }
 
     private val viewModel by lazy {
-        MoreAboutDvsViewModel(
+        HolderConsentViewModel(
             analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator
+            orchestrator = orchestrator,
+            showMoreAboutDvs = MutableStateFlow(true)
         )
     }
-
-    private val uiState: MoreAboutDvsViewModel.MoreAboutDvsUiState
-        get() =
-            viewModel.uiState.value
 
     @Test
     fun `UI contains the correct elements`() = verifyUiElements(
@@ -79,13 +86,6 @@ class MoreAboutDvsScreenTest {
     }
 
     @Test
-    fun `Preview contains the correct elements`() = verifyUiElements(
-        expectedOrganization = "Stub-DVS Ltd."
-    ) {
-        MoreAboutDvsPreview(state = uiState)
-    }
-
-    @Test
     fun `Launching the screen sends an analytics event`() = runTest {
         composeTestRule.run {
             setContent { Render() }
@@ -100,8 +100,8 @@ class MoreAboutDvsScreenTest {
     fun `Reading the DVS privacy policy sends an analytics event`() = runTest {
         composeTestRule.run {
             setContent { Render() }
-
             performPrivacyPolicyButtonClick()
+            waitForIdle()
 
             waitUntil("Doesn't contain expected event!: $analyticsLogger") {
                 analyticsLogger.contains(MoreAboutDvsTestData.expectedButtonEvent)
@@ -132,9 +132,9 @@ class MoreAboutDvsScreenTest {
     @Composable
     private fun Render() {
         GdsTheme {
-            MoreAboutDvsScreen(
-                modifier = Modifier.fillMaxSize(),
-                viewModel = viewModel
+            HolderConsentScreen(
+                viewModel = viewModel,
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
