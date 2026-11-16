@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+    <string name="holder_stop_check_dialog_title">Are you sure you want to stop the check?</string>
+    <string name="holder_stop_check_dialog_body">You’ll end your connection with the person doing the check. Your details will not be shared.</string>
+    <string name="holder_stop_check_dialog_stop_button">Stop the check</string>
+    <string name="holder_stop_check_dialog_continue_button">Continue with the check</string>
+</resources>

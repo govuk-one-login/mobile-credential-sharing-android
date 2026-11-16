@@ -2,70 +2,126 @@ package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import androidx.compose.runtime.Composable
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.mockk.mockk
 import kotlin.test.Test
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.empty
 import org.junit.Rule
 import org.junit.runner.RunWith
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
+import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
+import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.cancellation.CancellationDialogContentsRule
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(AndroidJUnit4::class)
 class HolderCancellationDialogContentsTest {
     @get:Rule
-    val composeTestRule = CancellationDialogContentsRule()
+    val dispatcherRule = MainDispatcherRule()
 
+    @get:Rule
+    val composeTestRule = HolderCancellationDialogContentsRule()
+
+    private val holderState = MutableStateFlow<HolderSessionState>(
+        HolderSessionState.ProcessingEstablishment
+    )
     private val orchestrator by lazy {
-        FakeOrchestrator()
+        FakeOrchestrator(initialHolderState = holderState)
     }
+    private val analyticsLogger = FakeAnalyticsLogger()
     private val viewModel by lazy {
-        HolderCancellationDialogViewModel(orchestrator)
+        HolderCancellationDialogViewModel(
+            orchestrator = orchestrator,
+            analyticsLogger = analyticsLogger,
+            ioDispatcher = dispatcherRule.testDispatcher
+        )
     }
+
+    private val stopTheCheckEvent = Button(
+        text = "Stop the check",
+        params = walletSharingRequiredParameters
+    ).asLegacyEvent()
+
+    private val continueWithTheCheckEvent = Button(
+        text = "Continue with the check",
+        params = walletSharingRequiredParameters
+    ).asLegacyEvent()
 
     @Test
     fun `Validate UI contents`() = runTest {
         composeTestRule.run {
             setContent { Render() }
-            assertTitleIsDisplayed()
-            assertCancelJourneyButtonIsDisplayed()
-            assertDismissDialogButtonIsDisplayed()
+            assertContentsAreDisplayed()
         }
     }
 
     @Test
-    fun `Dialog is dismissable`() = runTest {
+    fun `Continuing with the check dismisses the dialog and logs the button event`() = runTest {
         composeTestRule.run {
             setContent { Render() }
-            performDismissDialogClick()
-            assertDismissDialogClickCount(1)
-        }
-    }
-
-    @Test
-    fun `Cancelling the journey defers to the orchestrator`() = runTest {
-        composeTestRule.run {
-            setContent { Render() }
-            performCancelJourneyClick()
+            performContinueWithTheCheckClick()
             waitForIdle()
 
-            assertThat(
-                orchestrator.cancelCount,
-                equalTo(1)
-            )
+            assertThat(dismissCount, equalTo(1))
         }
+        assertThat(analyticsLogger, contains(continueWithTheCheckEvent))
+        assertThat(orchestrator.cancelCount, equalTo(0))
+    }
+
+    @Test
+    fun `Stopping the check before a request arrives cancels the journey`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+            performStopTheCheckClick()
+            waitForIdle()
+        }
+
+        assertThat(orchestrator.cancelCount, equalTo(1))
+        assertThat(orchestrator.denyConsentCount, equalTo(0))
+        assertThat(analyticsLogger, contains(stopTheCheckEvent))
+    }
+
+    @Test
+    fun `Stopping the check from Agree to share runs the deny behaviour`() = runTest {
+        holderState.value = HolderSessionState.AwaitingUserConsent(
+            request = mockk(relaxed = true),
+            presentation = mockk(relaxed = true)
+        )
+
+        composeTestRule.run {
+            setContent { Render() }
+            performStopTheCheckClick()
+            waitForIdle()
+        }
+
+        assertThat(orchestrator.denyConsentCount, equalTo(1))
+        assertThat(analyticsLogger, contains(stopTheCheckEvent))
+    }
+
+    @Test
+    fun `Showing the dialog does not log any analytics`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+            waitForIdle()
+        }
+
+        assertThat(analyticsLogger.toList(), empty())
     }
 
     @Composable
-    private fun Render(
-        content: @Composable () -> Unit = {
+    private fun Render() {
+        GdsTheme {
             HolderCancellationDialogContents(
                 viewModel = viewModel,
-                onDismiss = composeTestRule::incrementDismissDialogClickCount
+                onDismiss = composeTestRule::incrementDismissCount
             )
         }
-    ) {
-        GdsTheme { content() }
     }
 }
