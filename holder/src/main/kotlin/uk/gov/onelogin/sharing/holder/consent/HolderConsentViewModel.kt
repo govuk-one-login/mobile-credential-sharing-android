@@ -89,6 +89,7 @@ class HolderConsentViewModel(
 
     fun onReadPrivacyNotice() = viewModelScope.launch {
         analyticsLogger.readPrivacyNoticeButton()
+        showMoreAboutDvs.update { true }
     }
 
     fun onAccept() = viewModelScope.launch {
