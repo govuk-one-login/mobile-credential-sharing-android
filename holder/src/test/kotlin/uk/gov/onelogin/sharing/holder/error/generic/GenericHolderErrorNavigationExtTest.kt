@@ -1,6 +1,9 @@
 package uk.gov.onelogin.sharing.holder.error.generic
 
 import android.content.Context
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +45,7 @@ class GenericHolderErrorNavigationExtTest {
     val composeTestRule = GenericHolderErrorScreenRule()
 
     private lateinit var controller: TestNavHostController
+    private var onBackPressedDispatcher: OnBackPressedDispatcherOwner? = null
 
     private val analyticsLogger = FakeAnalyticsLogger()
     private var initialHolderState: HolderSessionState = HolderSessionState.Complete.Failed(
@@ -95,19 +99,24 @@ class GenericHolderErrorNavigationExtTest {
     fun `User actions navigate to the previous screen`(
         @TestParameter action: (
             GenericHolderErrorScreenRule,
-            TestNavHostController
+            TestNavHostController,
+            OnBackPressedDispatcherOwner?
         ) -> Unit = namedTestValues(
-            "Tapping primary button" to { rule, _ ->
+            "Tapping primary button" to { rule, _, _ ->
                 rule.performGoBackToDocumentsClick()
             },
-            "Popping navigation backstack" to { _, controller ->
+            "Popping navigation backstack" to { _, controller, _ ->
                 controller.popBackStack()
+            },
+            "Performing a back press via dispatcher" to { _, _, dispatcher ->
+                dispatcher?.onBackPressedDispatcher?.onBackPressed()
             }
         )
     ) = runTest {
         composeTestRule.run {
             setContent {
                 controller = prepareController(LocalContext.current)
+                onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
                 Render()
             }
 
@@ -116,7 +125,7 @@ class GenericHolderErrorNavigationExtTest {
 
             assertValidUi()
 
-            runOnUiThread { action(this, controller) }
+            runOnUiThread { action(this, controller, onBackPressedDispatcher) }
             waitForIdle()
 
             waitUntil(
