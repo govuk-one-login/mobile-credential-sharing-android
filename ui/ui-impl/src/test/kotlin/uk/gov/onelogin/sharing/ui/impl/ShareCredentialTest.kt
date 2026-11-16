@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharin
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.NonStartedHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
@@ -53,6 +55,10 @@ class ShareCredentialTest {
         text = "Close",
         params = walletSharingRequiredParameters
     ).asLegacyEvent()
+
+    private val failedState = HolderSessionState.Complete.Failed(
+        SessionError("This is a UI test", Exception())
+    )
 
     private val holderGraph by lazy {
         createTestHolderGraph(appGraph)
@@ -259,22 +265,112 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
-    fun `start is not called when state is not NotStarted`(
+    fun `start is delegated to the orchestrator whatever the state`(
         @TestParameter(valuesProvider = NonStartedHolderSessionStates::class)
         state: HolderSessionState
     ) = runTest {
-        val orchestrator = FakeOrchestrator(
+        var delegatedStartCount = 0
+        val fakeOrchestrator = FakeOrchestrator(
             initialHolderState = MutableStateFlow(state)
         )
+        // Counted separately because some screens reset on entry, which zeroes `startCount`.
+        val orchestrator = object : Orchestrator.Holder by fakeOrchestrator {
+            override fun start() {
+                delegatedStartCount++
+                fakeOrchestrator.start()
+            }
+        }
         val presenter = FakeCredentialPresenter(
             appGraph = appGraph,
             orchestrator = orchestrator
         )
 
         composeTestRule.setContent { ShareCredential(component = presenter) }
+
+        composeTestRule.waitUntil { delegatedStartCount == 1 }
+        composeTestRule.waitForIdle()
+        assertEquals(1, delegatedStartCount)
+    }
+
+    @Test
+    @UiThreadTest
+    fun `A previously dismissed journey doesn't call onExitJourney on entry`() = runTest {
+        var finishedCount = 0
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(failedState),
+            journeyFinished = MutableStateFlow(true)
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent {
+            ShareCredential(component = presenter, onExitJourney = { finishedCount++ })
+        }
+
+        composeTestRule.waitUntil { orchestrator.startCount == 1 }
+        composeTestRule.waitForIdle()
+        assertEquals(false, orchestrator.isJourneyFinished.value)
+        assertEquals(0, finishedCount)
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Dismissing the journey calls onExitJourney once`() = runTest {
+        var finishedCount = 0
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(failedState)
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent {
+            ShareCredential(component = presenter, onExitJourney = { finishedCount++ })
+        }
         composeTestRule.waitForIdle()
 
-        assertEquals(0, orchestrator.startCount)
+        orchestrator.dismiss()
+        orchestrator.dismiss()
+
+        composeTestRule.waitUntil { finishedCount == 1 }
+        composeTestRule.waitForIdle()
+        assertEquals(1, finishedCount)
+        assertEquals(1, orchestrator.startCount)
+        assertEquals(0, orchestrator.resetCount)
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Dismissing the journey without a callback passes a back press to the host`() = runTest {
+        var hostBackPressCount = 0
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(failedState)
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent {
+            // Registered before the SDK's handlers, mirroring a host NavHost.
+            BackHandler { hostBackPressCount++ }
+            ShareCredential(component = presenter)
+        }
+        composeTestRule.waitForIdle()
+
+        orchestrator.dismiss()
+
+        composeTestRule.waitUntil { hostBackPressCount == 1 }
+        composeTestRule.waitForIdle()
+        assertEquals(1, hostBackPressCount)
+        assertEquals(
+            expected = 0,
+            actual = orchestrator.resetCount,
+            message = "The SDK's error screen shouldn't have intercepted the back press"
+        )
     }
 
     @TestParameters(valuesProvider = HolderStateToNavigationRoute::class)
@@ -358,7 +454,8 @@ class ShareCredentialTest {
 
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progressIndicator").assertDoesNotExist()
-        assertEquals(0, orchestrator.startCount)
+        // The orchestrator keeps an undismissed result, which HolderOrchestratorTest covers.
+        assertEquals(1, orchestrator.startCount)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

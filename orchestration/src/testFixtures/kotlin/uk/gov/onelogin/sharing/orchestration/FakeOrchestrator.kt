@@ -21,6 +21,8 @@ class FakeOrchestrator(
     var cancelCount: Int = 0,
     var resetCount: Int = 0,
     var denyConsentCount: Int = 0,
+    var dismissCount: Int = 0,
+    val journeyFinished: MutableStateFlow<Boolean> = MutableStateFlow(false),
     private val onConfirmConsent: () -> Unit = {}
 ) : Orchestrator.Holder,
     Orchestrator.Verifier,
@@ -28,6 +30,7 @@ class FakeOrchestrator(
 
     override val holderSessionState: StateFlow<HolderSessionState> = initialHolderState
     override val verifierSessionState: StateFlow<VerifierSessionState> = initialVerifierState
+    override val isJourneyFinished: StateFlow<Boolean> = journeyFinished
 
     override suspend fun processQrCode(qrCode: String?) {
         when (val result = parser.parse(qrCode)) {
@@ -52,10 +55,16 @@ class FakeOrchestrator(
 
     override fun start() {
         startCount++
+        journeyFinished.value = false
     }
 
     override fun cancel() {
         cancelCount++
+    }
+
+    override fun dismiss() {
+        dismissCount++
+        journeyFinished.value = true
     }
 
     override suspend fun confirmConsent() = onConfirmConsent()
@@ -69,5 +78,6 @@ class FakeOrchestrator(
         startCount = 0
         cancelCount = 0
         resetCount++
+        journeyFinished.value = false
     }
 }

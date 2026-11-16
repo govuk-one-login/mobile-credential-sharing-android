@@ -16,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -46,8 +47,12 @@ import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.CANNOT_TRA
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_ERROR
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.START_ORCHESTRATION_SUCCESS
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.TRANSITION_SUCCESSFUL_TO_STATE
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.cannotDismissIncompleteJourneyMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.completedPrerequisiteChecks
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.continueJourneyOnStartMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.createSessionResetMessage
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.dismissedJourneyMessage
+import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.keepCompletedJourneyOnStartMessage
 import uk.gov.onelogin.sharing.orchestration.Orchestrator.LogMessages.recreateSessionOnStartMessage
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.exceptions.OrchestratorCannotStartException
@@ -105,7 +110,10 @@ class HolderOrchestrator(
     private val consentInFlight = AtomicBoolean(false)
     private var signingJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
+    private val journeyFinished = MutableStateFlow(false)
     private val currentContext: HolderSessionContext get() = sessionFlow.value.sessionContext
+
+    override val isJourneyFinished: StateFlow<Boolean> = journeyFinished.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val holderSessionState: StateFlow<HolderSessionState> = sessionFlow.flatMapLatest {
@@ -126,8 +134,19 @@ class HolderOrchestrator(
     }
 
     override fun start() {
-        if (sessionFlow.value.isComplete()) {
+        val session = sessionFlow.value
+
+        if (session.isComplete()) {
+            if (!journeyFinished.value) {
+                logger.debug(
+                    logTag,
+                    keepCompletedJourneyOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
+                )
+                return
+            }
+
             consentInFlight.set(false)
+            journeyFinished.value = false
             sessionFlow.update {
                 sessionFactory.create().also {
                     logger.debug(
@@ -136,16 +155,10 @@ class HolderOrchestrator(
                     )
                 }
             }
-        }
-
-        if (sessionFlow.value.currentState.value !is HolderSessionState.NotStarted) {
-            logger.error(
+        } else if (session.currentState.value !is HolderSessionState.NotStarted) {
+            logger.debug(
                 logTag,
-                START_ORCHESTRATION_ERROR,
-                OrchestratorCannotStartException(
-                    START_ORCHESTRATION_ERROR,
-                    IllegalStateException("Journey already in progress")
-                )
+                continueJourneyOnStartMessage(Orchestrator.Holder.JOURNEY_NAME)
             )
             return
         }
@@ -442,10 +455,25 @@ class HolderOrchestrator(
         }
     }
 
+    override fun dismiss() {
+        if (!sessionFlow.value.isComplete()) {
+            logger.debug(
+                logTag,
+                cannotDismissIncompleteJourneyMessage(Orchestrator.Holder.JOURNEY_NAME)
+            )
+            return
+        }
+
+        if (journeyFinished.compareAndSet(expect = false, update = true)) {
+            logger.debug(logTag, dismissedJourneyMessage(Orchestrator.Holder.JOURNEY_NAME))
+        }
+    }
+
     override fun reset() {
         engagementTimer.stop()
         signingJob?.cancel()
         consentInFlight.set(false)
+        journeyFinished.value = false
         sessionFlow.update {
             sessionFactory.create().also {
                 logger.debug(
