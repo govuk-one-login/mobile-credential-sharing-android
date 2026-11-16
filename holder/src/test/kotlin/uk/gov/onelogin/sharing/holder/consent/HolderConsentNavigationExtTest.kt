@@ -11,16 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.performClick
-import androidx.navigation.compose.ComposeNavigator
-import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
-import io.mockk.every
-import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
@@ -36,21 +33,15 @@ import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
 import uk.gov.onelogin.sharing.holder.StubMetroViewModelFactory
-import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.ORGANIZATION_NAME
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configureHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.navigation.TestNavHostControllerHelper.prepareController
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
-import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentDocumentSingleton
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentNamespaces
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
-import kotlin.test.BeforeTest
-import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestParameterInjector::class)
 class HolderConsentNavigationExtTest {
@@ -104,9 +95,23 @@ class HolderConsentNavigationExtTest {
     )
 
     private lateinit var navController: TestNavHostController
+    private var onBackPressedDispatcherOwner: OnBackPressedDispatcherOwner? = null
 
     @Test
-    fun `Back button behaviour is handled at a higher level`() =
+    fun `Back button behaviour is handled at a higher level`(
+        @TestParameter action: (
+            HolderConsentScreenRule,
+            TestNavHostController,
+            OnBackPressedDispatcherOwner?
+                ) -> Unit = namedTestValues(
+                    "Popping navigation backstack" to { _, controller, _ ->
+                        controller.popBackStack()
+                    },
+                    "Performing device back press" to { _, _, dispatcher ->
+                        dispatcher?.onBackPressedDispatcher?.onBackPressed()
+                    }
+                )
+    ) =
         runTest(dispatcherRule.testDispatcher) {
             holderState.update {
                 HolderSessionState.AwaitingUserConsent(
@@ -118,13 +123,16 @@ class HolderConsentNavigationExtTest {
             composeTestRule.run {
                 setContent {
                     navController = prepareController(LocalContext.current)
+                    onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
                     Render()
                 }
 
                 onNodeWithRole(Role.Button).performClick()
                 assertValidUi(presentationWithoutRetain)
 
-                runOnUiThread { navController.popBackStack() }
+                runOnUiThread {
+                    action(composeTestRule, navController, onBackPressedDispatcherOwner)
+                }
                 waitForIdle()
 
                 assertThat(
