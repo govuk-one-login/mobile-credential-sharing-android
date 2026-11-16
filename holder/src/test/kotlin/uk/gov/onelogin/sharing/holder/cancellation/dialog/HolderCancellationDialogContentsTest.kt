@@ -1,6 +1,9 @@
 package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.mockk.mockk
 import kotlin.test.Test
@@ -12,6 +15,7 @@ import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.empty
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
@@ -53,6 +57,14 @@ class HolderCancellationDialogContentsTest {
         text = "Continue with the check",
         params = walletSharingRequiredParameters
     ).asLegacyEvent()
+
+    private val welshCopy = listOf(
+        "Ydych chi’n siŵr eich bod eisiau stopio’r gwiriad?",
+        "Byddwch yn dod â’ch cysylltiad â’r person sy’n gwneud y gwiriad i ben. " +
+            "Ni fydd eich manylion yn cael eu rhannu.",
+        "Stopio’r gwiriad",
+        "Parhau gyda’r gwiriad"
+    )
 
     @Test
     fun `Validate UI contents`() = runTest {
@@ -103,6 +115,28 @@ class HolderCancellationDialogContentsTest {
 
         assertThat(orchestrator.denyConsentCount, equalTo(1))
         assertThat(analyticsLogger, contains(stopTheCheckEvent))
+    }
+
+    @Config(qualifiers = "cy")
+    @Test
+    fun `Dialog displays the Welsh translations`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+            welshCopy.forEach { onNodeWithText(it).assertIsDisplayed() }
+        }
+    }
+
+    @Config(qualifiers = "cy")
+    @Test
+    fun `Analytics for the buttons stay in English when the app is in Welsh`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+            onNodeWithText("Parhau gyda’r gwiriad").performClick()
+            onNodeWithText("Stopio’r gwiriad").performClick()
+            waitForIdle()
+        }
+
+        assertThat(analyticsLogger, contains(continueWithTheCheckEvent, stopTheCheckEvent))
     }
 
     @Test

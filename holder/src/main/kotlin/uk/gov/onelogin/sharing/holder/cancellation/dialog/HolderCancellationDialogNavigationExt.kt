@@ -1,11 +1,7 @@
 package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.window.DialogWindowProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -22,8 +18,6 @@ data object HolderCancellationDialogNavigationExt {
             val scope = rememberCoroutineScope()
             val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
 
-            RemoveDestinationDialogDim()
-
             HolderCancellationDialogContents(
                 onDismiss = {
                     scope.launch {
@@ -32,11 +26,5 @@ data object HolderCancellationDialogNavigationExt {
                 }
             )
         }
-    }
-
-    @Composable
-    private fun RemoveDestinationDialogDim() {
-        val window = (LocalView.current.parent as? DialogWindowProvider)?.window
-        SideEffect { window?.setDimAmount(0f) }
     }
 }

@@ -3,12 +3,14 @@ package uk.gov.onelogin.sharing.holder.cancellation.dialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.persistentListOf
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.dialogue.DialogueButtonParameters
 import uk.gov.android.ui.componentsv2.dialogue.GdsDialogue
+import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.holder.R
@@ -26,6 +28,10 @@ internal fun HolderCancellationDialogContents(
     viewModel: HolderCancellationDialogViewModel = metroViewModel(),
     onDismiss: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val stopButtonRes = R.string.holder_stop_check_dialog_stop_button
+    val continueButtonRes = R.string.holder_stop_check_dialog_continue_button
+
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("HolderCancellationDialog")
@@ -36,15 +42,15 @@ internal fun HolderCancellationDialogContents(
         contentText = stringResource(R.string.holder_stop_check_dialog_body),
         buttonParameters = persistentListOf(
             DialogueButtonParameters(
-                text = stringResource(R.string.holder_stop_check_dialog_stop_button),
+                text = stringResource(stopButtonRes),
                 buttonType = ButtonTypeV2.Primary(),
-                onClick = { viewModel.stopTheCheck() }
+                onClick = { viewModel.stopTheCheck(context.getEnglishString(stopButtonRes)) }
             ),
             DialogueButtonParameters(
-                text = stringResource(R.string.holder_stop_check_dialog_continue_button),
+                text = stringResource(continueButtonRes),
                 buttonType = ButtonTypeV2.Secondary(),
                 onClick = {
-                    viewModel.continueWithTheCheck()
+                    viewModel.continueWithTheCheck(context.getEnglishString(continueButtonRes))
                     onDismiss()
                 }
             )

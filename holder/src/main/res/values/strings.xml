@@ -20,6 +20,10 @@
     <string name="turn_on_bluetooth" translatable="true">Turn on Bluetooth</string>
     <string name="turn_on_bluetooth_before_sharing" translatable="true">Before you can share, you need to turn on Bluetooth.</string>
     <string name="use_qr_code_to_connect_next" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
+    <string name="stop_check_dialog_title" translatable="true">Are you sure you want to stop the check?</string>
+    <string name="stop_check_dialog_body" translatable="true">You’ll end your connection with the person doing the check. Your details will not be shared.</string>
+    <string name="stop_check_dialog_stop_button" translatable="true">Stop the check</string>
+    <string name="stop_check_dialog_continue_button" translatable="true">Continue with the check</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">

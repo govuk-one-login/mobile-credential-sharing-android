@@ -26,16 +26,8 @@ class HolderCancellationDialogViewModel(
     private val ioDispatcher: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
 
-    /**
-     * Stops the check.
-     *
-     * From the "Agree to share" screen this runs the existing Deny behaviour, so the Verifier is
-     * sent an empty, status 0 DeviceResponse followed by the session termination. Before a request
-     * has been received (for example "Getting list of details") there is nothing to deny, so the
-     * journey is cancelled instead.
-     */
-    fun stopTheCheck(): Job = viewModelScope.launch(ioDispatcher) {
-        analyticsLogger.stopTheCheckButton()
+    fun stopTheCheck(buttonText: String): Job = viewModelScope.launch(ioDispatcher) {
+        analyticsLogger.stopTheCheckButton(buttonText)
         if (orchestrator.holderSessionState.value is HolderSessionState.AwaitingUserConsent) {
             orchestrator.denyConsent()
         } else {
@@ -43,7 +35,7 @@ class HolderCancellationDialogViewModel(
         }
     }
 
-    fun continueWithTheCheck(): Job = viewModelScope.launch(ioDispatcher) {
-        analyticsLogger.continueWithTheCheckButton()
+    fun continueWithTheCheck(buttonText: String): Job = viewModelScope.launch(ioDispatcher) {
+        analyticsLogger.continueWithTheCheckButton(buttonText)
     }
 }

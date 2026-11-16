@@ -39,7 +39,7 @@ class HolderCancellationDialogViewModelTest {
     fun `Stopping the check cancels the journey when there is nothing to deny`() = runTest {
         assertThat(orchestrator.cancelCount, equalTo(0))
 
-        viewModel.stopTheCheck().join()
+        viewModel.stopTheCheck(STOP_BUTTON_TEXT).join()
 
         assertThat(orchestrator.cancelCount, equalTo(1))
         assertThat(orchestrator.denyConsentCount, equalTo(0))
@@ -52,20 +52,20 @@ class HolderCancellationDialogViewModelTest {
             presentation = mockk(relaxed = true)
         )
 
-        viewModel.stopTheCheck().join()
+        viewModel.stopTheCheck(STOP_BUTTON_TEXT).join()
 
         assertThat(orchestrator.denyConsentCount, equalTo(1))
     }
 
     @Test
-    fun `Stopping the check logs the stop the check button`() = runTest {
-        viewModel.stopTheCheck().join()
+    fun `Stopping the check logs the supplied button text`() = runTest {
+        viewModel.stopTheCheck(STOP_BUTTON_TEXT).join()
 
         assertThat(
             analyticsLogger,
             contains(
                 Button(
-                    text = "Stop the check",
+                    text = STOP_BUTTON_TEXT,
                     params = walletSharingRequiredParameters
                 ).asLegacyEvent()
             )
@@ -73,19 +73,24 @@ class HolderCancellationDialogViewModelTest {
     }
 
     @Test
-    fun `Continuing with the check logs the continue button and does not cancel`() = runTest {
-        viewModel.continueWithTheCheck().join()
+    fun `Continuing with the check logs the supplied button text and does not cancel`() = runTest {
+        viewModel.continueWithTheCheck(CONTINUE_BUTTON_TEXT).join()
 
         assertThat(
             analyticsLogger,
             contains(
                 Button(
-                    text = "Continue with the check",
+                    text = CONTINUE_BUTTON_TEXT,
                     params = walletSharingRequiredParameters
                 ).asLegacyEvent()
             )
         )
         assertThat(orchestrator.cancelCount, equalTo(0))
         assertThat(orchestrator.denyConsentCount, equalTo(0))
+    }
+
+    private companion object {
+        const val STOP_BUTTON_TEXT = "Stop the check"
+        const val CONTINUE_BUTTON_TEXT = "Continue with the check"
     }
 }

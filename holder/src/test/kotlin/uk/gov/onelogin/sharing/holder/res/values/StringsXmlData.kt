@@ -57,23 +57,6 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "Cancel",
         resourceId = R.string.holder_consent_deny_dialog_dismiss
     ),
-    HOLDER_STOP_CHECK_DIALOG_TITLE(
-        expected = "Are you sure you want to stop the check?",
-        resourceId = R.string.holder_stop_check_dialog_title
-    ),
-    HOLDER_STOP_CHECK_DIALOG_BODY(
-        expected = "You\u2019ll end your connection with the person doing the check. " +
-            "Your details will not be shared.",
-        resourceId = R.string.holder_stop_check_dialog_body
-    ),
-    HOLDER_STOP_CHECK_DIALOG_STOP_BUTTON(
-        expected = "Stop the check",
-        resourceId = R.string.holder_stop_check_dialog_stop_button
-    ),
-    HOLDER_STOP_CHECK_DIALOG_CONTINUE_BUTTON(
-        expected = "Continue with the check",
-        resourceId = R.string.holder_stop_check_dialog_continue_button
-    ),
     HOLDER_SUCCESS_UNFULFILLABLE_REQUEST_TITLE(
         expected = "Unfulfillable request",
         resourceId = R.string.holder_success_unfulfillable_request_title

@@ -62,8 +62,6 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
             onReadPrivacyNotice = viewModel::onReadPrivacyNotice,
             onCancel = {
                 viewModel.onCancelAndGoBack()
-                // Share the system back behaviour so the button, the back button and the back
-                // swipe all lead to the same "stop the check" confirmation.
                 backDispatcher?.onBackPressed()
             }
         )

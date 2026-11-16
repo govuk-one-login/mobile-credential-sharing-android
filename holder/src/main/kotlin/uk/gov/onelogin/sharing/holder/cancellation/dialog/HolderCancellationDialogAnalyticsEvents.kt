@@ -7,16 +7,19 @@ import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharin
 
 /**
  * GA4 analytics identities for the "stop the check" confirmation dialog.
+ *
+ * The button text is supplied by the caller so that it can be resolved in English regardless of
+ * the User's locale.
  */
 internal object HolderCancellationDialogAnalyticsEvents {
 
-    internal fun AnalyticsLogger.stopTheCheckButton() = Button(
-        text = "Stop the check",
+    internal fun AnalyticsLogger.stopTheCheckButton(text: String) = Button(
+        text = text,
         params = walletSharingRequiredParameters
     ).let(this::logEventV3Dot1)
 
-    internal fun AnalyticsLogger.continueWithTheCheckButton() = Button(
-        text = "Continue with the check",
+    internal fun AnalyticsLogger.continueWithTheCheckButton(text: String) = Button(
+        text = text,
         params = walletSharingRequiredParameters
     ).let(this::logEventV3Dot1)
 }
