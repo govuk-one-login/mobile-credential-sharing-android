@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -17,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -44,6 +46,9 @@ internal fun GenericHolderErrorScreen(
     val scope = rememberCoroutineScope()
     val onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
     val mainScope = rememberCoroutineScope { Dispatchers.Main }
+    val navigationEvent by viewModel.navigationEvent.collectAsStateWithLifecycle(
+        initialValue = null
+    )
     val onExitJourney: () -> Unit = {
         mainScope.launch {
             onBackPressedDispatcherOwner?.onBackPressedDispatcher?.onBackPressed()
@@ -69,21 +74,22 @@ internal fun GenericHolderErrorScreen(
         }
     }
 
-    BackHandler(true, buttonBehaviour)
+    BackHandler(
+        navigationEvent == null,
+        buttonBehaviour
+    )
 
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is ViewModelEvent.ExitJourney -> {
-                    R.string.holder_generic_error_button
-                        .let(context::getEnglishString)
-                        .let(viewModel::sendButtonEvent)
-                    onExitJourney()
-                }
+    LaunchedEffect(navigationEvent) {
+        when (navigationEvent) {
+            is ViewModelEvent.ExitJourney -> {
+                R.string.holder_generic_error_button
+                    .let(context::getEnglishString)
+                    .let(viewModel::sendButtonEvent)
+                onExitJourney()
+            }
 
-                else -> {
-                    // do nothing with null events
-                }
+            else -> {
+                // do nothing with null events
             }
         }
     }
