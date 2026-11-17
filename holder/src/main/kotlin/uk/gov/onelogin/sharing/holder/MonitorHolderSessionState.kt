@@ -17,7 +17,7 @@ import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluet
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
-import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
+import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.navigateToTurnOnBluetooth
@@ -185,7 +185,7 @@ private fun handleHolderSessionFailure(
             )
         )
     } else {
-        navController.navigateToUnrecoverableHolderError {
+        navController.navigateToGenericHolderError {
             popUpTo<HolderRoutes> {
                 inclusive = true
             }

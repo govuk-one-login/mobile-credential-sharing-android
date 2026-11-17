@@ -37,6 +37,20 @@ enum class TranslatableStringsData(
             "cy" to "Paratoi i rannu"
         )
     ),
+    GO_BACK_TO_DOCUMENTS(
+        resourceId = R.string.go_back_to_documents,
+        translations = mapOf(
+            "en" to "Go back to documents",
+            "cy" to "Ewch yn ôl i dogfennau"
+        )
+    ),
+    SHARING_IS_CURRENTLY_UNAVAILABLE(
+        resourceId = R.string.sharing_is_currently_unavailable,
+        translations = mapOf(
+            "en" to "Sharing is currently unavailable",
+            "cy" to "Nid yw rhannu ar gael ar hyn o bryd"
+        )
+    ),
     TURN_ON_BLUETOOTH(
         resourceId = R.string.turn_on_bluetooth,
         translations = mapOf(
@@ -59,6 +73,13 @@ enum class TranslatableStringsData(
                 "Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf."
         )
     ),
+    YOU_MAY_BE_ABLE_TO_USE_A_PHYSICAL_DOCUMENT_INSTEAD(
+        resourceId = R.string.you_may_be_able_to_use_a_physical_document_instead,
+        translations = mapOf(
+            "en" to "You may be able to use a physical document instead.",
+            "cy" to "Efallai y gallwch ddefnyddio dogfen gorfforol yn lle hynny."
+        )
+    ),
     YOU_WILL_CONNECT_VIA_QR_LATER(
         resourceId = R.string.you_will_connect_via_qr_later,
         translations = mapOf(
@@ -75,6 +96,13 @@ enum class TranslatableStringsData(
                 "you’ll need to turn it on too.",
             "cy" to "Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, " +
                 "bydd angen i chi ei droi ymlaen hefyd."
+        )
+    ),
+    YOUR_DETAILS_HAVE_NOT_BEEN_SHARED(
+        resourceId = R.string.your_details_have_not_been_shared,
+        translations = mapOf(
+            "en" to "Your details have not been shared.",
+            "cy" to "Nid yw eich manylion wedi’u rhannu."
         )
     )
     ;
