@@ -2,10 +2,12 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -130,17 +132,11 @@ class BluetoothPermissionDeniedScreenTest {
     @Test
     fun `Tapping Allow launches the in-app Bluetooth permission prompt`() = runTest {
         composeTestRule.run {
-            setContent {
-                ProvideActivityResultRegistry(testRegistry) {
-                    BluetoothPermissionDeniedScreen(viewModel = viewModel)
-                }
-            }
+            setContent { Render() }
 
             performAllowClick()
 
-            waitUntil { launchedAction != null }
-            assertTrue(launchedAction is PrerequisiteAction.RequestPermissions)
-
+            waitUntil { launchedAction is PrerequisiteAction.RequestPermissions }
             waitUntil { analyticsLogger.size >= 2 }
         }
         assertThat(
@@ -156,14 +152,7 @@ class BluetoothPermissionDeniedScreenTest {
     fun `Tapping Cancel invokes the cancel callback and records analytics`() = runTest {
         var cancelled = false
         composeTestRule.run {
-            setContent {
-                ProvideActivityResultRegistry(testRegistry) {
-                    BluetoothPermissionDeniedScreen(
-                        viewModel = viewModel,
-                        onCancel = { cancelled = true }
-                    )
-                }
-            }
+            setContent { Render(onCancel = { cancelled = true }) }
 
             performCancelClick()
 
@@ -183,11 +172,7 @@ class BluetoothPermissionDeniedScreenTest {
     @Test
     fun `Prerequisites are rechecked after the permission prompt returns`() = runTest {
         composeTestRule.run {
-            setContent {
-                ProvideActivityResultRegistry(testRegistry) {
-                    BluetoothPermissionDeniedScreen(viewModel = viewModel)
-                }
-            }
+            setContent { Render() }
 
             performAllowClick()
 
@@ -200,7 +185,7 @@ class BluetoothPermissionDeniedScreenTest {
     @Test
     fun `Displaying the screen sends a screen view event`() = runTest {
         composeTestRule.run {
-            setContent { BluetoothPermissionDeniedScreen(viewModel = viewModel) }
+            setContent { Render() }
             waitUntil { analyticsLogger.size != 0 }
         }
         assertThat(
@@ -213,13 +198,9 @@ class BluetoothPermissionDeniedScreenTest {
     @Config(qualifiers = "cy")
     fun `Displaying the screen in Welsh sends analytics events in English`() = runTest {
         composeTestRule.run {
-            setContent {
-                ProvideActivityResultRegistry(testRegistry) {
-                    BluetoothPermissionDeniedScreen(viewModel = viewModel)
-                }
-            }
+            setContent { Render() }
 
-            assertWelshTitleIsDisplayed()
+            assertValidTitle()
 
             performAllowClick()
             waitUntil { analyticsLogger.size >= 2 }
@@ -236,7 +217,7 @@ class BluetoothPermissionDeniedScreenTest {
     @Test
     fun `Closing the journey shows a loading spinner`() = runTest {
         composeTestRule.run {
-            setContent { BluetoothPermissionDeniedScreen(viewModel = viewModel) }
+            setContent { Render() }
             assertValidTitle()
             holderState.update { HolderSessionState.SendingTermination }
             waitUntilLoadingSpinnerExists()
@@ -253,13 +234,7 @@ class BluetoothPermissionDeniedScreenTest {
         )
 
         composeTestRule.run {
-            setContent {
-                CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
-                    ProvideActivityResultRegistry(testRegistry) {
-                        BluetoothPermissionDeniedScreen(viewModel = viewModel)
-                    }
-                }
-            }
+            setContent { Render(lifecycleOwner = lifecycleOwner) }
 
             performAllowClick()
             waitUntil { recheckCount == 1 }
@@ -281,13 +256,7 @@ class BluetoothPermissionDeniedScreenTest {
         )
 
         composeTestRule.run {
-            setContent {
-                CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
-                    ProvideActivityResultRegistry(testRegistry) {
-                        BluetoothPermissionDeniedScreen(viewModel = viewModel)
-                    }
-                }
-            }
+            setContent { Render(lifecycleOwner = lifecycleOwner) }
 
             runOnIdle {
                 lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -302,11 +271,7 @@ class BluetoothPermissionDeniedScreenTest {
     @Test
     fun `Injected viewmodel is used by default`() = runTest {
         composeTestRule.run {
-            setContent {
-                CompositionLocalProvider(LocalMetroViewModelFactory provides viewModelFactory) {
-                    BluetoothPermissionDeniedScreen()
-                }
-            }
+            setContent { RenderWithInjectedViewModel() }
 
             assertValidTitle()
             waitUntil { analyticsLogger.size != 0 }
@@ -331,6 +296,30 @@ class BluetoothPermissionDeniedScreenTest {
         composeTestRule.run {
             setContent { BluetoothPermissionDeniedLoadingContentPreview() }
             assertLoadingSpinnerIsDisplayed()
+        }
+    }
+
+    @Composable
+    private fun Render(onCancel: () -> Unit = {}, lifecycleOwner: LifecycleOwner? = null) {
+        val content: @Composable () -> Unit = {
+            ProvideActivityResultRegistry(testRegistry) {
+                BluetoothPermissionDeniedScreen(viewModel = viewModel, onCancel = onCancel)
+            }
+        }
+
+        if (lifecycleOwner == null) {
+            content()
+        } else {
+            CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
+                content()
+            }
+        }
+    }
+
+    @Composable
+    private fun RenderWithInjectedViewModel() {
+        CompositionLocalProvider(LocalMetroViewModelFactory provides viewModelFactory) {
+            BluetoothPermissionDeniedScreen()
         }
     }
 }

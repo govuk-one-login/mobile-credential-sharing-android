@@ -3,9 +3,12 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission
 import android.content.Context
 import android.content.res.Resources
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
@@ -13,9 +16,11 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
+import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
 
 class BluetoothPermissionDeniedScreenRule(
@@ -24,11 +29,10 @@ class BluetoothPermissionDeniedScreenRule(
         ApplicationProvider.getApplicationContext<Context>().resources
 ) : ComposeContentTestRule by composeTestRule {
 
-    fun onTitle(useUnmergedTree: Boolean = false) = onAllNodes(
-        hasText(resources.getString(R.string.holder_bluetooth_permission_denied_title))
-            and isHeading(),
+    fun onTitle(useUnmergedTree: Boolean = false) = onNodeWithText(
+        resources.getString(R.string.holder_bluetooth_permission_denied_title),
         useUnmergedTree = useUnmergedTree
-    ).onFirst()
+    )
 
     fun onFirstParagraph(useUnmergedTree: Boolean = false) = onAllNodesWithText(
         resources.getString(R.string.holder_bluetooth_permission_denied_body_1),
@@ -56,8 +60,9 @@ class BluetoothPermissionDeniedScreenRule(
     fun onLoadingSpinner() = onNode(loadingSpinner)
 
     // assertions
-    fun assertValidTitle(useUnmergedTree: Boolean = false) =
-        onTitle(useUnmergedTree).assertIsDisplayed()
+    fun assertValidTitle(useUnmergedTree: Boolean = false) = onTitle(useUnmergedTree)
+        .assert(isHeading())
+        .assertIsDisplayed()
 
     fun assertValidBody1(useUnmergedTree: Boolean = false) =
         onFirstParagraph(useUnmergedTree).assertIsDisplayed()
@@ -68,10 +73,14 @@ class BluetoothPermissionDeniedScreenRule(
     fun assertValidAllowButton(useUnmergedTree: Boolean = false) = onAllowButton(useUnmergedTree)
         .assertHasClickAction()
         .assertIsDisplayed()
+        .assertWidthIsAtLeast(minimumTouchTarget)
+        .assertHeightIsAtLeast(minimumTouchTarget)
 
     fun assertValidCancelButton(useUnmergedTree: Boolean = false) = onCancelButton(useUnmergedTree)
         .assertHasClickAction()
         .assertIsDisplayed()
+        .assertWidthIsAtLeast(minimumTouchTarget)
+        .assertHeightIsAtLeast(minimumTouchTarget)
 
     fun assertValidUi(useUnmergedTree: Boolean = false) {
         assertValidTitle(useUnmergedTree)
@@ -80,10 +89,6 @@ class BluetoothPermissionDeniedScreenRule(
         assertValidAllowButton(useUnmergedTree)
         assertValidCancelButton(useUnmergedTree)
     }
-
-    fun assertWelshTitleIsDisplayed() = onAllNodes(
-        hasText("Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos") and isHeading()
-    ).onFirst().assertIsDisplayed()
 
     fun assertTitleDoesNotExist() = onAllNodes(
         hasText(resources.getString(R.string.holder_bluetooth_permission_denied_title))
