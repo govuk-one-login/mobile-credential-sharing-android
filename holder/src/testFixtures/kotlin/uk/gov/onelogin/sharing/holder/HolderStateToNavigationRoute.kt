@@ -10,7 +10,7 @@ import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRout
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionRoute
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
-import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
+import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
@@ -127,10 +127,10 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     )
                 )
             ) {
-                instanceOf<UnrecoverableHolderErrorRoute>(
-                    UnrecoverableHolderErrorRoute::class.java
+                instanceOf<GenericHolderErrorRoute>(
+                    GenericHolderErrorRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<UnrecoverableHolderErrorRoute>()
+                    currentBackStackEntry?.toRoute<GenericHolderErrorRoute>()
                 )
             },
             Triple(
