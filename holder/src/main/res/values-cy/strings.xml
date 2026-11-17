@@ -5,6 +5,7 @@
     <string name="ask_administrator_to_allow_bluetooth">Os yw sefydliad yn rheoli’r ffôn hwn, gofynnwch i weinyddwr ganiatáu Bluetooth.</string>
     <string name="bluetooth_is_restricted">Mae Bluetooth wedi’i gyfyngu</string>
     <string name="details_requested_not_available">Nid yw’r manylion a ofynnwyd amdanynt ar gael</string>
+    <string name="bluetooth_is_turned_off">Mae Bluetooth wedi’i droi i ffwrdd</string>
     <string name="dvs_is_certified_under_uk_digital_verification_services_meaning_that">Mae %1$s wedi’i ardystio o dan Fframwaith Ymddiriedaeth Gwasanaethau Gwirio Digidol y DU. Mae hyn yn golygu bod yn rhaid iddynt:</string>
     <string name="dvs_is_trusted_to_receive_and_store_details">Mae llywodraeth y DU yn ymddiried yn %1$s i dderbyn a storio eich manylion yn ddiogel.</string>
     <string name="dvs_s_privacy_notice">Hysbysiad preifatrwydd %1$s</string>
@@ -25,6 +26,7 @@
     <string name="stop_check_dialog_title">Ydych chi’n siŵr eich bod eisiau stopio’r gwiriad?</string>
     <string name="the_person_checking_is_using_an_app_powered_by_dvs">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap sy’n cael ei bweru gan %1$s.</string>
     <string name="the_person_doing_the_check_asked_for_details_not_on_your_documents">Gofynnodd y person sy’n gwneud y gwiriad am fanylion nad ydynt ar eich dogfennau.</string>
+    <string name="to_be_able_to_share_turn_on_bluetooth">I allu rhannu, mae angen i chi droi Bluetooth ymlaen.</string>
     <string name="turn_off_parental_controls_restricting_bluetooth">Os oes gan y ffôn hwn reolaethau rhieni sy’n cyfyngu ar Bluetooth, diffoddwch nhw yng ngosodiadau eich ffôn.</string>
     <string name="turn_on_bluetooth">Troi Bluetooth ymlaen</string>
     <string name="turn_on_bluetooth_before_sharing">Cyn y gallwch rannu, mae angen i chi droi Bluetooth ymlaen.</string>

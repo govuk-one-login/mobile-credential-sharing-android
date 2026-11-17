@@ -4,6 +4,7 @@
     <string name="allow_bluetooth_before_sharing_details" translatable="true">Before you can share details from your UK driving licence, you need to allow this app to use Bluetooth.</string>
     <string name="ask_administrator_to_allow_bluetooth">If an organisation manages this phone, ask an administrator to allow Bluetooth.</string>
     <string name="bluetooth_is_restricted">Bluetooth is restricted</string>
+    <string name="bluetooth_is_turned_off" translatable="true">Bluetooth is turned off</string>
     <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>
     <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
     <string name="bluetooth_turned_off_holder">Bluetooth was turned off on holder device during session</string>
@@ -34,6 +35,7 @@
     <string name="stop_check_dialog_title" translatable="true">Are you sure you want to stop the check?</string>
     <string name="the_person_checking_is_using_an_app_powered_by_dvs">The person doing the check is using an app powered by %1$s.</string>
     <string name="the_person_doing_the_check_asked_for_details_not_on_your_documents">The person doing the check asked for details that are not on your documents.</string>
+    <string name="to_be_able_to_share_turn_on_bluetooth" translatable="true">To be able to share, you need to turn on Bluetooth.</string>
     <string name="turn_off_parental_controls_restricting_bluetooth">If this phone has parental controls restricting Bluetooth, turn them off in your phone settings.</string>
     <string name="turn_on_bluetooth" translatable="true">Turn on Bluetooth</string>
     <string name="turn_on_bluetooth_before_sharing" translatable="true">Before you can share, you need to turn on Bluetooth.</string>
