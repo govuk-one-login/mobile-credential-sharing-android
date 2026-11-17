@@ -14,6 +14,7 @@ import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
@@ -68,6 +69,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     TurnOnBluetoothRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<TurnOnBluetoothRoute>()
+                )
+            },
+            Triple(
+                "'Preflight (Bluetooth enable denied)' -> DeviceBleDeniedRoute",
+                HolderSessionStateStubs.preflightBluetoothEnableDenied
+            ) {
+                instanceOf<DeviceBleDeniedRoute>(
+                    DeviceBleDeniedRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<DeviceBleDeniedRoute>()
                 )
             },
             Triple(
