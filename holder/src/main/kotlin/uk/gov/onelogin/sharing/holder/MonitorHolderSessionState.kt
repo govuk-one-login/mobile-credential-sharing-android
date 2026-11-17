@@ -25,6 +25,7 @@ import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoa
 import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.navigateToTurnOnBluetooth
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedNavigationExt.navigateToDeviceBleDenied
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.navigateToBleRestricted
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission.BluetoothPermissionDeniedNavigationExt.navigateToBluetoothPermissionDenied
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
@@ -120,7 +121,13 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Preflight -> {
-            if (state.requiresBluetoothEnabled()) {
+            if (state.requiresBluetoothEnabledAfterDenial()) {
+                {
+                    navController.navigateToDeviceBleDenied {
+                        exitJourneyOptions()
+                    }
+                }
+            } else if (state.requiresBluetoothEnabled()) {
                 {
                     navController.navigateToTurnOnBluetooth {
                         exitJourneyOptions()

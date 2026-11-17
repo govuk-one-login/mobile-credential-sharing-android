@@ -67,11 +67,14 @@ sealed class HolderSessionState :
      *
      * @param missingPrerequisites The list of [MissingPrerequisite]s required to perform the
      * journey in it's entirety.
+     * @param enableBluetoothDenied `true` when the User declined to turn on the device's Bluetooth
+     * when prompted.
      * @param onComplete The behaviour to call after a User action. Usually, this means performing
      * preflight checks again. Defaults to `{}`, meaning no additional behaviour occurs.
      */
     data class Preflight(
         val missingPrerequisites: List<MissingPrerequisite>,
+        val enableBluetoothDenied: Boolean = false,
         val onComplete: () -> Unit = {}
     ) : HolderSessionState(),
         Iterable<MissingPrerequisite> by missingPrerequisites {
@@ -90,6 +93,12 @@ sealed class HolderSessionState :
             (it as? MissingPrerequisites.Bluetooth)?.state ==
                 BluetoothState.PermissionNotGranted
         }
+
+        /**
+         * Check if device's Bluetooth is still turned off after the user declined to enable it
+         */
+        fun requiresBluetoothEnabledAfterDenial(): Boolean =
+            enableBluetoothDenied && requiresBluetoothEnabled()
     }
 
     /**
