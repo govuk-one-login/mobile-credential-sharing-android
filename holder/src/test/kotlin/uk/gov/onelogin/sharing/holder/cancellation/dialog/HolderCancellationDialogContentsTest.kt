@@ -1,10 +1,12 @@
 package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,7 @@ import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.holder.TestViewModelFactory
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -147,6 +150,39 @@ class HolderCancellationDialogContentsTest {
         }
 
         assertThat(analyticsLogger.toList(), empty())
+    }
+
+    @Test
+    fun `Preview follows the same display as the dialog`() = runTest {
+        composeTestRule.run {
+            setContent { HolderCancellationDialogPreview() }
+            assertContentsAreDisplayed()
+            performContinueWithTheCheckClick()
+            performStopTheCheckClick()
+            assertContentsAreDisplayed()
+        }
+    }
+
+    @Test
+    fun `Default arguments resolve the view model from the view model factory`() = runTest {
+        val viewModelFactory = TestViewModelFactory(
+            viewModelProviders = mapOf(HolderCancellationDialogViewModel::class to { viewModel })
+        )
+
+        composeTestRule.run {
+            setContent {
+                CompositionLocalProvider(LocalMetroViewModelFactory provides viewModelFactory) {
+                    GdsTheme { HolderCancellationDialogContents() }
+                }
+            }
+            assertContentsAreDisplayed()
+            performContinueWithTheCheckClick()
+            performStopTheCheckClick()
+            waitForIdle()
+        }
+
+        assertThat(analyticsLogger, contains(continueWithTheCheckEvent, stopTheCheckEvent))
+        assertThat(orchestrator.cancelCount, equalTo(1))
     }
 
     @Composable
