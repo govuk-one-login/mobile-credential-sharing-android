@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+    <string name="holder_device_ble_denied_title">@string/bluetooth_is_turned_off</string>
+    <string name="holder_device_ble_denied_body_1">@string/to_be_able_to_share_turn_on_bluetooth</string>
+    <string name="holder_device_ble_denied_body_2">@string/use_qr_code_to_connect_next</string>
+    <string name="holder_device_ble_denied_turn_on_button">@string/turn_on_bluetooth</string>
+    <string name="holder_device_ble_denied_cancel_button">@string/consent_screen_cancel_button</string>
+</resources>

@@ -6,6 +6,7 @@
     <string name="enable_bluetooth_permission">Please enable bluetooth permissions to continue</string>
     <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
     <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>
+    <string name="bluetooth_is_turned_off" translatable="true">Bluetooth is turned off</string>
     <string name="bluetooth_turned_off_holder">Bluetooth was turned off on holder device during session</string>
     <string name="checking_journey_requirements">Checking journey requirements...</string>
     <string name="creating_qr_code">Creating QR code...</string>
@@ -17,6 +18,7 @@
     <string name="holder_consent_organization_sentence">The person doing the check is using an approved app powered by %1$s</string>
     <string name="open_app_permissions">Open app permissions</string>
     <string name="sharing_is_currently_unavailable">Sharing is currently unavailable</string>
+    <string name="to_be_able_to_share_turn_on_bluetooth" translatable="true">To be able to share, you need to turn on Bluetooth.</string>
     <string name="turn_on_bluetooth" translatable="true">Turn on Bluetooth</string>
     <string name="turn_on_bluetooth_before_sharing" translatable="true">Before you can share, you need to turn on Bluetooth.</string>
     <string name="use_qr_code_to_connect_next" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
