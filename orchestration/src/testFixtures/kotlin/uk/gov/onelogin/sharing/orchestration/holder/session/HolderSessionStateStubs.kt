@@ -16,6 +16,8 @@ object HolderSessionStateStubs {
     val preflightWithoutBluetooth: HolderSessionState.Preflight = preflightWithBluetooth(
         BluetoothState.PoweredOff
     )
+    val preflightBluetoothEnableDenied: HolderSessionState.Preflight =
+        preflightWithoutBluetooth.copy(enableBluetoothDenied = true)
     val successStub: HolderSessionState = HolderSessionState.Complete.Success()
 
     val consentPresentationStub: ConsentPresentation = ConsentPresentation(

@@ -9,7 +9,6 @@ import io.mockk.mockk
 import java.security.GeneralSecurityException
 import java.security.cert.X509Certificate
 import java.util.UUID
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -245,6 +244,82 @@ class HolderOrchestratorTest {
         assertThat(
             orchestrator.holderSessionState.value,
             hasMissingPreflightPrerequisites(Prerequisite.BLUETOOTH)
+        )
+    }
+
+    @Test
+    fun `Starting with Bluetooth powered off does not mark Bluetooth enabling as denied`() =
+        runTest {
+            prerequisiteResponses.add(
+                MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            )
+            val orchestrator = createOrchestrator()
+            backgroundScope.launch {
+                orchestrator.holderSessionState.collect {}
+            }
+            orchestrator.start()
+
+            val state = orchestrator.holderSessionState.value as HolderSessionState.Preflight
+            assertEquals(false, state.enableBluetoothDenied)
+        }
+
+    @Test
+    fun `Rechecking while Bluetooth stays powered off marks Bluetooth enabling as denied`() =
+        runTest {
+            prerequisiteResponses.add(
+                MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            )
+            val orchestrator = createOrchestrator()
+            backgroundScope.launch {
+                orchestrator.holderSessionState.collect {}
+            }
+            orchestrator.start()
+
+            (orchestrator.holderSessionState.value as HolderSessionState.Preflight).onComplete()
+
+            val state = orchestrator.holderSessionState.value as HolderSessionState.Preflight
+            assertEquals(true, state.requiresBluetoothEnabledAfterDenial())
+        }
+
+    @Test
+    fun `Rechecking after resolving permissions with Bluetooth off does not mark denial`() =
+        runTest {
+            prerequisiteResponses.add(
+                MissingPrerequisites.Bluetooth(BluetoothState.PermissionNotGranted)
+            )
+            val orchestrator = createOrchestrator()
+            backgroundScope.launch {
+                orchestrator.holderSessionState.collect {}
+            }
+            orchestrator.start()
+
+            prerequisiteResponses[0] = MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            (orchestrator.holderSessionState.value as HolderSessionState.Preflight).onComplete()
+
+            val state = orchestrator.holderSessionState.value as HolderSessionState.Preflight
+            assertEquals(true, state.requiresBluetoothEnabled())
+            assertEquals(false, state.enableBluetoothDenied)
+        }
+
+    @Test
+    fun `Rechecking after Bluetooth is turned on presents engagement`() = runTest {
+        prerequisiteResponses.add(
+            MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+        )
+        val orchestrator = createOrchestrator()
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
+        orchestrator.start()
+        val preflight = orchestrator.holderSessionState.value as HolderSessionState.Preflight
+
+        preflight.onComplete()
+        prerequisiteResponses.clear()
+        (orchestrator.holderSessionState.value as HolderSessionState.Preflight).onComplete()
+
+        assertThat(
+            orchestrator.holderSessionState.value,
+            inPresentingEngagement()
         )
     }
 

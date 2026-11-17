@@ -52,6 +52,26 @@ enum class DeferredStringsXmlData(
         defersTo = R.string.sharing_is_currently_unavailable,
         resourceId = R.string.holder_generic_error_title
     ),
+    HOLDER_DEVICE_BLE_DENIED_TITLE(
+        defersTo = R.string.bluetooth_is_turned_off,
+        resourceId = R.string.holder_device_ble_denied_title
+    ),
+    HOLDER_DEVICE_BLE_DENIED_BODY_1(
+        defersTo = R.string.to_be_able_to_share_turn_on_bluetooth,
+        resourceId = R.string.holder_device_ble_denied_body_1
+    ),
+    HOLDER_DEVICE_BLE_DENIED_BODY_2(
+        defersTo = R.string.use_qr_code_to_connect_next,
+        resourceId = R.string.holder_device_ble_denied_body_2
+    ),
+    HOLDER_DEVICE_BLE_DENIED_TURN_ON_BUTTON(
+        defersTo = R.string.turn_on_bluetooth,
+        resourceId = R.string.holder_device_ble_denied_turn_on_button
+    ),
+    HOLDER_DEVICE_BLE_DENIED_CANCEL_BUTTON(
+        defersTo = R.string.consent_screen_cancel_button,
+        resourceId = R.string.holder_device_ble_denied_cancel_button
+    ),
     HOLDER_PREREQUISITES_NOT_STARTED(
         defersTo = R.string.checking_journey_requirements,
         resourceId = R.string.holder_prerequisites_not_started
