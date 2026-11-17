@@ -4,16 +4,12 @@ import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard
 
 sealed interface HolderConsentUiState {
     data object Loading : HolderConsentUiState
-    data class ConfirmConsent(
+    data class Loaded(
         val normalisedOrganizationName: String,
         val organizationName: String,
         val privacyPolicyUrl: String,
         val card: ConsentCard? = null,
         val isBusy: Boolean = false,
-    ) : HolderConsentUiState
-
-    data class MoreAboutDvs(
-        val normalisedOrganizationName: String,
-        val privacyPolicyUrl: String
+        val shouldShowMoreAboutDvs: Boolean = false,
     ) : HolderConsentUiState
 }

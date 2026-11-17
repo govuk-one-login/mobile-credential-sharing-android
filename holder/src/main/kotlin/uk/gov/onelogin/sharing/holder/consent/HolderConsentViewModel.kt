@@ -53,26 +53,20 @@ class HolderConsentViewModel(
         presentation,
         showMoreAboutDvs
     ) { presentation, showMoreAboutDvs ->
-        if (showMoreAboutDvs) {
-            HolderConsentUiState.MoreAboutDvs(
-                normalisedOrganizationName = presentation.normalisedOrganizationName,
-                privacyPolicyUrl = presentation.privacyPolicyUrl,
-            )
-        } else {
-            presentation.firstDocumentAttributes
+        presentation.firstDocumentAttributes
+            ?.let(ConsentAttributeResolver::toDisplayAttributes)
+            ?.let(ConsentCard::from)
+        HolderConsentUiState.Loaded(
+            privacyPolicyUrl = presentation.privacyPolicyUrl,
+            card = presentation.documents.firstOrNull()
+                ?.let(ConsentDocument::namespaceAttributes)
                 ?.let(ConsentAttributeResolver::toDisplayAttributes)
-                ?.let(ConsentCard::from)
-            HolderConsentUiState.ConfirmConsent(
-                privacyPolicyUrl = presentation.privacyPolicyUrl,
-                card = presentation.documents.firstOrNull()
-                    ?.let(ConsentDocument::namespaceAttributes)
-                    ?.let(ConsentAttributeResolver::toDisplayAttributes)
-                    ?.let(ConsentCard::from),
-                normalisedOrganizationName = presentation.normalisedOrganizationName,
-                organizationName = presentation.organizationName,
-                isBusy = presentation.isBusy,
-            )
-        }
+                ?.let(ConsentCard::from),
+            normalisedOrganizationName = presentation.normalisedOrganizationName,
+            organizationName = presentation.organizationName,
+            shouldShowMoreAboutDvs = showMoreAboutDvs,
+            isBusy = presentation.isBusy,
+        )
     }.stateIn(
         viewModelScope.plus(dispatcher),
         SharingStarted.Eagerly,
@@ -109,8 +103,8 @@ class HolderConsentViewModel(
         orchestrator.denyConsent()
     }
 
-    fun dismissMoreAboutDvsScreen(buttonText: String) = viewModelScope.launch {
-        analyticsLogger.buttonEvent(buttonText)
+    fun dismissMoreAboutDvsScreen() = viewModelScope.launch {
+        analyticsLogger.buttonEvent("Close")
         showMoreAboutDvs.update { false }
     }
 }

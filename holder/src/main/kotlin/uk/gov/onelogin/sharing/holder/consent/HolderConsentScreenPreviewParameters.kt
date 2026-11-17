@@ -7,22 +7,23 @@ import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
 internal class HolderConsentScreenPreviewParameters(
-    private val inputs: List<HolderConsentUiState> = listOf(
-        HolderConsentUiState.Loading,
-        confirmConsentPreviewState,
-        HolderConsentUiState.MoreAboutDvs(
-            normalisedOrganizationName = "Organisation Ltd.",
-            privacyPolicyUrl = "https://verifier.example/privacy"
+    private val inputs: List<Pair<String, HolderConsentUiState>> = listOf(
+        "Loading" to HolderConsentUiState.Loading,
+        "Confirm consent" to loadedPreviewState,
+        "More about DVS" to loadedPreviewState.copy(
+            shouldShowMoreAboutDvs = true
         )
     )
 ) : PreviewParameterProvider<HolderConsentUiState> {
     override val values: Sequence<HolderConsentUiState>
-        get() = inputs.asSequence()
+        get() = inputs
+            .map { it.second }
+            .asSequence()
 
-    override fun getDisplayName(index: Int): String? = inputs[index]::class.java.simpleName
+    override fun getDisplayName(index: Int): String = inputs[index].first
 
     internal companion object {
-        internal val confirmConsentPreviewState = HolderConsentUiState.ConfirmConsent(
+        internal val loadedPreviewState = HolderConsentUiState.Loaded(
             card = ConsentCard.from(
                 ConsentAttributeResolver.toDisplayAttributes(
                     listOf(

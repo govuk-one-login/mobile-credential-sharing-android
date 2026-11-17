@@ -3,10 +3,13 @@ package uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,19 +29,23 @@ import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.componentsv2.heading.GdsHeading
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreenPreviewParameters
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.AgreeToShareCard
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsContent
 
 
 @Composable
 internal fun ReviewWhatYouWillShareContent(
-    state: HolderConsentUiState.ConfirmConsent,
+    state: HolderConsentUiState.Loaded,
     modifier: Modifier = Modifier,
     onScreenLoad: (String) -> Unit = {},
     onReadPrivacyNotice: () -> Unit = {},
@@ -99,7 +106,7 @@ internal fun ReviewWhatYouWillShareContent(
 }
 
 private fun LazyListScope.consentBody(
-    state: HolderConsentUiState.ConfirmConsent,
+    state: HolderConsentUiState.Loaded,
     horizontalPadding: Dp,
     onReadPrivacyNotice: () -> Unit
 ) {
@@ -155,3 +162,15 @@ private fun LazyListScope.consentBody(
     }
 }
 
+@PreviewContent
+@Composable
+internal fun ReviewWhatYouWillShareContentPreview() {
+    GdsTheme {
+        Surface {
+            ReviewWhatYouWillShareContent(
+                modifier = Modifier.fillMaxSize(),
+                state = HolderConsentScreenPreviewParameters.loadedPreviewState
+            )
+        }
+    }
+}

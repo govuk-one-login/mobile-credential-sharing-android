@@ -10,13 +10,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasAnyChild
-import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -143,7 +142,11 @@ class MoreAboutDvsScreenRule(
         )
     }
 
-    fun onContainer() = onNode(hasScrollAction())
+    fun onContainer() = onNode(
+        hasParent(
+            hasTestTag("MoreAboutDvsContent")
+        ) and hasTestTag("BODY_LAZY_COLUMN_TEST_TAG")
+    )
 
     fun onDismissButton(useUnmergedTree: Boolean = false) = onNodeWithTag(
         "closeButton",

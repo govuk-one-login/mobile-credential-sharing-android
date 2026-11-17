@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -8,12 +7,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
@@ -29,54 +34,78 @@ import uk.gov.android.ui.componentsv2.topappbar.GdsTopAppBarDefaults.scrollBehav
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
+import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreenPreviewParameters
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
 import uk.gov.onelogin.sharing.core.R as coreR
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun MoreAboutDvsContent(
-    state: HolderConsentUiState.MoreAboutDvs,
+    state: HolderConsentUiState.Loaded,
     modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    ),
     onScreenLoad: (String) -> Unit = {},
-    onCancelScreen: (String) -> Unit = {},
+    onCancelScreen: () -> Unit = {},
     onPrivacyPolicyLinkClick: (String) -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val metrics = rememberMetricsStateHolder()
     val latestOnScreenLoad by rememberUpdatedState(onScreenLoad)
 
-    LaunchedEffect(Unit) {
-        metrics.putScreenState("MoreAboutDvsScreen")
-        context.getEnglishString(
-            R.string.more_about_dvs_title,
-            "DVS"
-        ).let(latestOnScreenLoad)
-    }
-
-    Column(modifier = modifier) {
-        DismissScreenButton(
-            modifier = Modifier
-                .fillMaxWidth(),
-            onCancelScreen = onCancelScreen
-        )
-
-        LeftAlignedScreenV2(
-            modifier = Modifier.fillMaxSize(),
-            title = stringResource(
+    if (state.shouldShowMoreAboutDvs) {
+        LaunchedEffect(Unit) {
+            metrics.putScreenState("MoreAboutDvsScreen")
+            context.getEnglishString(
                 R.string.more_about_dvs_title,
-                state.normalisedOrganizationName
-            ),
-            body = state.normalisedOrganizationName.moreAboutDvsBodyContent(
-                onPrivacyPolicyLinkClick = {
-                    onPrivacyPolicyLinkClick(state.privacyPolicyUrl)
+                "DVS"
+            ).let(latestOnScreenLoad)
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = onCancelScreen,
+            containerColor = MaterialTheme.colorScheme.background,
+            modifier = modifier,
+            sheetState = sheetState,
+        ) {
+            DismissScreenButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("MoreAboutDvsDismiss"),
+                onCancelScreen = {
+                    scope.launch {
+                        sheetState.hide()
+                    }.invokeOnCompletion {
+                        onCancelScreen()
+                    }
                 }
-            ),
-            forceScroll = true
-        )
+            )
+
+            LeftAlignedScreenV2(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("MoreAboutDvsContent"),
+                title = stringResource(
+                    R.string.more_about_dvs_title,
+                    state.normalisedOrganizationName
+                ),
+                body = state.normalisedOrganizationName.moreAboutDvsBodyContent(
+                    onPrivacyPolicyLinkClick = {
+                        onPrivacyPolicyLinkClick(state.privacyPolicyUrl)
+                    }
+                ),
+                forceScroll = true
+            )
+        }
     }
 }
 
@@ -84,14 +113,14 @@ internal fun MoreAboutDvsContent(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun DismissScreenButton(
     modifier: Modifier = Modifier,
-    onCancelScreen: (String) -> Unit = {}
+    onCancelScreen: () -> Unit = {}
 ) {
     TopAppBar(
         title = {},
         modifier = modifier,
         navigationIcon = {
             IconButton(
-                { onCancelScreen("Close") },
+                onClick = onCancelScreen,
                 modifier = Modifier
                     .testTag("closeButton")
                     .minimumInteractiveComponentSize()
@@ -191,5 +220,21 @@ internal fun String.removeDoubleFullStop(): String = let { text ->
         text.dropLast(1)
     } else {
         text
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@PreviewContent
+@Composable
+internal fun MoreAboutDvsContentPreview() {
+    GdsTheme {
+        Surface {
+            MoreAboutDvsContent(
+                modifier = Modifier.fillMaxSize(),
+                state = HolderConsentScreenPreviewParameters.loadedPreviewState.copy(
+                    shouldShowMoreAboutDvs = true
+                ),
+            )
+        }
     }
 }

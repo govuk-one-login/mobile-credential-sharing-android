@@ -126,7 +126,7 @@ class HolderConsentViewModelTest {
                 organizationName = "Organisation Ltd",
                 privacyPolicyUrl = "https://verifier.example/privacy"
             )
-            val expected = HolderConsentUiState.ConfirmConsent(
+            val expected = HolderConsentUiState.Loaded(
                 card = ConsentCard.from(
                     ConsentAttributeResolver.toDisplayAttributes(
                         listOf(
@@ -162,7 +162,7 @@ class HolderConsentViewModelTest {
                 organizationName = "Organisation Ltd",
                 privacyPolicyUrl = "https://verifier.example/privacy"
             )
-            val expectedState = HolderConsentUiState.ConfirmConsent(
+            val expectedState = HolderConsentUiState.Loaded(
                 card = null,
                 normalisedOrganizationName = "Organisation Ltd.",
                 organizationName = "Organisation Ltd",

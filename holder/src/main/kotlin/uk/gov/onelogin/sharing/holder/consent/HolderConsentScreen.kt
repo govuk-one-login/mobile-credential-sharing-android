@@ -5,13 +5,17 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
@@ -24,9 +28,13 @@ import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsContent
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.ReviewWhatYouWillShareContent
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HolderConsentScreen(
     modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    ),
     viewModel: HolderConsentViewModel = metroViewModel()
 ) {
     val uiState: HolderConsentUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -34,6 +42,7 @@ internal fun HolderConsentScreen(
     HolderConsentContent(
         modifier = modifier,
         state = uiState,
+        sheetState = sheetState,
         onAgree = viewModel::onAccept,
         onLoadReviewWhatYouWillShare = viewModel::sendReviewWhatYouWillShareScreenEvent,
         onLoadMoreAboutDvs = viewModel::sendMoreAboutDvsScreenEvent,
@@ -44,15 +53,19 @@ internal fun HolderConsentScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HolderConsentContent(
     state: HolderConsentUiState,
     modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    ),
     onLoadReviewWhatYouWillShare: (String) -> Unit = {},
     onLoadMoreAboutDvs: (String) -> Unit = {},
     onAgree: () -> Unit = {},
     onReadPrivacyNotice: () -> Unit = {},
-    onDismissMoreAboutDvsScreen: (String) -> Unit = {},
+    onDismissMoreAboutDvsScreen: () -> Unit = {},
     onOpenDvsPrivacyPolicyLink: (String) -> Unit = {},
     onCancel: () -> Unit = {}
 ) {
@@ -70,47 +83,53 @@ internal fun HolderConsentContent(
             }
         }
 
-        is HolderConsentUiState.ConfirmConsent -> {
-            ReviewWhatYouWillShareContent(
-                modifier = modifier,
-                state = state,
-                onReadPrivacyNotice = onReadPrivacyNotice,
-                onScreenLoad = onLoadReviewWhatYouWillShare,
-                onAgree = onAgree,
-                onCancel = onCancel
-            )
-        }
+        is HolderConsentUiState.Loaded -> {
+            Column(
+                modifier = modifier
+            ) {
+                ReviewWhatYouWillShareContent(
+                    modifier = Modifier.fillMaxSize(),
+                    state = state,
+                    onReadPrivacyNotice = onReadPrivacyNotice,
+                    onScreenLoad = onLoadReviewWhatYouWillShare,
+                    onAgree = onAgree,
+                    onCancel = onCancel
+                )
 
-        is HolderConsentUiState.MoreAboutDvs -> {
-            MoreAboutDvsContent(
-                state = state,
-                onScreenLoad = onLoadMoreAboutDvs,
-                modifier = modifier,
-                onCancelScreen = onDismissMoreAboutDvsScreen,
-            ) { privacyPolicyUrl ->
-                scope.launch {
-                    context.getEnglishString(
-                        R.string.more_about_dvs_privacy_policy_link,
-                        "DVS"
-                    ).let(onOpenDvsPrivacyPolicyLink)
+                MoreAboutDvsContent(
+                    state = state,
+                    sheetState = sheetState,
+                    onScreenLoad = onLoadMoreAboutDvs,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("MoreAboutDvs"),
+                    onCancelScreen = onDismissMoreAboutDvsScreen,
+                ) { privacyPolicyUrl ->
+                    scope.launch {
+                        context.getEnglishString(
+                            R.string.more_about_dvs_privacy_policy_link,
+                            "DVS"
+                        ).let(onOpenDvsPrivacyPolicyLink)
 
-                    val intent = CustomTabsIntent.Builder()
-                        .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
-                        .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                        .setDownloadButtonEnabled(false)
-                        .build()
+                        val intent = CustomTabsIntent.Builder()
+                            .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+                            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                            .setDownloadButtonEnabled(false)
+                            .build()
 
-                    privacyPolicyUrl
-                        .let(Uri::parse)
-                        .let { uri ->
-                            intent.launchUrl(context, uri)
-                        }
+                        privacyPolicyUrl
+                            .let(Uri::parse)
+                            .let { uri ->
+                                intent.launchUrl(context, uri)
+                            }
+                    }
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @PreviewContent
 @Composable
 internal fun HolderConsentScreenPreview(

@@ -1,20 +1,21 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import android.content.Intent
-import android.net.Uri
-import android.net.Uri.parse
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isDialog
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.Matchers.allOf
 import org.junit.Rule
@@ -22,16 +23,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
-import uk.gov.logging.api.analytics.extensions.getEnglishString
-import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreen
-import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import kotlin.test.Test
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RunWith(RobolectricTestParameterInjector::class)
 class MoreAboutDvsScreenTest {
 
@@ -100,6 +99,13 @@ class MoreAboutDvsScreenTest {
     fun `Reading the DVS privacy policy sends an analytics event`() = runTest {
         composeTestRule.run {
             setContent { Render() }
+            onNode(
+                hasParent(
+                    hasTestTag("MoreAboutDvsContent")
+                ) and hasTestTag("BODY_LAZY_COLUMN_TEST_TAG")
+            ).performScrollToNode(
+                hasTestTag("openUri")
+            )
             performPrivacyPolicyButtonClick()
             waitForIdle()
 
