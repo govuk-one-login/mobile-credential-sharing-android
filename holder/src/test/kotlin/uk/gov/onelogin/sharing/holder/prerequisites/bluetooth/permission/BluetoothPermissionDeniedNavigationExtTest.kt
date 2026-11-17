@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission
 
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.testing.junit.testparameterinjector.TestParameter
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -39,7 +42,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class BluetoothPermissionDeniedNavigationExtTest {
 
     @get:Rule
@@ -118,33 +121,75 @@ class BluetoothPermissionDeniedNavigationExtTest {
     @Test
     fun `Bluetooth permission denied screen exists in the navigation graph`() = runTest {
         composeTestRule.run {
-            setContent {
-                controller = TestNavHostController(LocalContext.current).apply {
-                    navigatorProvider.addNavigator(ComposeNavigator())
-                    navigatorProvider.addNavigator(DialogNavigator())
-                    addOnDestinationChangedListener(onDestinationChangedListener)
-                }
+            setNavContent()
+            navigateToPermissionDenied()
+            assertValidUi()
+        }
+    }
 
-                CompositionLocalProvider(LocalMetroViewModelFactory provides viewModelFactory) {
-                    Render()
+    @Test
+    fun `Every way of leaving the screen pops it off the back stack`(
+        @TestParameter action: LeaveAction
+    ) = runTest {
+        composeTestRule.run {
+            val backPressedDispatcherOwner = setNavContent()
+            navigateToPermissionDenied()
+            assertValidUi()
+
+            when (action) {
+                LeaveAction.CancelButton -> performCancelClick()
+
+                LeaveAction.PopBackStack -> runOnUiThread { controller.popBackStack() }
+
+                LeaveAction.BackPressedDispatcher -> runOnUiThread {
+                    backPressedDispatcherOwner()?.onBackPressedDispatcher?.onBackPressed()
                 }
             }
 
-            onNodeWithText("Navigate").onParent().performClick()
-
-            waitUntil { hasNavigatedToBluetoothPermissionDenied }
-
-            assertValidUi()
+            waitUntil("Did not leave the permission denied screen via $action") {
+                controller.currentBackStackEntry?.destination?.route == START_DESTINATION
+            }
+            assertTitleDoesNotExist()
         }
+    }
+
+    enum class LeaveAction {
+        CancelButton,
+        PopBackStack,
+        BackPressedDispatcher
+    }
+
+    private fun BluetoothPermissionDeniedScreenRule.setNavContent():
+        () -> OnBackPressedDispatcherOwner? {
+        var owner: OnBackPressedDispatcherOwner? = null
+        setContent {
+            owner = LocalOnBackPressedDispatcherOwner.current
+            controller = TestNavHostController(LocalContext.current).apply {
+                navigatorProvider.addNavigator(ComposeNavigator())
+                navigatorProvider.addNavigator(DialogNavigator())
+                addOnDestinationChangedListener(onDestinationChangedListener)
+            }
+
+            CompositionLocalProvider(LocalMetroViewModelFactory provides viewModelFactory) {
+                Render()
+            }
+        }
+        return { owner }
+    }
+
+    private fun BluetoothPermissionDeniedScreenRule.navigateToPermissionDenied() {
+        onNodeWithText("Navigate").onParent().performClick()
+        waitUntil { hasNavigatedToBluetoothPermissionDenied }
+        waitForIdle()
     }
 
     @Composable
     private fun Render() {
         NavHost(
             navController = controller,
-            startDestination = "Unit test"
+            startDestination = START_DESTINATION
         ) {
-            composable("Unit test") {
+            composable(START_DESTINATION) {
                 Button(
                     onClick = {
                         controller.navigateToBluetoothPermissionDenied()
@@ -156,5 +201,9 @@ class BluetoothPermissionDeniedNavigationExtTest {
 
             configureBluetoothPermissionDenied()
         }
+    }
+
+    private companion object {
+        const val START_DESTINATION = "Unit test"
     }
 }

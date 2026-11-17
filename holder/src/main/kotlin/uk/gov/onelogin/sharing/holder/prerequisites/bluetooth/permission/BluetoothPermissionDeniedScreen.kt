@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -116,7 +117,7 @@ internal fun BluetoothPermissionDeniedContent(
     modifier: Modifier = Modifier
 ) {
     ErrorScreen(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         icon = { horizontalPadding ->
             GdsIcon(
                 image = ImageVector.vectorResource(ErrorScreenIcon.ErrorIcon.icon),
@@ -135,20 +136,14 @@ internal fun BluetoothPermissionDeniedContent(
             )
         },
         body = { horizontalPadding ->
-            item {
-                Text(
-                    text = stringResource(R.string.holder_bluetooth_permission_denied_body_1),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
+            items(
+                listOf(
+                    R.string.holder_bluetooth_permission_denied_body_1,
+                    R.string.holder_bluetooth_permission_denied_body_2
                 )
-            }
-            item {
+            ) { text ->
                 Text(
-                    text = stringResource(R.string.holder_bluetooth_permission_denied_body_2),
+                    text = stringResource(text),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
