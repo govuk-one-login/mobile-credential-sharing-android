@@ -59,7 +59,7 @@ class DeviceBleDeniedScreenTest {
                 missingPrerequisites = listOf(
                     MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
                 ),
-                bluetoothEnableDenied = true
+                enableBluetoothDenied = true
             ) { recheckCount++ }
         )
     }
