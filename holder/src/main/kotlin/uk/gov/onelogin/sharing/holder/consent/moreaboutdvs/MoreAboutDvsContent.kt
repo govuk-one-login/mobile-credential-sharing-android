@@ -96,9 +96,9 @@ internal fun MoreAboutDvsContent(
                     .testTag("MoreAboutDvsContent"),
                 title = stringResource(
                     R.string.more_about_dvs_title,
-                    state.normalisedOrganizationName
+                    state.organizationName
                 ),
-                body = state.normalisedOrganizationName.moreAboutDvsBodyContent(
+                body = state.organizationName.moreAboutDvsBodyContent(
                     onPrivacyPolicyLinkClick = {
                         onPrivacyPolicyLinkClick(state.privacyPolicyUrl)
                     }
