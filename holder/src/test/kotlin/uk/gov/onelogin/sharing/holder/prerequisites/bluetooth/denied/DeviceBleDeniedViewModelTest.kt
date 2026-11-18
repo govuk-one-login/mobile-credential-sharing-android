@@ -47,7 +47,7 @@ class DeviceBleDeniedViewModelTest {
             missingPrerequisites = listOf(
                 MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
             ),
-            bluetoothEnableDenied = true
+            enableBluetoothDenied = true
         ) { recheckCount++ }
     )
     private val orchestrator = FakeOrchestrator(initialHolderState = holderState)

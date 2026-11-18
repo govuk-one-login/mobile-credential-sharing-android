@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -32,15 +33,15 @@ class DeviceBleDeniedScreenRule(
     fun onSecondParagraph() =
         onNodeWithText(resources.getString(R.string.holder_device_ble_denied_body_2))
 
-    fun onTurnOnBluetoothButton() = onNode(
+    fun onTurnOnBluetoothButton() = onAllNodes(
         hasText(resources.getString(R.string.holder_device_ble_denied_turn_on_button))
             and hasRole(Role.Button)
-    )
+    ).onFirst()
 
-    fun onCancelButton() = onNode(
+    fun onCancelButton() = onAllNodes(
         hasText(resources.getString(R.string.holder_device_ble_denied_cancel_button))
             and hasRole(Role.Button)
-    )
+    ).onFirst()
 
     private val loadingSpinner = hasTestTag(DEVICE_BLE_DENIED_SPINNER_TEST_TAG)
     fun onLoadingSpinner() = onNode(loadingSpinner)
