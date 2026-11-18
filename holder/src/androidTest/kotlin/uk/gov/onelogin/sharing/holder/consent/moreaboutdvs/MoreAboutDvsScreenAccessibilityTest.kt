@@ -1,7 +1,13 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -11,6 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.core.accessibility.AccessibilityHelper.performAccessibilityCheck
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
 
@@ -28,14 +35,17 @@ class MoreAboutDvsScreenAccessibilityTest {
     @Composable
     private fun Render() {
         GdsTheme {
-            MoreAboutDvsContent(
+            MoreAboutDvsScreen(
                 state = HolderConsentUiState.Loaded(
                     organizationName = "Stub-DVS Ltd.",
                     normalisedOrganizationName = "Stub-DVS Ltd.",
                     privacyPolicyUrl = "https://this.is.an.accessibility.test/",
                     shouldShowMoreAboutDvs = true
                 ),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
+                    .padding(top = spacingDouble)
+                    .fillMaxSize(),
             )
         }
     }

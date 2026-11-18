@@ -23,6 +23,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.BodyHelper.removeDoubleFullStop
 
 class MoreAboutDvsScreenRule(
     composeTestRule: ComposeContentTestRule = createComposeRule(),

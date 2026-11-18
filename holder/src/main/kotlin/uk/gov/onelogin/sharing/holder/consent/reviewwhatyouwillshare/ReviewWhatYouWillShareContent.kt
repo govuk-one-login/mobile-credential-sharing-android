@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,7 +38,6 @@ import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreenPreviewParameters
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
-import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsContent
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.AgreeToShareCard
 
 @Composable

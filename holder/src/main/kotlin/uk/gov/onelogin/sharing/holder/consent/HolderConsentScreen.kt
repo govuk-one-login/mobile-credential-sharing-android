@@ -32,7 +32,7 @@ import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsContent
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsScreen
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.ReviewWhatYouWillShareContent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,7 +103,7 @@ internal fun HolderConsentContent(
                     onCancel = onCancel
                 )
 
-                MoreAboutDvsContent(
+                MoreAboutDvsScreen(
                     state = state,
                     sheetState = sheetState,
                     onScreenLoad = onLoadMoreAboutDvs,
