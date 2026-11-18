@@ -55,7 +55,18 @@ internal fun FinishedVerifierJourneyScreen(
         )
 
         response.documents!!.forEach { document ->
-            Text(document.toString())
+            Text(
+                document.docType,
+                modifier = Modifier.semantics {
+                    heading()
+                }
+            )
+            document.toDisplayedAttributes().forEach { (namespace, attributes) ->
+                Text(namespace)
+                attributes.forEach { attribute ->
+                    Text("${attribute.elementIdentifier}: ${attribute.value}")
+                }
+            }
         }
 
         Button(

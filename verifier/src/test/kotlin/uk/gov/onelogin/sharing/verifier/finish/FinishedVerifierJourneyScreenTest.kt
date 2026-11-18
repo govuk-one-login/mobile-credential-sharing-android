@@ -14,8 +14,11 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.models.mdoc.cbor.CborMapper
+import uk.gov.onelogin.sharing.models.mdoc.cbor.serializers.EmbeddedCbor
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponse
 import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.DeviceResponseStub
+import uk.gov.onelogin.sharing.models.mdoc.sessionEstablishment.deviceResponse.SharingIssuerSigned
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -70,14 +73,59 @@ class FinishedVerifierJourneyScreenTest {
     }
 
     @Test
-    fun `Outputs the Document to the User`() = runTest(dispatcherRule.testDispatcher) {
+    fun `Outputs the Document attributes to the User`() = runTest(dispatcherRule.testDispatcher) {
+        response = DeviceResponse(
+            documents = listOf(
+                DeviceResponseStub.document.copy(
+                    issuerSigned = SharingIssuerSigned(
+                        nameSpaces = mapOf(
+                            NAMESPACE to listOf(
+                                encodeItem(1, "given_name", "Jane"),
+                                encodeItem(2, "age_over_21", true),
+                                encodeItem(3, "portrait", byteArrayOf(1, 2, 3))
+                            )
+                        ),
+                        issuerAuth = byteArrayOf(0x02)
+                    )
+                )
+            )
+        )
+
         composeTestRule.run {
             setContent {
                 Render()
             }
 
-            assertDocumentIsDisplayed(response.documents!![0])
+            assertDocTypeIsDisplayed(response.documents!![0])
+            assertTextIsDisplayed(NAMESPACE)
+            assertAttributeIsDisplayed("given_name", "Jane")
+            assertAttributeIsDisplayed("age_over_21", "true")
+            assertAttributeIsDisplayed("portrait", "<3 bytes>")
         }
+    }
+
+    @Test
+    fun `Skips attributes that cannot be decoded`() = runTest(dispatcherRule.testDispatcher) {
+        composeTestRule.run {
+            setContent {
+                Render()
+            }
+
+            assertDocTypeIsDisplayed(response.documents!![0])
+            assertTextIsDisplayed(NAMESPACE)
+        }
+    }
+
+    private fun encodeItem(digestId: Int, elementIdentifier: String, elementValue: Any): ByteArray {
+        val item = CborMapper.default.writeValueAsBytes(
+            mapOf(
+                "digestID" to digestId,
+                "random" to byteArrayOf(0),
+                "elementIdentifier" to elementIdentifier,
+                "elementValue" to elementValue
+            )
+        )
+        return CborMapper.default.writeValueAsBytes(EmbeddedCbor(item))
     }
 
     @Composable
@@ -87,5 +135,9 @@ class FinishedVerifierJourneyScreenTest {
             viewModel = viewModel,
             onExitJourney = { composeTestRule.updateHasExitedJourney() }
         )
+    }
+
+    private companion object {
+        const val NAMESPACE = "org.iso.18013.5.1"
     }
 }

@@ -20,10 +20,16 @@ class FinishedVerifierJourneyScreenRule(composeTestRule: ComposeContentTestRule)
         "Unexpected exit journey call count! Actual: $hasExitedJourneyCount"
     ) { expectedCount.matches(hasExitedJourneyCount) }
 
-    fun assertDocumentIsDisplayed(document: VerifiableDocument) =
-        onNodeWithText(document.toString(), substring = true)
-            .assertExists()
-            .assertIsDisplayed()
+    fun assertDocTypeIsDisplayed(document: VerifiableDocument) = assertTextIsDisplayed(
+        document.docType
+    )
+
+    fun assertAttributeIsDisplayed(elementIdentifier: String, value: String) =
+        assertTextIsDisplayed("$elementIdentifier: $value")
+
+    fun assertTextIsDisplayed(text: String) = onNodeWithText(text)
+        .assertExists()
+        .assertIsDisplayed()
 
     fun performExitJourneyClick() = onNodeWithText("Exit journey", useUnmergedTree = true)
         .onParent()
