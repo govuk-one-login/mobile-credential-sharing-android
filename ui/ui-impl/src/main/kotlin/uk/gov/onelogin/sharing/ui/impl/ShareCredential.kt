@@ -149,11 +149,9 @@ internal fun ShareCredential(
         }
     }
 
-    BackHandler(state.userCanCancel(), onBack = onCancel)
-
-    // Non-cancellable loading phases (for example "Sharing your details") must not navigate back;
-    // swallow the system back press while on these screens.
-    BackHandler(state.blocksSystemBack()) { }
+    BackHandler(enabled = state.userCanCancel() || state.blocksSystemBack()) {
+        if (state.userCanCancel()) onCancel()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
