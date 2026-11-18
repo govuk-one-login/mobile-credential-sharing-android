@@ -9,7 +9,6 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertWidthIsAtLeast
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -56,9 +55,6 @@ class BluetoothPermissionDeniedScreenRule(
         useUnmergedTree = useUnmergedTree
     ).onFirst()
 
-    private val loadingSpinner = hasTestTag(BLUETOOTH_PERMISSION_DENIED_SPINNER_TEST_TAG)
-    fun onLoadingSpinner() = onNode(loadingSpinner)
-
     // assertions
     fun assertValidTitle(useUnmergedTree: Boolean = false) = onTitle(useUnmergedTree)
         .assert(isHeading())
@@ -90,15 +86,14 @@ class BluetoothPermissionDeniedScreenRule(
         assertValidCancelButton(useUnmergedTree)
     }
 
-    fun assertTitleDoesNotExist() = onAllNodes(
-        hasText(resources.getString(R.string.holder_bluetooth_permission_denied_title))
-            and isHeading()
-    ).assertCountEquals(0)
+    private val title =
+        hasText(resources.getString(R.string.holder_bluetooth_permission_denied_title)) and
+            isHeading()
 
-    fun assertLoadingSpinnerIsDisplayed() = onLoadingSpinner().assertIsDisplayed()
+    fun assertTitleDoesNotExist() = onAllNodes(title).assertCountEquals(0)
 
-    fun waitUntilLoadingSpinnerExists() = waitUntil {
-        onAllNodes(loadingSpinner).fetchSemanticsNodes().isNotEmpty()
+    fun waitUntilTitleDoesNotExist() = waitUntil {
+        onAllNodes(title).fetchSemanticsNodes().isEmpty()
     }
 
     fun performAllowClick() = onAllowButton().performClick()

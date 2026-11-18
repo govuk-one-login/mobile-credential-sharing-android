@@ -2,13 +2,10 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -16,11 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -44,8 +39,6 @@ import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
-
-internal const val BLUETOOTH_PERMISSION_DENIED_SPINNER_TEST_TAG = "bluetoothPermissionDeniedSpinner"
 
 @Composable
 internal fun BluetoothPermissionDeniedScreen(
@@ -84,9 +77,7 @@ internal fun BluetoothPermissionDeniedScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    if (isLeaving) {
-        BluetoothPermissionDeniedLoadingContent(modifier = modifier)
-    } else {
+    if (!isLeaving) {
         BluetoothPermissionDeniedContent(
             modifier = modifier,
             onAllow = {
@@ -173,29 +164,6 @@ internal fun BluetoothPermissionDeniedContent(
     )
 }
 
-@Composable
-internal fun BluetoothPermissionDeniedLoadingContent(
-    modifier: Modifier = Modifier,
-    progress: (() -> Float)? = null
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (progress != null) {
-            CircularProgressIndicator(
-                progress = progress,
-                modifier = Modifier.testTag(BLUETOOTH_PERMISSION_DENIED_SPINNER_TEST_TAG)
-            )
-        } else {
-            CircularProgressIndicator(
-                modifier = Modifier.testTag(BLUETOOTH_PERMISSION_DENIED_SPINNER_TEST_TAG)
-            )
-        }
-    }
-}
-
 @PreviewContent
 @Composable
 internal fun BluetoothPermissionDeniedContentPreview() {
@@ -205,19 +173,6 @@ internal fun BluetoothPermissionDeniedContentPreview() {
                 onAllow = {},
                 onCancel = {},
                 modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-}
-
-@PreviewContent
-@Composable
-internal fun BluetoothPermissionDeniedLoadingContentPreview() {
-    GdsTheme {
-        Surface {
-            BluetoothPermissionDeniedLoadingContent(
-                modifier = Modifier.fillMaxSize(),
-                progress = { 0.7f }
             )
         }
     }
