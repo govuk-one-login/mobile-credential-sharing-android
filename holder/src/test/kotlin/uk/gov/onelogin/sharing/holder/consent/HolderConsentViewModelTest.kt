@@ -1,6 +1,10 @@
 package uk.gov.onelogin.sharing.holder.consent
 
+import androidx.compose.runtime.MutableState
 import app.cash.turbine.test
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import io.mockk.mockk
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -8,6 +12,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
+import org.junit.runner.RunWith
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
@@ -15,6 +20,8 @@ import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiStateMatchers.isLoading
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiStateMatchers.isShowingMoreAboutDvs
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
@@ -27,14 +34,17 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
+@RunWith(TestParameterInjector::class)
 class HolderConsentViewModelTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
-    private val holderState = MutableStateFlow<HolderSessionState>(
-        HolderSessionState.NotStarted
-    )
+    private val holderState by lazy {
+        MutableStateFlow<HolderSessionState>(
+            HolderSessionState.NotStarted
+        )
+    }
 
     private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
 
@@ -44,11 +54,14 @@ class HolderConsentViewModelTest {
         initialHolderState = holderState,
     )
 
+    private var showMoreAboutDvs = false
+
     private val viewModel by lazy {
         HolderConsentViewModel(
             orchestrator = orchestrator,
             analyticsLogger = analyticsLogger,
-            dispatcher = dispatcherRule.testDispatcher
+            dispatcher = dispatcherRule.testDispatcher,
+            showMoreAboutDvs = MutableStateFlow(showMoreAboutDvs)
         )
     }
 
@@ -62,7 +75,7 @@ class HolderConsentViewModelTest {
         viewModel.onAccept().join()
 
         assertThat(
-            orchestrator,
+            orchestratorWithConsentTracking,
             hasConfirmConsentCount(1)
         )
         assertThat(
@@ -148,7 +161,7 @@ class HolderConsentViewModelTest {
             viewModel.uiState.test {
                 assertThat(
                     awaitItem(),
-                    equalTo(HolderConsentUiState.Loading)
+                    isLoading()
                 )
 
                 holderState.value = HolderSessionState.AwaitingUserConsent(
@@ -178,7 +191,7 @@ class HolderConsentViewModelTest {
             viewModel.uiState.test {
                 assertThat(
                     awaitItem(),
-                    equalTo(HolderConsentUiState.Loading)
+                    isLoading()
                 )
 
                 holderState.value = HolderSessionState.AwaitingUserConsent(
@@ -255,5 +268,29 @@ class HolderConsentViewModelTest {
             analyticsLogger,
             contains(MoreAboutDvsTestData.expectedDismissButtonEvent)
         )
+    }
+
+    @Test
+    fun `Showing more about DVS is dependent on the boolean state flow`(
+        @TestParameter input: Boolean
+    ) = runTest(dispatcherRule.testDispatcher) {
+        val presentation = ConsentPresentation(
+            documents = emptyList(),
+            organizationName = "Organisation Ltd",
+            privacyPolicyUrl = "https://verifier.example/privacy"
+        )
+
+        showMoreAboutDvs = input
+        holderState.value = HolderSessionState.AwaitingUserConsent(
+            presentation = presentation,
+            request = mockk(relaxed = true)
+        )
+
+        viewModel.uiState.test {
+            assertThat(
+                expectMostRecentItem(),
+                isShowingMoreAboutDvs(input)
+            )
+        }
     }
 }

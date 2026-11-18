@@ -7,6 +7,7 @@
     <string name="dvs_s_privacy_notice">Hysbysiad preifatrwydd %1$s</string>
     <string name="find_out_how_sharing_works">Darganfyddwch sut mae rhannu yn gweithio</string>
     <string name="get_ready_to_share">Paratoi i rannu</string>
+    <string name="go_back_to_documents">Ewch yn ôl i dogfennau</string>
     <string name="holder_consent_organization_sentence">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap cymeradwy wedi’i bweru gan %1$s</string>
     <string name="how_long_they_will_keep_your_details" translatable="true">am faint o amser y byddant yn cadw eich manylion</string>
     <string name="how_your_details_can_be_used" translatable="true">sut y gall eich manylion gael ei ddefnyddio</string>

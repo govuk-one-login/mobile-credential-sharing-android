@@ -1,8 +1,13 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -36,6 +42,7 @@ import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
+import uk.gov.android.ui.theme.spacingTriple
 import uk.gov.logging.api.analytics.extensions.getEnglishString
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -74,21 +81,33 @@ internal fun MoreAboutDvsContent(
         ModalBottomSheet(
             onDismissRequest = onCancelScreen,
             containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
+            shape = RoundedCornerShape(
+                topEnd = spacingTriple,
+                topStart = spacingTriple,
+            ),
             modifier = modifier,
             sheetState = sheetState,
+            dragHandle = null,
+            contentWindowInsets = { WindowInsets.safeDrawing },
         ) {
-            DismissScreenButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("MoreAboutDvsDismiss"),
-                onCancelScreen = {
-                    scope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
-                        onCancelScreen()
+            Box(Modifier.fillMaxWidth()) {
+                DismissScreenButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("MoreAboutDvsDismiss"),
+                    onCancelScreen = {
+                        scope.launch {
+                            sheetState.hide()
+                        }.invokeOnCompletion {
+                            onCancelScreen()
+                        }
                     }
-                }
-            )
+                )
+                BottomSheetDefaults.DragHandle(
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
 
             LeftAlignedScreenV2(
                 modifier = Modifier
