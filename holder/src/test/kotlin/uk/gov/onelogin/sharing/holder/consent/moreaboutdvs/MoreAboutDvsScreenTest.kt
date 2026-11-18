@@ -7,8 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.isDialog
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
@@ -110,7 +108,7 @@ class MoreAboutDvsScreenTest {
             waitForIdle()
 
             waitUntil("Doesn't contain expected event!: $analyticsLogger") {
-                analyticsLogger.contains(MoreAboutDvsTestData.expectedButtonEvent)
+                analyticsLogger.contains(MoreAboutDvsTestData.expectedPrivacyPolicyButtonEvent)
             }
         }
     }

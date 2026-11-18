@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.holder.consent
 
 import app.cash.turbine.test
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
@@ -16,9 +15,12 @@ import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
+import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsTestData
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasCancelCount
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasConfirmConsentCount
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentDocument
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentNamespace
@@ -35,13 +37,11 @@ class HolderConsentViewModelTest {
     )
 
     private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
-    private var confirmConsentCount = 0
 
     private val analyticsLogger = FakeAnalyticsLogger()
 
     private val orchestratorWithConsentTracking = FakeOrchestrator(
         initialHolderState = holderState,
-        onConfirmConsent = { confirmConsentCount++ }
     )
 
     private val viewModel by lazy {
@@ -61,7 +61,10 @@ class HolderConsentViewModelTest {
 
         viewModel.onAccept().join()
 
-        assertEquals(1, confirmConsentCount)
+        assertThat(
+            orchestrator,
+            hasConfirmConsentCount(1)
+        )
         assertThat(
             analyticsLogger,
             contains(
@@ -82,7 +85,10 @@ class HolderConsentViewModelTest {
 
         viewModel.onDeny().join()
 
-        assertEquals(1, orchestratorWithConsentTracking.cancelCount)
+        assertThat(
+            orchestratorWithConsentTracking,
+            hasCancelCount(1)
+        )
     }
 
     @Test
@@ -214,4 +220,40 @@ class HolderConsentViewModelTest {
                 )
             )
         }
+
+    @Test
+    fun `Sends an analytics screen event for the More about DVS screen`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        viewModel.sendMoreAboutDvsScreenEvent(MoreAboutDvsTestData.SCREEN_NAME).join()
+
+        assertThat(
+            analyticsLogger,
+            contains(MoreAboutDvsTestData.expectedScreenEvent)
+        )
+    }
+
+    @Test
+    fun `Sends an analytics button event when opening the privacy policy URL`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        viewModel.onOpenDvsPrivacyPolicy(MoreAboutDvsTestData.PRIVACY_NOTICE_BUTTON_TEXT).join()
+
+        assertThat(
+            analyticsLogger,
+            contains(MoreAboutDvsTestData.expectedPrivacyPolicyButtonEvent)
+        )
+    }
+
+    @Test
+    fun `Sends an analytics button event when dismissing the More about DVS screen`() = runTest(
+        dispatcherRule.testDispatcher
+    ) {
+        viewModel.dismissMoreAboutDvsScreen().join()
+
+        assertThat(
+            analyticsLogger,
+            contains(MoreAboutDvsTestData.expectedDismissButtonEvent)
+        )
+    }
 }

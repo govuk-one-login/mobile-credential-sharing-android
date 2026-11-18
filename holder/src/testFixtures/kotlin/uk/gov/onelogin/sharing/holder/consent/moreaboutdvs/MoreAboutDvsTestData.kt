@@ -26,8 +26,13 @@ object MoreAboutDvsTestData {
      *
      * Also handles the parameter of the related [more_about_dvs_privacy_policy_link] resource.
      */
-    val expectedButtonEvent = Button(
+    val expectedPrivacyPolicyButtonEvent = Button(
         text = PRIVACY_NOTICE_BUTTON_TEXT,
+        params = walletSharingRequiredParameters
+    ).asLegacyEvent()
+
+    val expectedDismissButtonEvent = Button(
+        text = "Close",
         params = walletSharingRequiredParameters
     ).asLegacyEvent()
 }
