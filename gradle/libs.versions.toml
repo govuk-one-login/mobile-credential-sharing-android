@@ -43,6 +43,7 @@ turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "1.0.1" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
 uk-gov-ui = "20.2.1" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
+govuk-network = "0.20.0"
 
 # Minimum safe versions for vulnerable build classpath transitive dependencies
 netty = "4.1.132.Final"
@@ -137,6 +138,7 @@ uk-gov-ui-android-patterns = { module = "uk.gov.android:patterns", version.ref =
 uk-gov-ui-android-patterns-camera = { module = "uk.gov.android:patterns-camera", version.ref = "uk-gov-ui" }
 uk-gov-ui-android-theme = { module = "uk.gov.android:theme", version.ref = "uk-gov-ui" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "xzing" }
+network = { group = "uk.gov.android", name = "network", version.ref = "govuk-network" }
 
 [bundles]
 androidx-camera = [

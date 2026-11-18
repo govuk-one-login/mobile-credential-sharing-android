@@ -32,6 +32,7 @@ android {
 dependencies {
     listOf(
         libs.jackson.cbor,
+        libs.network,
         projects.credentialFormat,
         projects.exchangeFormat
     ).forEach(::implementation)

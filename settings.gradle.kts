@@ -21,6 +21,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         listOf(
+            "mobile-android-networking",
             "mobile-android-ui",
         ).forEach { githubRepositoryName ->
             maven {
