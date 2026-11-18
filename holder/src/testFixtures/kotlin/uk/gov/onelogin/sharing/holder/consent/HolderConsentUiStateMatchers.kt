@@ -9,19 +9,15 @@ import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard
 
 object HolderConsentUiStateMatchers {
 
-    fun hasConsentCard(
-        expected: ConsentCard
-    ) = hasConsentCard(equalTo(expected))
+    fun hasConsentCard(expected: ConsentCard) = hasConsentCard(equalTo(expected))
 
-    fun hasConsentCard(
-        matcher: Matcher<in ConsentCard>
-    ): Matcher<in HolderConsentUiState> = HolderConsentUiStateMatcher(matcher) {
-        (it as? HolderConsentUiState.Loaded)?.card
-    }
+    fun hasConsentCard(matcher: Matcher<in ConsentCard>): Matcher<in HolderConsentUiState> =
+        HolderConsentUiStateMatcher(matcher) {
+            (it as? HolderConsentUiState.Loaded)?.card
+        }
 
-    fun hasNormalisedOrganisationName(
-        expected: String
-    ) = hasNormalisedOrganisationName(equalTo(expected))
+    fun hasNormalisedOrganisationName(expected: String) =
+        hasNormalisedOrganisationName(equalTo(expected))
 
     fun hasNormalisedOrganisationName(
         matcher: Matcher<in String>
@@ -29,33 +25,26 @@ object HolderConsentUiStateMatchers {
         (it as? HolderConsentUiState.Loaded)?.normalisedOrganizationName
     }
 
-    fun hasOrganisationName(
-        expected: String
-    ) = hasOrganisationName(equalTo(expected))
+    fun hasOrganisationName(expected: String) = hasOrganisationName(equalTo(expected))
 
-    fun hasOrganisationName(
-        matcher: Matcher<in String>
-    ): Matcher<in HolderConsentUiState> = HolderConsentUiStateMatcher(matcher) {
-        (it as? HolderConsentUiState.Loaded)?.organizationName
-    }
+    fun hasOrganisationName(matcher: Matcher<in String>): Matcher<in HolderConsentUiState> =
+        HolderConsentUiStateMatcher(matcher) {
+            (it as? HolderConsentUiState.Loaded)?.organizationName
+        }
 
-    fun hasPrivacyPolicyUrl(
-        expected: String
-    ) = hasPrivacyPolicyUrl(equalTo(expected))
+    fun hasPrivacyPolicyUrl(expected: String) = hasPrivacyPolicyUrl(equalTo(expected))
 
-    fun hasPrivacyPolicyUrl(
-        matcher: Matcher<in String>
-    ): Matcher<in HolderConsentUiState> = HolderConsentUiStateMatcher(matcher) {
-        (it as? HolderConsentUiState.Loaded)?.privacyPolicyUrl
-    }
+    fun hasPrivacyPolicyUrl(matcher: Matcher<in String>): Matcher<in HolderConsentUiState> =
+        HolderConsentUiStateMatcher(matcher) {
+            (it as? HolderConsentUiState.Loaded)?.privacyPolicyUrl
+        }
 
-    fun isBusy(
-        expected: Boolean = true
-    ): Matcher<in HolderConsentUiState> = HolderConsentUiStateMatcher(
-        equalTo(expected)
-    ) {
-        (it as? HolderConsentUiState.Loaded)?.isBusy
-    }
+    fun isBusy(expected: Boolean = true): Matcher<in HolderConsentUiState> =
+        HolderConsentUiStateMatcher(
+            equalTo(expected)
+        ) {
+            (it as? HolderConsentUiState.Loaded)?.isBusy
+        }
 
     fun isLoading(): Matcher<in HolderConsentUiState> = instanceOf(
         HolderConsentUiState.Loading::class.java
@@ -65,13 +54,12 @@ object HolderConsentUiStateMatchers {
         HolderConsentUiState.Loaded::class.java
     )
 
-    fun isShowingMoreAboutDvs(
-        expected: Boolean = true
-    ): Matcher<in HolderConsentUiState> = HolderConsentUiStateMatcher(
-        equalTo(expected)
-    ) {
-        (it as? HolderConsentUiState.Loaded)?.shouldShowMoreAboutDvs
-    }
+    fun isShowingMoreAboutDvs(expected: Boolean = true): Matcher<in HolderConsentUiState> =
+        HolderConsentUiStateMatcher(
+            equalTo(expected)
+        ) {
+            (it as? HolderConsentUiState.Loaded)?.shouldShowMoreAboutDvs
+        }
 
     private class HolderConsentUiStateMatcher<T>(
         private val matcher: Matcher<T>,
@@ -83,8 +71,7 @@ object HolderConsentUiStateMatchers {
             mismatchDescription: Description?
         ) = matcher.describeMismatch(transformer(item), mismatchDescription)
 
-        override fun matchesSafely(
-            item: HolderConsentUiState?
-        ): Boolean = matcher.matches(transformer(item))
+        override fun matchesSafely(item: HolderConsentUiState?): Boolean =
+            matcher.matches(transformer(item))
     }
 }

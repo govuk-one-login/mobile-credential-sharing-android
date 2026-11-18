@@ -5,6 +5,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.google.testing.junit.testparameterinjector.TestParameter
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
@@ -23,7 +24,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationT
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RunWith(RobolectricTestParameterInjector::class)
@@ -61,7 +61,7 @@ class HolderConsentScreenTest {
         MdlAttribute.DrivingPrivileges,
         MdlAttribute.IssueDate,
         MdlAttribute.ExpiryDate,
-        MdlAttribute.Portrait,
+        MdlAttribute.Portrait
     ).associateWith { false }
 
     private val presentationWithoutRetain = createConsentPresentation(
@@ -78,7 +78,7 @@ class HolderConsentScreenTest {
         MdlAttribute.DocumentNumber,
         MdlAttribute.DrivingPrivileges,
         MdlAttribute.IssueDate,
-        MdlAttribute.ExpiryDate,
+        MdlAttribute.ExpiryDate
     ).associateWith {
         true
     } + (MdlAttribute.Portrait to false)

@@ -44,13 +44,13 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingTriple
 import uk.gov.logging.api.analytics.extensions.getEnglishString
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreenPreviewParameters
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
-import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,12 +84,12 @@ internal fun MoreAboutDvsContent(
             contentColor = MaterialTheme.colorScheme.onBackground,
             shape = RoundedCornerShape(
                 topEnd = spacingTriple,
-                topStart = spacingTriple,
+                topStart = spacingTriple
             ),
             modifier = modifier,
             sheetState = sheetState,
             dragHandle = null,
-            contentWindowInsets = { WindowInsets.safeDrawing },
+            contentWindowInsets = { WindowInsets.safeDrawing }
         ) {
             Box(Modifier.fillMaxWidth()) {
                 DismissScreenButton(
@@ -105,7 +105,7 @@ internal fun MoreAboutDvsContent(
                     }
                 )
                 BottomSheetDefaults.DragHandle(
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
 
@@ -130,10 +130,7 @@ internal fun MoreAboutDvsContent(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun DismissScreenButton(
-    modifier: Modifier = Modifier,
-    onCancelScreen: () -> Unit = {}
-) {
+private fun DismissScreenButton(modifier: Modifier = Modifier, onCancelScreen: () -> Unit = {}) {
     TopAppBar(
         title = {},
         modifier = modifier,
@@ -164,15 +161,15 @@ private fun DismissScreenButton(
 private fun String.moreAboutDvsBodyContent(
     onPrivacyPolicyLinkClick: () -> Unit
 ): PersistentList<LeftAlignedScreenBodyV2> = (
-        introductionTexts() +
-                introductionBullets() +
-                privacyNoticeSubheading() +
-                privacyNoticeBody() +
-                privacyNoticeBullets() +
-                privacyNoticeButton(
-                    onClick = onPrivacyPolicyLinkClick
-                )
-        ).toPersistentList()
+    introductionTexts() +
+        introductionBullets() +
+        privacyNoticeSubheading() +
+        privacyNoticeBody() +
+        privacyNoticeBullets() +
+        privacyNoticeButton(
+            onClick = onPrivacyPolicyLinkClick
+        )
+    ).toPersistentList()
 
 @Composable
 private fun String.introductionTexts(): List<LeftAlignedScreenBodyV2.Text> = listOf(
@@ -252,7 +249,7 @@ internal fun MoreAboutDvsContentPreview() {
                 modifier = Modifier.fillMaxSize(),
                 state = HolderConsentScreenPreviewParameters.loadedPreviewState.copy(
                     shouldShowMoreAboutDvs = true
-                ),
+                )
             )
         }
     }

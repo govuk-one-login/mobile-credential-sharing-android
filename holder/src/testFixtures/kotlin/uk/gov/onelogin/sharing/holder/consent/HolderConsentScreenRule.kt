@@ -44,32 +44,26 @@ class HolderConsentScreenRule(
         .assert(isHeading())
         .assertIsDisplayed()
 
-    fun assertValidAgreeButton(
-        attributeCount: Int,
-        useUnmergedTree: Boolean = false
-    ) = onAgreeButton(attributeCount, useUnmergedTree)
-        .assertExists()
-        .assertHasClickAction()
-        .assertIsEnabled()
-        .assertIsDisplayed()
-        .assertWidthIsAtLeast(minimumTouchTarget)
-        .assertHeightIsAtLeast(minimumTouchTarget)
+    fun assertValidAgreeButton(attributeCount: Int, useUnmergedTree: Boolean = false) =
+        onAgreeButton(attributeCount, useUnmergedTree)
+            .assertExists()
+            .assertHasClickAction()
+            .assertIsEnabled()
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(minimumTouchTarget)
+            .assertHeightIsAtLeast(minimumTouchTarget)
 
-    fun assertAgreeButtonIsEnabled(
-        attributeCount: Int,
-        useUnmergedTree: Boolean = true
-    ) = onAgreeButton(
-        attributeCount = attributeCount,
-        useUnmergedTree = useUnmergedTree
-    ).assertIsEnabled()
+    fun assertAgreeButtonIsEnabled(attributeCount: Int, useUnmergedTree: Boolean = true) =
+        onAgreeButton(
+            attributeCount = attributeCount,
+            useUnmergedTree = useUnmergedTree
+        ).assertIsEnabled()
 
-    fun assertAgreeButtonIsNotEnabled(
-        attributeCount: Int,
-        useUnmergedTree: Boolean = false
-    ) = onAgreeButton(
-        attributeCount = attributeCount,
-        useUnmergedTree = useUnmergedTree
-    ).assertIsNotEnabled()
+    fun assertAgreeButtonIsNotEnabled(attributeCount: Int, useUnmergedTree: Boolean = false) =
+        onAgreeButton(
+            attributeCount = attributeCount,
+            useUnmergedTree = useUnmergedTree
+        ).assertIsNotEnabled()
 
     fun assertCancelButtonIsDisplayed() = onCancelButton().assertIsDisplayed()
     fun assertCancelButtonIsEnabled() = onCancelButton().assertIsEnabled()
@@ -96,7 +90,7 @@ class HolderConsentScreenRule(
 
     fun assertElementsPartiallyRetained(
         organizationName: String,
-        useUnmergedTree: Boolean = false,
+        useUnmergedTree: Boolean = false
     ) {
         assertHiddenTextIsDisplayable(
             resources.getString(
@@ -114,12 +108,9 @@ class HolderConsentScreenRule(
         )
     }
 
-    private fun assertHiddenTextIsDisplayable(
-        textToScrollTo: String,
-        useUnmergedTree: Boolean
-    ) {
+    private fun assertHiddenTextIsDisplayable(textToScrollTo: String, useUnmergedTree: Boolean) {
         onContainer().performScrollToNode(
-            hasText(textToScrollTo),
+            hasText(textToScrollTo)
         )
         onNodeWithText(
             textToScrollTo,
@@ -150,15 +141,11 @@ class HolderConsentScreenRule(
             .forEach { it.assertExists() }
     }
 
-    fun assertValidBody(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) = onBody(organizationName, useUnmergedTree)
-        .assertExists()
+    fun assertValidBody(organizationName: String, useUnmergedTree: Boolean = false) =
+        onBody(organizationName, useUnmergedTree)
+            .assertExists()
 
-    fun assertValidCancelButton(
-        useUnmergedTree: Boolean = true
-    ) = onCancelButton(useUnmergedTree)
+    fun assertValidCancelButton(useUnmergedTree: Boolean = true) = onCancelButton(useUnmergedTree)
         .assertExists()
         .assertHasClickAction()
         .assertIsEnabled()
@@ -172,30 +159,23 @@ class HolderConsentScreenRule(
     ).assertExists()
         .assertIsDisplayed()
 
-    fun assertValidPrivacyNoticeLink(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) = onPrivacyNoticeLink(
-        organizationName,
-        useUnmergedTree
-    ).assertExists()
-        .assertHasClickAction()
-        .assertIsEnabled()
-        .assertIsDisplayed()
-        .assertWidthIsAtLeast(minimumTouchTarget)
-        .assertHeightIsAtLeast(minimumTouchTarget)
+    fun assertValidPrivacyNoticeLink(organizationName: String, useUnmergedTree: Boolean = false) =
+        onPrivacyNoticeLink(
+            organizationName,
+            useUnmergedTree
+        ).assertExists()
+            .assertHasClickAction()
+            .assertIsEnabled()
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(minimumTouchTarget)
+            .assertHeightIsAtLeast(minimumTouchTarget)
 
-    fun assertValidTitle(
-        useUnmergedTree: Boolean = false
-    ) = onTitle(useUnmergedTree)
+    fun assertValidTitle(useUnmergedTree: Boolean = false) = onTitle(useUnmergedTree)
         .assertExists()
         .assert(isHeading())
         .assertIsDisplayed()
 
-    fun assertValidUi(
-        presentation: ConsentPresentation,
-        useUnmergedTree: Boolean = false
-    ) {
+    fun assertValidUi(presentation: ConsentPresentation, useUnmergedTree: Boolean = false) {
         assertValidTitle(useUnmergedTree)
         assertValidBody(presentation.normalisedOrganizationName, useUnmergedTree)
         assertValidPrivacyNoticeLink(presentation.normalisedOrganizationName, useUnmergedTree)
@@ -216,28 +196,23 @@ class HolderConsentScreenRule(
 
     fun assertValidRetainedAttributes(
         presentation: ConsentPresentation,
-        useUnmergedTree: Boolean = false,
+        useUnmergedTree: Boolean = false
     ) = presentation.firstDocumentAttributes
         ?.filter(ConsentAttribute::intentToRetain)
         ?.let { assertValidAttributes(it, useUnmergedTree) }
 
-    fun clickAgreeButton(
-        attributeCount: Int,
-        useUnmergedTree: Boolean = true
-    ) = onAgreeButton(
+    fun clickAgreeButton(attributeCount: Int, useUnmergedTree: Boolean = true) = onAgreeButton(
         attributeCount = attributeCount,
         useUnmergedTree = useUnmergedTree
     ).performClick()
 
     fun clickCancelButton() = onCancelButton().performClick()
 
-    fun clickPrivacyNoticeLink(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) = onPrivacyNoticeLink(
-        organizationName,
-        useUnmergedTree
-    ).performClick()
+    fun clickPrivacyNoticeLink(organizationName: String, useUnmergedTree: Boolean = false) =
+        onPrivacyNoticeLink(
+            organizationName,
+            useUnmergedTree
+        ).performClick()
 
     private fun onAgreeButton(
         attributeCount: Int,
@@ -265,10 +240,7 @@ class HolderConsentScreenRule(
         ).onFirst()
     }
 
-    fun onBody(
-        organizationName: String,
-        useUnmergedTree: Boolean = false
-    ) = onNodeWithText(
+    fun onBody(organizationName: String, useUnmergedTree: Boolean = false) = onNodeWithText(
         resources.getString(
             R.string.holder_consent_organization_sentence,
             organizationName

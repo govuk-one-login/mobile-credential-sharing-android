@@ -51,7 +51,7 @@ class HolderConsentViewModelTest {
     private val analyticsLogger = FakeAnalyticsLogger()
 
     private val orchestratorWithConsentTracking = FakeOrchestrator(
-        initialHolderState = holderState,
+        initialHolderState = holderState
     )
 
     private var showMoreAboutDvs = false

@@ -38,10 +38,9 @@ import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreenPreviewParameters
-import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.AgreeToShareCard
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.MoreAboutDvsContent
-
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.AgreeToShareCard
 
 @Composable
 internal fun ReviewWhatYouWillShareContent(

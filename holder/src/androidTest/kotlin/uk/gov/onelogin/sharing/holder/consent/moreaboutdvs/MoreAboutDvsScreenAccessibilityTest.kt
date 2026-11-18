@@ -33,7 +33,7 @@ class MoreAboutDvsScreenAccessibilityTest {
                     organizationName = "Stub-DVS Ltd.",
                     normalisedOrganizationName = "Stub-DVS Ltd.",
                     privacyPolicyUrl = "https://this.is.an.accessibility.test/",
-                    shouldShowMoreAboutDvs = true,
+                    shouldShowMoreAboutDvs = true
                 ),
                 modifier = Modifier.fillMaxSize()
             )

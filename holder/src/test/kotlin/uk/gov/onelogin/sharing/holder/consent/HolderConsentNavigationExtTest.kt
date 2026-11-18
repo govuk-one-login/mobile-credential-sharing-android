@@ -83,7 +83,7 @@ class HolderConsentNavigationExtTest {
         MdlAttribute.DrivingPrivileges,
         MdlAttribute.IssueDate,
         MdlAttribute.ExpiryDate,
-        MdlAttribute.Portrait,
+        MdlAttribute.Portrait
     ).associateWith { false }
 
     private val presentationWithoutRetain = createConsentPresentation(
@@ -103,44 +103,43 @@ class HolderConsentNavigationExtTest {
             HolderConsentScreenRule,
             TestNavHostController,
             OnBackPressedDispatcherOwner?
-                ) -> Unit = namedTestValues(
-                    "Popping navigation backstack" to { _, controller, _ ->
-                        controller.popBackStack()
-                    },
-                    "Performing device back press" to { _, _, dispatcher ->
-                        dispatcher?.onBackPressedDispatcher?.onBackPressed()
-                    }
-                )
-    ) =
-        runTest(dispatcherRule.testDispatcher) {
-            holderState.update {
-                HolderSessionState.AwaitingUserConsent(
-                    request = DeviceRequestStub.deviceRequestStub,
-                    presentation = presentationWithoutRetain
-                )
+        ) -> Unit = namedTestValues(
+            "Popping navigation backstack" to { _, controller, _ ->
+                controller.popBackStack()
+            },
+            "Performing device back press" to { _, _, dispatcher ->
+                dispatcher?.onBackPressedDispatcher?.onBackPressed()
             }
-
-            composeTestRule.run {
-                setContent {
-                    navController = prepareController(LocalContext.current)
-                    onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
-                    Render()
-                }
-
-                onNodeWithRole(Role.Button).performClick()
-                assertValidUi(presentationWithoutRetain)
-
-                runOnUiThread {
-                    action(composeTestRule, navController, onBackPressedDispatcherOwner)
-                }
-                waitForIdle()
-
-                assertThat(
-                    navController.currentDestination?.route,
-                    equalTo("previous")
-                )
-            }
+        )
+    ) = runTest(dispatcherRule.testDispatcher) {
+        holderState.update {
+            HolderSessionState.AwaitingUserConsent(
+                request = DeviceRequestStub.deviceRequestStub,
+                presentation = presentationWithoutRetain
+            )
         }
+
+        composeTestRule.run {
+            setContent {
+                navController = prepareController(LocalContext.current)
+                onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
+                Render()
+            }
+
+            onNodeWithRole(Role.Button).performClick()
+            assertValidUi(presentationWithoutRetain)
+
+            runOnUiThread {
+                action(composeTestRule, navController, onBackPressedDispatcherOwner)
+            }
+            waitForIdle()
+
+            assertThat(
+                navController.currentDestination?.route,
+                equalTo("previous")
+            )
+        }
+    }
 
     @Composable
     private fun Render() {
@@ -165,6 +164,6 @@ class HolderConsentNavigationExtTest {
                     configureHolderConsentScreen()
                 }
             }
-            }
         }
     }
+}

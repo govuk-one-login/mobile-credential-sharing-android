@@ -10,6 +10,6 @@ sealed interface HolderConsentUiState {
         val privacyPolicyUrl: String,
         val card: ConsentCard? = null,
         val isBusy: Boolean = false,
-        val shouldShowMoreAboutDvs: Boolean = false,
+        val shouldShowMoreAboutDvs: Boolean = false
     ) : HolderConsentUiState
 }

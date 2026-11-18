@@ -25,8 +25,8 @@ import uk.gov.onelogin.sharing.core.HolderUiScope
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.agreeAndShareButton
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.cancelAndGoBackButton
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.moreAboutDvsScreen
-import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.reviewWhatYouWillShareScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.readPrivacyNoticeButton
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentAnalyticsEvents.reviewWhatYouWillShareScreen
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
 import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
@@ -41,7 +41,7 @@ class HolderConsentViewModel(
     private val orchestrator: Orchestrator.Holder,
     private val analyticsLogger: AnalyticsLogger,
     private val showMoreAboutDvs: MutableStateFlow<Boolean> = MutableStateFlow(false),
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     private val presentation: Flow<ConsentPresentation> = orchestrator
@@ -65,7 +65,7 @@ class HolderConsentViewModel(
             normalisedOrganizationName = presentation.normalisedOrganizationName,
             organizationName = presentation.organizationName,
             shouldShowMoreAboutDvs = showMoreAboutDvs,
-            isBusy = presentation.isBusy,
+            isBusy = presentation.isBusy
         )
     }.stateIn(
         viewModelScope.plus(dispatcher),

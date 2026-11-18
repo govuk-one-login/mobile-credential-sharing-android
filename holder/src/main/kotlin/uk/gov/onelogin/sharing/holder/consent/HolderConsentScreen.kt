@@ -112,7 +112,7 @@ internal fun HolderConsentContent(
                         .padding(top = spacingDouble)
                         .fillMaxSize()
                         .testTag("MoreAboutDvs"),
-                    onCancelScreen = onDismissMoreAboutDvsScreen,
+                    onCancelScreen = onDismissMoreAboutDvsScreen
                 ) { privacyPolicyUrl ->
                     scope.launch {
                         context.getEnglishString(
@@ -149,7 +149,7 @@ internal fun HolderConsentScreenPreview(
         Surface {
             HolderConsentContent(
                 modifier = Modifier.fillMaxSize(),
-                state = state,
+                state = state
             )
         }
     }
