@@ -36,6 +36,22 @@ enum class DeferredStringsXmlData(
         defersTo = R.string.you_will_connect_via_qr_later,
         resourceId = R.string.get_ready_to_share_use_qr_to_connect
     ),
+    HOLDER_GENERIC_ERROR_BODY_1(
+        defersTo = R.string.your_details_have_not_been_shared,
+        resourceId = R.string.holder_generic_error_body_1
+    ),
+    HOLDER_GENERIC_ERROR_BODY_2(
+        defersTo = R.string.you_may_be_able_to_use_a_physical_document_instead,
+        resourceId = R.string.holder_generic_error_body_2
+    ),
+    HOLDER_GENERIC_ERROR_BUTTON(
+        defersTo = R.string.go_back_to_documents,
+        resourceId = R.string.holder_generic_error_button
+    ),
+    HOLDER_GENERIC_ERROR_TITLE(
+        defersTo = R.string.sharing_is_currently_unavailable,
+        resourceId = R.string.holder_generic_error_title
+    ),
     HOLDER_PREREQUISITES_NOT_STARTED(
         defersTo = R.string.checking_journey_requirements,
         resourceId = R.string.holder_prerequisites_not_started

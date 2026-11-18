@@ -16,11 +16,14 @@
     <string name="read_dvs_s_privacy_policy_to_find_out" translatable="true">Darllenwch hysbysiad preifatrwydd %1$s i ddarganfod:</string>
     <string name="the_person_checking_is_using_an_app_powered_by_dvs">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap sy’n cael ei bweru gan %1$s.</string>
     <string name="use_encryption_when_storing_your_details" translatable="true">ddefnyddio amgryptio wrth storio’ch manylion</string>
-    <string name="you_will_connect_via_qr_later">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny yn nes ymlaen.</string>
-    <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>
+    <string name="sharing_is_currently_unavailable">Nid yw rhannu ar gael ar hyn o bryd</string>
     <string name="turn_on_bluetooth">Troi Bluetooth ymlaen</string>
     <string name="turn_on_bluetooth_before_sharing">Cyn y gallwch rannu, mae angen i chi droi Bluetooth ymlaen.</string>
     <string name="use_qr_code_to_connect_next">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf.</string>
+    <string name="you_may_be_able_to_use_a_physical_document_instead">Efallai y gallwch ddefnyddio dogfen gorfforol yn lle hynny.</string>
+    <string name="you_will_connect_via_qr_later">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny yn nes ymlaen.</string>
+    <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>
+    <string name="your_details_have_not_been_shared">Nid yw eich manylion wedi’u rhannu.</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
