@@ -83,5 +83,21 @@ enum class DeferredStringsXmlData(
     HOLDER_TURN_ON_BLUETOOTH_BUTTON(
         defersTo = R.string.turn_on_bluetooth,
         resourceId = R.string.holder_turn_on_bluetooth_button
+    ),
+    HOLDER_STOP_CHECK_DIALOG_TITLE(
+        defersTo = R.string.stop_check_dialog_title,
+        resourceId = R.string.holder_stop_check_dialog_title
+    ),
+    HOLDER_STOP_CHECK_DIALOG_BODY(
+        defersTo = R.string.stop_check_dialog_body,
+        resourceId = R.string.holder_stop_check_dialog_body
+    ),
+    HOLDER_STOP_CHECK_DIALOG_STOP_BUTTON(
+        defersTo = R.string.stop_check_dialog_stop_button,
+        resourceId = R.string.holder_stop_check_dialog_stop_button
+    ),
+    HOLDER_STOP_CHECK_DIALOG_CONTINUE_BUTTON(
+        defersTo = R.string.stop_check_dialog_continue_button,
+        resourceId = R.string.holder_stop_check_dialog_continue_button
     )
 }

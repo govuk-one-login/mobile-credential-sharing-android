@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.consent
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
     val presentation by viewModel.presentation.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val titleRes = R.string.holder_consent_screen_title
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
@@ -58,7 +60,10 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
             titleRes = titleRes,
             onAgree = viewModel::onAccept,
             onReadPrivacyNotice = viewModel::onReadPrivacyNotice,
-            onCancel = viewModel::onCancelAndGoBack
+            onCancel = {
+                viewModel.onCancelAndGoBack()
+                backDispatcher?.onBackPressed()
+            }
         )
     } ?: CircularProgressIndicator()
 }

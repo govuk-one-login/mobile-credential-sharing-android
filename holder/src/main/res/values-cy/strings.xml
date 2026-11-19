@@ -14,6 +14,10 @@
     <string name="you_will_connect_via_qr_later">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny yn nes ymlaen.</string>
     <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>
     <string name="your_details_have_not_been_shared">Nid yw eich manylion wedi’u rhannu.</string>
+    <string name="stop_check_dialog_title">Ydych chi’n siŵr eich bod eisiau stopio’r gwiriad?</string>
+    <string name="stop_check_dialog_body">Byddwch yn dod â’ch cysylltiad â’r person sy’n gwneud y gwiriad i ben. Ni fydd eich manylion yn cael eu rhannu.</string>
+    <string name="stop_check_dialog_stop_button">Stopio’r gwiriad</string>
+    <string name="stop_check_dialog_continue_button">Parhau gyda’r gwiriad</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
