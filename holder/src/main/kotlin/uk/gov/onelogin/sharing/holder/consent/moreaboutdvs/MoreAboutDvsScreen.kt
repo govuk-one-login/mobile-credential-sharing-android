@@ -200,6 +200,7 @@ private fun DismissScreenButton(modifier: Modifier = Modifier, onCancelScreen: (
 @Composable
 internal fun MoreAboutDvsScreenPreview() {
     GdsTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {}
         Surface {
             MoreAboutDvsContent(
                 sheetState = rememberModalBottomSheetState(
