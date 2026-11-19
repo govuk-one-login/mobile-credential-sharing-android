@@ -29,7 +29,6 @@ internal object BodyHelper {
         introductionTexts() +
             introductionBullets() +
             privacyNoticeSubheading() +
-            privacyNoticeBody() +
             privacyNoticeBullets() +
             privacyNoticeButton(
                 onClick = onPrivacyPolicyLinkClick
@@ -75,11 +74,6 @@ internal object BodyHelper {
         )
 
     @Composable
-    private fun String.privacyNoticeBody(): Text = Text(
-        text = stringResource(R.string.more_about_dvs_privacy_body, this)
-    )
-
-    @Composable
     private fun String.privacyNoticeBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
         R.string.more_about_dvs_privacy_bullet_1,
         R.string.more_about_dvs_privacy_bullet_2
@@ -88,7 +82,13 @@ internal object BodyHelper {
     }.map { bulletText ->
         ListItem(text = bulletText)
     }.let { bulletItems ->
-        LeftAlignedScreenBodyV2.BulletList(items = bulletItems.toPersistentList())
+        LeftAlignedScreenBodyV2.BulletList(
+            items = bulletItems.toPersistentList(),
+            title = ListTitle(
+                text = stringResource(R.string.more_about_dvs_privacy_body, this),
+                TitleType.Text
+            )
+        )
     }
 
     @Composable
