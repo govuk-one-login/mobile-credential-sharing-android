@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -12,6 +14,7 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2.Text
+import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.holder.R
 
@@ -88,7 +91,10 @@ internal object BodyHelper {
         text = stringResource(R.string.more_about_dvs_privacy_policy_link, this),
         onClick = onClick,
         showIcon = true,
-        modifier = Modifier.testTag("openUri")
+        modifier = Modifier
+            .testTag("openUri")
+            .widthIn(min = minimumTouchTarget)
+            .heightIn(min = minimumTouchTarget)
     )
 
     internal fun String.removeDoubleFullStop(): String = let { text ->

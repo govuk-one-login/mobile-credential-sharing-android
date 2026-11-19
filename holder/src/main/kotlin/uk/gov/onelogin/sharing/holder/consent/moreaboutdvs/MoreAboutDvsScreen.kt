@@ -5,9 +5,14 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
@@ -33,16 +38,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.topappbar.GdsTopAppBarDefaults.scrollBehaviour
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingTriple
 import uk.gov.logging.api.analytics.extensions.getEnglishString
-import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
@@ -50,6 +54,7 @@ import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreenPreviewParameters
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.BodyHelper.moreAboutDvsBodyContent
+import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,7 +155,10 @@ private fun TopSheetBar(modifier: Modifier = Modifier, handler: () -> Unit = {})
             onCancelScreen = handler
         )
         BottomSheetDefaults.DragHandle(
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier
+                .align(Alignment.Center)
+                .minimumInteractiveComponentSize()
+                .size(minimumTouchTarget)
         )
     }
 }
@@ -167,6 +175,8 @@ private fun DismissScreenButton(modifier: Modifier = Modifier, onCancelScreen: (
                 modifier = Modifier
                     .testTag("closeButton")
                     .minimumInteractiveComponentSize()
+                    .width(minimumTouchTarget)
+                    .height(minimumTouchTarget)
             ) {
                 Icon(
                     painter = painterResource(coreR.drawable.filled_close),
@@ -190,7 +200,10 @@ private fun DismissScreenButton(modifier: Modifier = Modifier, onCancelScreen: (
 internal fun MoreAboutDvsScreenPreview() {
     GdsTheme {
         Surface {
-            MoreAboutDvsScreen(
+            MoreAboutDvsContent(
+                sheetState = rememberModalBottomSheetState(
+                    skipPartiallyExpanded = true
+                ),
                 modifier = Modifier
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                     .padding(top = spacingDouble)
