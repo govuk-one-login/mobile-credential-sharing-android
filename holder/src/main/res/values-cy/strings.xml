@@ -18,9 +18,6 @@
     <string name="stop_check_dialog_body">Byddwch yn dod â’ch cysylltiad â’r person sy’n gwneud y gwiriad i ben. Ni fydd eich manylion yn cael eu rhannu.</string>
     <string name="stop_check_dialog_stop_button">Stopio’r gwiriad</string>
     <string name="stop_check_dialog_continue_button">Parhau gyda’r gwiriad</string>
-    <string name="bluetooth_permission_denied_title">Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos</string>
-    <string name="bluetooth_permission_denied_before_sharing">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\’r ap hwn gysylltu â dyfeisiau cyfagos.</string>
-    <string name="bluetooth_permission_denied_allow_button">Caniatáu</string>
     <string name="you_need_to_allow_connection_to_nearby_devices">Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos</string>
     <string name="allow_app_to_connect_to_nearby_devices_to_share">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\’r ap hwn gysylltu â dyfeisiau cyfagos.</string>
     <string name="allow">Caniatáu</string>
