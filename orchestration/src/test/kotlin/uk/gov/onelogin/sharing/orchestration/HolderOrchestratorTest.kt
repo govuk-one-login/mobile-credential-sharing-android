@@ -102,6 +102,9 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.verification.crl.CrlConfigurationException
+import uk.gov.onelogin.sharing.verification.crl.CrlReadinessCheck
+import uk.gov.onelogin.sharing.verification.crl.CrlRefreshResult
 import uk.gov.onelogin.sharing.verification.reader.AuthenticatedReaderRequest
 import uk.gov.onelogin.sharing.verification.reader.FakeReaderAuthentication
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
@@ -182,7 +185,8 @@ class HolderOrchestratorTest {
             FakeAuthenticatedReaderRequestFactory(),
         readerAuthentication: ReaderAuthentication = fakeReaderAuthentication,
         engagementTimer: SessionTimer = FakeSessionTimer(),
-        prerequisiteGate: PrerequisiteGate = gate
+        prerequisiteGate: PrerequisiteGate = gate,
+        crlReadinessCheck: CrlReadinessCheck = CrlReadinessCheck { CrlRefreshResult.READY }
     ) = HolderOrchestrator(
         logger = logger,
         sessionFactory = sessionFactory,
@@ -199,8 +203,66 @@ class HolderOrchestratorTest {
         readerAuthentication = readerAuthentication,
         trustedReaderCertificates = trustedReaderCertificates,
         authenticatedReaderRequestFactory = authenticatedReaderRequestFactory,
-        engagementTimer = engagementTimer
+        engagementTimer = engagementTimer,
+        crlReadinessCheck = crlReadinessCheck
     )
+
+    @Test
+    fun `starting a journey runs the CRL readiness check and logs the result`() = runTest {
+        var calls = 0
+        val orchestrator = createOrchestrator(
+            sessionFactory = createSessionFactory(),
+            crlReadinessCheck = CrlReadinessCheck {
+                calls++
+                CrlRefreshResult.UPDATE_REQUIRED
+            }
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        orchestrator.start()
+        advanceUntilIdle()
+
+        assertEquals(1, calls)
+        assert("CRL refresh: UPDATE_REQUIRED" in logger)
+    }
+
+    @Test
+    fun `a CRL configuration error is logged and does not stop the journey yet`() = runTest {
+        val orchestrator = createOrchestrator(
+            sessionFactory = createSessionFactory(),
+            crlReadinessCheck = CrlReadinessCheck { throw CrlConfigurationException.MissingResource() }
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        orchestrator.start()
+        advanceUntilIdle()
+
+        assert("CRL refresh: configuration error" in logger)
+        assert(START_ORCHESTRATION_SUCCESS in logger)
+    }
+
+    @Test
+    fun `a journey start while a CRL refresh is still running does not start another`() = runTest {
+        val gate = CompletableDeferred<CrlRefreshResult>()
+        var calls = 0
+        val orchestrator = createOrchestrator(
+            sessionFactory = createSessionFactory(),
+            crlReadinessCheck = CrlReadinessCheck {
+                calls++
+                gate.await()
+            }
+        )
+        backgroundScope.launch { orchestrator.holderSessionState.collect {} }
+
+        orchestrator.start()
+        orchestrator.reset()
+        orchestrator.start()
+        gate.complete(CrlRefreshResult.READY)
+        advanceUntilIdle()
+
+        assertEquals(1, calls)
+        assert("CRL refresh: already running, not starting another" in logger)
+    }
 
     @Test
     fun `Starting the Orchestrator journey navigates to the PresentingEngagement state`() =

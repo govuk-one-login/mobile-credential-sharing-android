@@ -30,8 +30,7 @@ import uk.gov.onelogin.sharing.testapp.home.HomeRoute
 import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.ReaderRootCertificateProvider
 import uk.gov.onelogin.sharing.verification.crl.CrlConfigurationException
-import uk.gov.onelogin.sharing.verification.crl.CrlFetchResult
-import uk.gov.onelogin.sharing.verification.crl.CrlPrefetchDownloader
+import uk.gov.onelogin.sharing.verification.crl.CrlProvider
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -117,27 +116,18 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Demo of the host handing the SDK its CRL configuration (assets/credential-sharing-crl.json)
-     * and the SDK downloading each listed URL through the network library. Results go to logcat.
+     * and the SDK refreshing it: every configured URL is retrieved through the network library,
+     * then the cached CRLs are checked against their signed dates. The result goes to logcat.
      */
     private fun prefetchCrls() {
         lifecycleScope.launch {
             try {
-                CrlPrefetchDownloader(applicationContext).downloadAll().forEach { (url, result) ->
-                    Log.i(CRL_TAG, "${url.substringAfterLast('/')} -> ${result.describe()}")
-                }
+                val result = CrlProvider(applicationContext).refresh()
+                Log.i(CRL_TAG, "refresh() -> $result")
             } catch (e: CrlConfigurationException) {
                 Log.e(CRL_TAG, "CRL configuration error: ${e.message}")
             }
         }
-    }
-
-    private fun CrlFetchResult.describe(): String = when (this) {
-        is CrlFetchResult.Success ->
-            "OK status=$status bytes=$byteCount cache-control=$cacheControl " +
-                "issuer=${crl.issuerX500Principal.name} nextUpdate=${crl.nextUpdate}"
-        is CrlFetchResult.Malformed -> "NOT A CRL status=$status bytes=$byteCount ($cause)"
-        is CrlFetchResult.HttpError -> "HTTP error $status"
-        is CrlFetchResult.Unreachable -> "UNREACHABLE ${cause.message}"
     }
 
     override fun onPause() {

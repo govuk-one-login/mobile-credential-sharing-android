@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -73,6 +74,9 @@ import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteGate
+import uk.gov.onelogin.sharing.verification.crl.CrlConfigurationException
+import uk.gov.onelogin.sharing.verification.crl.CrlReadinessCheck
+import uk.gov.onelogin.sharing.verification.crl.CrlRefreshResult
 import uk.gov.onelogin.sharing.verification.format.document.IssuerSigned
 import uk.gov.onelogin.sharing.verification.format.document.VerifiableDocument
 import uk.gov.onelogin.sharing.verification.reader.ReaderAuthentication
@@ -100,11 +104,13 @@ class HolderOrchestrator(
     private val authenticatedReaderRequestFactory: AuthenticatedReaderRequestFactory,
     private val readerAuthentication: ReaderAuthentication,
     private val engagementTimer: SessionTimer = SessionTimerImpl(appCoroutineScope, logger),
-    private val engagementTimingPolicy: EngagementTimingPolicy = EngagementTimingPolicy()
+    private val engagementTimingPolicy: EngagementTimingPolicy = EngagementTimingPolicy(),
+    private val crlReadinessCheck: CrlReadinessCheck = CrlReadinessCheck { CrlRefreshResult.READY }
 ) : Orchestrator.Holder {
     private var transportStateJob: Job? = null
     private val consentInFlight = AtomicBoolean(false)
     private var signingJob: Job? = null
+    private var crlRefreshJob: Job? = null
     private val sessionFlow = MutableStateFlow(sessionFactory.create())
     private val currentContext: HolderSessionContext get() = sessionFlow.value.sessionContext
 
@@ -151,7 +157,29 @@ class HolderOrchestrator(
             return
         }
 
+        refreshCrls()
         performPreflightChecks()
+    }
+
+    /**
+     * SPIKE: runs the CRL readiness check on every journey start and logs the result. It does not
+     * gate engagement yet: UPDATE_REQUIRED will end the session before engagement once the
+     * CrlRefreshRequired session error and its screen exist.
+     */
+    private fun refreshCrls() {
+        if (crlRefreshJob?.isActive == true) {
+            logger.debug(logTag, "CRL refresh: already running, not starting another")
+            return
+        }
+
+        crlRefreshJob = appCoroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val tag = this@HolderOrchestrator.logTag
+            try {
+                logger.debug(tag, "CRL refresh: ${crlReadinessCheck.refresh()}")
+            } catch (e: CrlConfigurationException) {
+                logger.error(tag, "CRL refresh: configuration error", e)
+            }
+        }
     }
 
     private fun performPreflightChecks() {
