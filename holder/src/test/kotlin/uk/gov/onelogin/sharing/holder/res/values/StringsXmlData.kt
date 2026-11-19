@@ -73,6 +73,22 @@ enum class StringsXmlData(val expected: String, @param:StringRes val resourceId:
         expected = "You will not connect with a device yet. You’ll use a QR code to do that next.",
         resourceId = R.string.use_qr_code_to_connect_next
     ),
+    YOU_NEED_TO_ALLOW_CONNECTION_TO_NEARBY_DEVICES(
+        expected = "You need to allow connection to nearby devices",
+        resourceId = R.string.you_need_to_allow_connection_to_nearby_devices
+    ),
+    ALLOW_APP_TO_CONNECT_TO_NEARBY_DEVICES_TO_SHARE(
+        expected = "To be able to share, you need to allow this app to connect to nearby devices.",
+        resourceId = R.string.allow_app_to_connect_to_nearby_devices_to_share
+    ),
+    ALLOW(
+        expected = "Allow",
+        resourceId = R.string.allow
+    ),
+    CANCEL_AND_GO_BACK_TO_DOCUMENTS(
+        expected = "Cancel and go back to documents",
+        resourceId = R.string.cancel_and_go_back_to_documents
+    ),
     HOLDER_CONSENT_SCREEN_WHAT_YOU_SHARE_HEADING(
         expected = "What you\u2019ll share",
         resourceId = R.string.holder_consent_screen_what_you_share_heading

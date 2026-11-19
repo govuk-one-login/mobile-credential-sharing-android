@@ -8,6 +8,8 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.prerequisites.api.MissingPrerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 
 /**
  * Represents a digital credential verification journey's state for devices that contain digital
@@ -51,6 +53,14 @@ sealed class HolderSessionState :
         fun requiresBluetoothEnabled(): Boolean = missingPrerequisites.any {
             it.prerequisite == Prerequisite.BLUETOOTH &&
                 it.getAction() == PrerequisiteAction.EnableBluetooth
+        }
+
+        /**
+         * Bluetooth permission was previously denied but the in-app prompt can be shown again.
+         */
+        fun requiresBluetoothPermission(): Boolean = missingPrerequisites.any {
+            (it as? MissingPrerequisites.Bluetooth)?.state ==
+                BluetoothState.PermissionNotGranted
         }
     }
 

@@ -28,6 +28,11 @@
     <string name="stop_check_dialog_body" translatable="true">You’ll end your connection with the person doing the check. Your details will not be shared.</string>
     <string name="stop_check_dialog_stop_button" translatable="true">Stop the check</string>
     <string name="stop_check_dialog_continue_button" translatable="true">Continue with the check</string>
+    <string name="you_need_to_allow_connection_to_nearby_devices">You need to allow connection to nearby devices</string>
+    <string name="allow_app_to_connect_to_nearby_devices_to_share">To be able to share, you need to allow this app to connect to nearby devices.</string>
+    <string name="allow">Allow</string>
+
+    <string name="cancel_and_go_back_to_documents">Cancel and go back to documents</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
@@ -52,7 +57,6 @@
         <item quantity="one">Agree and share %1$d detail</item>
         <item quantity="other">Agree and share %1$d details</item>
     </plurals>
-    <string name="consent_screen_cancel_button">Cancel and go back to documents</string>
     <string name="consent_attr_document_number">Licence number</string>
     <string name="consent_attr_portrait">Photo</string>
     <string name="consent_attr_title">Title</string>

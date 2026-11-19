@@ -18,6 +18,11 @@
     <string name="stop_check_dialog_body">Byddwch yn dod â’ch cysylltiad â’r person sy’n gwneud y gwiriad i ben. Ni fydd eich manylion yn cael eu rhannu.</string>
     <string name="stop_check_dialog_stop_button">Stopio’r gwiriad</string>
     <string name="stop_check_dialog_continue_button">Parhau gyda’r gwiriad</string>
+    <string name="you_need_to_allow_connection_to_nearby_devices">Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos</string>
+    <string name="allow_app_to_connect_to_nearby_devices_to_share">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\’r ap hwn gysylltu â dyfeisiau cyfagos.</string>
+    <string name="allow">Caniatáu</string>
+
+    <string name="cancel_and_go_back_to_documents">Canslo a mynd yn ôl i ddogfennau</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
@@ -54,7 +59,6 @@
         <item quantity="many">Cytuno a rhannu %1$d manylion</item>
         <item quantity="other">Cytuno a rhannu %1$d manylion</item>
     </plurals>
-    <string name="consent_screen_cancel_button">Canslo a mynd yn ôl i ddogfennau</string>
     <string name="consent_attr_document_number">Rhif y drwydded</string>
     <string name="consent_attr_portrait">Llun</string>
     <string name="consent_attr_title">Teitl</string>
