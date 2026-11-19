@@ -143,22 +143,36 @@ class DeviceBleDeniedScreenTest {
     }
 
     @Test
-    fun `Prerequisites are rechecked after enable Bluetooth dialogue returns`() = runTest {
+    fun `Returning from the enable Bluetooth dialogue rechecks prerequisites once`() = runTest {
+        val lifecycleOwner = TestLifecycleOwner(
+            initialState = Lifecycle.State.RESUMED,
+            coroutineDispatcher = Dispatchers.Unconfined
+        )
+
         composeTestRule.run {
-            setContent { Render() }
-            waitForIdle()
-            val initialRecheckCount = recheckCount
-
-            performTurnOnBluetoothClick()
-
-            waitUntil("Prerequisites were not rechecked") {
-                recheckCount > initialRecheckCount
+            setContent {
+                CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
+                    Render()
+                }
             }
+            waitForIdle()
+
+            // The test registry returns the dialogue's result straight away.
+            performTurnOnBluetoothClick()
+            waitUntil { launchedAction != null }
+            runOnIdle {
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            }
+
+            waitUntil("Prerequisites were not rechecked") { recheckCount == 1 }
+            waitForIdle()
+            assertEquals(1, recheckCount, "Prerequisites should only be rechecked once")
         }
     }
 
     @Test
-    fun `Prerequisites are rechecked on resume`() = runTest {
+    fun `Prerequisites are only rechecked when resuming after a pause`() = runTest {
         val lifecycleOwner = TestLifecycleOwner(
             initialState = Lifecycle.State.STARTED,
             coroutineDispatcher = Dispatchers.Unconfined
@@ -171,9 +185,15 @@ class DeviceBleDeniedScreenTest {
                 }
             }
             waitForIdle()
-            assertEquals(0, recheckCount)
 
             runOnIdle { lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME) }
+            waitForIdle()
+            assertEquals(0, recheckCount, "The initial resume shouldn't recheck")
+
+            runOnIdle {
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+            }
 
             waitUntil { recheckCount == 1 }
         }

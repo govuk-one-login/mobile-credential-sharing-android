@@ -209,7 +209,7 @@ class HolderOrchestrator(
 
                 else -> {
                     val wasAwaitingBluetoothEnabled =
-                        (holderSessionState.value as? HolderSessionState.Preflight)
+                        (sessionFlow.value.currentState.value as? HolderSessionState.Preflight)
                             ?.requiresBluetoothEnabled() == true
 
                     HolderSessionState.Preflight(

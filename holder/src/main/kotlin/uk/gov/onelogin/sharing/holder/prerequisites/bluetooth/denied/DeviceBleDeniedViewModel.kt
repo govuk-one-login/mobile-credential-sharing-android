@@ -7,6 +7,7 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,9 +51,30 @@ class DeviceBleDeniedViewModel(
             orchestrator.holderSessionState.value !is HolderSessionState.Preflight
         )
 
+    /**
+     * Whether the screen has been paused since it last checked. The enable Bluetooth dialogue and
+     * the Settings app both pause the screen, so the following resume is the single point where
+     * the user may have changed the device's Bluetooth state.
+     */
+    private val hasBeenPaused = AtomicBoolean(false)
+
     fun recheckPrerequisites(): Job = viewModelScope.launch(dispatcher) {
         (orchestrator.holderSessionState.value as? HolderSessionState.Preflight)
             ?.onComplete()
+    }
+
+    fun onScreenPaused() {
+        hasBeenPaused.set(true)
+    }
+
+    /**
+     * Rechecks prerequisites only when returning to the screen. Skips the initial resume, as the
+     * previous screen has only just performed the checks that routed here.
+     */
+    fun onScreenResumed(): Job? = if (hasBeenPaused.getAndSet(false)) {
+        recheckPrerequisites()
+    } else {
+        null
     }
 
     fun turnOnBluetooth(launcher: ActivityResultLauncher<PrerequisiteAction>) {

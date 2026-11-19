@@ -47,7 +47,7 @@ internal fun DeviceBleDeniedScreen(
     viewModel: DeviceBleDeniedViewModel = metroViewModel(),
     launcher: ActivityResultLauncher<PrerequisiteAction> = rememberLauncherForActivityResult(
         PrerequisiteActionContract
-    ) { viewModel.recheckPrerequisites() }
+    ) {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -64,8 +64,10 @@ internal fun DeviceBleDeniedScreen(
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.recheckPrerequisites()
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> viewModel.onScreenPaused()
+                Lifecycle.Event.ON_RESUME -> viewModel.onScreenResumed()
+                else -> Unit
             }
         }
 
