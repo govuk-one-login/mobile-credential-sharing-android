@@ -45,7 +45,7 @@ class MoreAboutDvsScreenAccessibilityTest {
                 modifier = Modifier
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                     .padding(top = spacingDouble)
-                    .fillMaxSize(),
+                    .fillMaxSize()
             )
         }
     }

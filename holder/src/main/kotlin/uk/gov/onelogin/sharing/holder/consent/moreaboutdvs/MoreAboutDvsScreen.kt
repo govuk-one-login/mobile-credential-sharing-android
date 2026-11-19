@@ -81,7 +81,7 @@ internal fun MoreAboutDvsScreen(
             onCancelScreen = onCancelScreen,
             onPrivacyPolicyLinkClick = onPrivacyPolicyLinkClick,
             sheetState = sheetState,
-            state = state,
+            state = state
         )
     }
 }
@@ -141,10 +141,7 @@ internal fun MoreAboutDvsContent(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun TopSheetBar(
-    modifier: Modifier = Modifier,
-    handler: () -> Unit = {}
-) {
+private fun TopSheetBar(modifier: Modifier = Modifier, handler: () -> Unit = {}) {
     Box(modifier = modifier) {
         DismissScreenButton(
             modifier = Modifier

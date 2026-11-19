@@ -21,15 +21,15 @@ internal object BodyHelper {
     internal fun String.moreAboutDvsBodyContent(
         onPrivacyPolicyLinkClick: () -> Unit
     ): PersistentList<LeftAlignedScreenBodyV2> = (
-            introductionTexts() +
-                    introductionBullets() +
-                    privacyNoticeSubheading() +
-                    privacyNoticeBody() +
-                    privacyNoticeBullets() +
-                    privacyNoticeButton(
-                        onClick = onPrivacyPolicyLinkClick
-                    )
-            ).toPersistentList()
+        introductionTexts() +
+            introductionBullets() +
+            privacyNoticeSubheading() +
+            privacyNoticeBody() +
+            privacyNoticeBullets() +
+            privacyNoticeButton(
+                onClick = onPrivacyPolicyLinkClick
+            )
+        ).toPersistentList()
 
     @Composable
     private fun String.introductionTexts(): List<Text> = listOf(
