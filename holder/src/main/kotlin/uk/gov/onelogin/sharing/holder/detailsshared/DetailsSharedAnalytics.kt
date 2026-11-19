@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.awaitingresolution
+package uk.gov.onelogin.sharing.holder.detailsshared
 
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
@@ -6,7 +6,7 @@ import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
 import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
-internal object AwaitingVerifierResolutionAnalytics {
+internal object DetailsSharedAnalytics {
     internal fun AnalyticsLogger.detailsSharedScreen(name: String) = Screen(
         name = name,
         id = "c2ccd487-c0e0-4ef8-943b-c555c4856a2c",

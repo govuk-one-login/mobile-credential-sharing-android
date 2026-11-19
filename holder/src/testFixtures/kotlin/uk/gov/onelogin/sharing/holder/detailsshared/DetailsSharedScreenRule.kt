@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.awaitingresolution
+package uk.gov.onelogin.sharing.holder.detailsshared
 
 import android.content.Context
 import android.content.res.Resources
@@ -9,7 +9,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -17,7 +16,7 @@ import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.onelogin.sharing.holder.R
 
-class AwaitingVerifierResolutionScreenRule(
+class DetailsSharedScreenRule(
     private val composeTestRule: ComposeContentTestRule = createComposeRule()
 ) : ComposeContentTestRule by composeTestRule {
 
@@ -28,7 +27,7 @@ class AwaitingVerifierResolutionScreenRule(
     // node finders
     fun onSuccessIcon() = onNodeWithTag(SUCCESS_ICON_TEST_TAG, useUnmergedTree = true)
     fun onTitle() = onNode(
-        hasText(resources.getString(R.string.holder_awaiting_verifier_resolution_title))
+        hasText(resources.getString(R.string.holder_details_shared_title))
             and isHeading()
     )
 
@@ -37,11 +36,11 @@ class AwaitingVerifierResolutionScreenRule(
     )
 
     fun onBodyFirstParagraph() = onNodeWithText(
-        resources.getString(R.string.holder_awaiting_verifier_resolution_body_1)
+        resources.getString(R.string.holder_details_shared_body_1)
     )
 
     fun onBodySecondParagraph() = onNodeWithText(
-        resources.getString(R.string.holder_awaiting_verifier_resolution_body_2)
+        resources.getString(R.string.holder_details_shared_body_2)
     )
 
     fun onGoBackToDocumentsButton() = onNode(

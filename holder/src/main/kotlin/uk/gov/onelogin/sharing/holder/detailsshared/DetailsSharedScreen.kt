@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.awaitingresolution
+package uk.gov.onelogin.sharing.holder.detailsshared
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -54,9 +54,9 @@ import uk.gov.onelogin.sharing.holder.R
 const val SUCCESS_ICON_TEST_TAG = "success"
 
 @Composable
-internal fun AwaitingVerifierResolutionScreen(
+internal fun DetailsSharedScreen(
     modifier: Modifier = Modifier,
-    viewModel: AwaitingVerifierResolutionViewModel = metroViewModel(),
+    viewModel: DetailsSharedViewModel = metroViewModel(),
     onExitJourney: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -98,9 +98,9 @@ internal fun AwaitingVerifierResolutionScreen(
     }
 
     val metrics = rememberMetricsStateHolder()
-    val titleRes = R.string.holder_awaiting_verifier_resolution_title
+    val titleRes = R.string.holder_details_shared_title
     LaunchedEffect(Unit) {
-        metrics.putScreenState("AwaitingVerifierResolutionScreen")
+        metrics.putScreenState("DetailsSharedScreen")
         viewModel.sendScreenEvent(context.getEnglishString(titleRes))
     }
 
@@ -109,7 +109,7 @@ internal fun AwaitingVerifierResolutionScreen(
         exit = slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }),
         modifier = modifier
     ) {
-        AwaitingVerifierResolutionContent(
+        DetailsSharedContent(
             onGoBackToDocuments = {
                 viewModel.sendGoBackToDocumentsEvent()
                 exitCallback.handleOnBackPressed()
@@ -120,7 +120,7 @@ internal fun AwaitingVerifierResolutionScreen(
 
 @Suppress("LongMethod")
 @Composable
-internal fun AwaitingVerifierResolutionContent(
+internal fun DetailsSharedContent(
     modifier: Modifier = Modifier,
     onGoBackToDocuments: () -> Unit = {}
 ) {
@@ -143,7 +143,7 @@ internal fun AwaitingVerifierResolutionContent(
                     color = GdsLocalColorScheme.current.successIcon
                 )
                 GdsHeading(
-                    text = stringResource(R.string.holder_awaiting_verifier_resolution_title),
+                    text = stringResource(R.string.holder_details_shared_title),
                     textAlign = GdsHeadingAlignment.CenterAligned
                 )
             }
@@ -152,20 +152,20 @@ internal fun AwaitingVerifierResolutionContent(
         body = { padding ->
             item {
                 BodyText(
-                    textRes = R.string.holder_awaiting_verifier_resolution_body_1,
+                    textRes = R.string.holder_details_shared_body_1,
                     modifier = Modifier.padding(horizontal = padding)
                 )
             }
             item {
                 BodyText(
-                    textRes = R.string.holder_awaiting_verifier_resolution_body_2,
+                    textRes = R.string.holder_details_shared_body_2,
                     modifier = Modifier.padding(horizontal = padding)
                 )
             }
         },
         primaryButton = {
             GdsButton(
-                text = stringResource(R.string.holder_awaiting_verifier_resolution_button),
+                text = stringResource(R.string.holder_details_shared_button),
                 buttonType = ButtonTypeV2.Primary(),
                 onClick = onGoBackToDocuments,
                 modifier = Modifier.fillMaxWidth()
@@ -187,10 +187,10 @@ private fun BodyText(@StringRes textRes: Int, modifier: Modifier = Modifier) {
 
 @Composable
 @PreviewContent
-internal fun AwaitingVerifierResolutionScreenPreview() {
+internal fun DetailsSharedScreenPreview() {
     GdsTheme {
         Surface {
-            AwaitingVerifierResolutionContent(
+            DetailsSharedContent(
                 modifier = Modifier.fillMaxSize()
             )
         }

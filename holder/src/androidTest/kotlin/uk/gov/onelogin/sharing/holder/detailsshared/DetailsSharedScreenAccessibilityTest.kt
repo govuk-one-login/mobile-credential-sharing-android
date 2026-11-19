@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.awaitingresolution
+package uk.gov.onelogin.sharing.holder.detailsshared
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
@@ -16,7 +16,7 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @RunWith(AndroidJUnit4::class)
-class AwaitingVerifierResolutionScreenAccessibilityTest {
+class DetailsSharedScreenAccessibilityTest {
 
     @get:Rule
     val accessibilityRule = createAndroidComposeRule<ComponentActivity>()
@@ -30,7 +30,7 @@ class AwaitingVerifierResolutionScreenAccessibilityTest {
     }
 
     private val viewmodel by lazy {
-        AwaitingVerifierResolutionViewModel(
+        DetailsSharedViewModel(
             analyticsLogger = FakeAnalyticsLogger(),
             orchestrator = orchestrator
         )
@@ -43,6 +43,6 @@ class AwaitingVerifierResolutionScreenAccessibilityTest {
 
     @Composable
     private fun Render() {
-        GdsTheme { AwaitingVerifierResolutionScreen(viewModel = viewmodel) }
+        GdsTheme { DetailsSharedScreen(viewModel = viewmodel) }
     }
 }

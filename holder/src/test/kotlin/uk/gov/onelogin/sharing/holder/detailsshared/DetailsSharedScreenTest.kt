@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.awaitingresolution
+package uk.gov.onelogin.sharing.holder.detailsshared
 
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.BackHandler
@@ -21,17 +21,17 @@ import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 
 @RunWith(RobolectricTestParameterInjector::class)
-class AwaitingVerifierResolutionScreenTest {
+class DetailsSharedScreenTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
 
     @get:Rule
-    val composeTestRule = AwaitingVerifierResolutionScreenRule()
+    val composeTestRule = DetailsSharedScreenRule()
 
     private val orchestrator = FakeOrchestrator()
     private val analyticsLogger = StoredAnalyticsLogger()
-    private val viewModel = AwaitingVerifierResolutionViewModel(analyticsLogger, orchestrator)
+    private val viewModel = DetailsSharedViewModel(analyticsLogger, orchestrator)
     private var exitJourneyCount = 0
 
     @Test
@@ -73,7 +73,7 @@ class AwaitingVerifierResolutionScreenTest {
                 setContent {
                     backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
                     BackHandler { hostBackPresses++ }
-                    AwaitingVerifierResolutionScreen(
+                    DetailsSharedScreen(
                         viewModel = viewModel,
                         onExitJourney = {
                             backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()
@@ -123,8 +123,8 @@ class AwaitingVerifierResolutionScreenTest {
                 analyticsLogger,
                 hasSentEvents(
                     contains(
-                        AwaitingVerifierResolutionTestData.expectedScreenEvent,
-                        AwaitingVerifierResolutionTestData.expectedGoBackToDocumentsEvent
+                        DetailsSharedTestData.expectedScreenEvent,
+                        DetailsSharedTestData.expectedGoBackToDocumentsEvent
                     )
                 )
             )
@@ -132,7 +132,7 @@ class AwaitingVerifierResolutionScreenTest {
 
     @Composable
     private fun Render() {
-        AwaitingVerifierResolutionScreen(
+        DetailsSharedScreen(
             viewModel = viewModel,
             onExitJourney = { exitJourneyCount++ }
         )
@@ -140,6 +140,6 @@ class AwaitingVerifierResolutionScreenTest {
 
     @Composable
     private fun RenderPreview() {
-        AwaitingVerifierResolutionScreenPreview()
+        DetailsSharedScreenPreview()
     }
 }

@@ -86,18 +86,18 @@ enum class DeferredStringsXmlData(
     ),
     DETAILS_SHARED(
         defersTo = R.string.details_shared,
-        resourceId = R.string.holder_awaiting_verifier_resolution_title
+        resourceId = R.string.holder_details_shared_title
     ),
     BLUETOOTH_CONNECTION_WILL_NOW_END(
         defersTo = R.string.bluetooth_connection_will_now_end,
-        resourceId = R.string.holder_awaiting_verifier_resolution_body_2
+        resourceId = R.string.holder_details_shared_body_2
     ),
     PERSON_WILL_CHECK_DETAILS_SHARED(
         defersTo = R.string.person_will_check_details_shared,
-        resourceId = R.string.holder_awaiting_verifier_resolution_body_1
+        resourceId = R.string.holder_details_shared_body_1
     ),
     GO_BACK_TO_DOCUMENTS(
         defersTo = R.string.go_back_to_documents,
-        resourceId = R.string.holder_awaiting_verifier_resolution_button
+        resourceId = R.string.holder_details_shared_button
     )
 }

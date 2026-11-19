@@ -1,26 +1,23 @@
-package uk.gov.onelogin.sharing.holder.awaitingresolution
+package uk.gov.onelogin.sharing.holder.detailsshared
 
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
 import org.junit.Test
-import org.robolectric.annotation.Config
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
-import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionTestData.BUTTON_TEXT
-import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionTestData.SCREEN_ID
-import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionTestData.SCREEN_NAME
+import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedTestData.BUTTON_TEXT
+import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedTestData.SCREEN_ID
+import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AwaitingVerifierResolutionViewModelTest {
+class DetailsSharedViewModelTest {
 
     @get:Rule
     val dispatcherRule = MainDispatcherRule()
@@ -31,7 +28,7 @@ class AwaitingVerifierResolutionViewModelTest {
     )
     private val analyticsLogger = StoredAnalyticsLogger()
 
-    private val viewModel = AwaitingVerifierResolutionViewModel(analyticsLogger, orchestrator)
+    private val viewModel = DetailsSharedViewModel(analyticsLogger, orchestrator)
 
     @Test
     fun `Dismisses the journey through orchestrator`() {
@@ -45,7 +42,7 @@ class AwaitingVerifierResolutionViewModelTest {
         viewModel.sendScreenEvent(SCREEN_NAME)
         assertThat(
             analyticsLogger,
-            contains(AwaitingVerifierResolutionTestData.expectedScreenEvent)
+            contains(DetailsSharedTestData.expectedScreenEvent)
 
         )
     }
@@ -55,7 +52,7 @@ class AwaitingVerifierResolutionViewModelTest {
         viewModel.sendGoBackToDocumentsEvent()
         assertThat(
             analyticsLogger,
-            contains(AwaitingVerifierResolutionTestData.expectedGoBackToDocumentsEvent)
+            contains(DetailsSharedTestData.expectedGoBackToDocumentsEvent)
 
         )
     }

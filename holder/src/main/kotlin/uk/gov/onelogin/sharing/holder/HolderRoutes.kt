@@ -7,10 +7,10 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.navigation
 import kotlinx.serialization.Serializable
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute.Companion.configureBluetoothConnectionErrorRoute
-import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.configureAwaitingVerifierResolutionScreen
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.configureHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.configureHolderUserCancellationDialog
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configureHolderConsentScreen
+import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedNavigationExt.configureDetailsSharedScreen
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.configureGenericHolderError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.configureGetReadyToShare
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
@@ -34,7 +34,7 @@ data object HolderRoutes {
             configureHolderPresentQrScreen()
             configureHolderConsentScreen()
             configureBluetoothConnectionErrorRoute()
-            configureAwaitingVerifierResolutionScreen()
+            configureDetailsSharedScreen()
             configureHolderSuccessScreen()
             configureHolderUserCancellationDialog()
             configureHolderUserCancellationScreen()

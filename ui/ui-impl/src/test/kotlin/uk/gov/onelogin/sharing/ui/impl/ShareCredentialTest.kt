@@ -337,7 +337,7 @@ class ShareCredentialTest {
             "Current route: ${controller.currentDestination?.route}"
         ) {
             controller.currentDestination?.route
-                ?.contains("AwaitingVerifierResolution") == true
+                ?.contains("DetailsShared") == true
         }
 
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()

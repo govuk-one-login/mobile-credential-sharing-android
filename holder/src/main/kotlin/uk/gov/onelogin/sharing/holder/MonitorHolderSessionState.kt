@@ -14,9 +14,9 @@ import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
 import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluetoothConnectionErrorRoute
-import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
+import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedNavigationExt.navigateToDetailsSharedScreen
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
@@ -26,7 +26,6 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
 import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
@@ -194,7 +193,7 @@ private fun convertSuccessStateToNavigation(
 ): () -> Unit = when (state.presentation.result) {
     ResolutionResult.DetailsShared -> {
         {
-            navController.navigateToAwaitingVerifierResolutionScreen {
+            navController.navigateToDetailsSharedScreen {
                 exitJourneyOptions()
                 launchSingleTop = true
             }
@@ -213,7 +212,7 @@ private fun convertSuccessStateToNavigation(
     // fallback to the generic error screen
     is ResolutionResult.Failed -> {
         {
-            navController.navigateToUnrecoverableHolderError {
+            navController.navigateToGenericHolderError {
                 exitJourneyOptions()
             }
         }
