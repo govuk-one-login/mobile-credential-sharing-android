@@ -45,7 +45,7 @@ class MoreAboutDvsScreenRule(
         mapOf(
             "first" to R.string.more_about_dvs_body_1,
             "second" to R.string.more_about_dvs_body_2,
-            "third" to R.string.more_about_dvs_body_3
+            "third" to R.string.more_about_dvs_bullet_title
         ).forEach { (description, resourceId) ->
             onNodeWithText(
                 resources.getString(

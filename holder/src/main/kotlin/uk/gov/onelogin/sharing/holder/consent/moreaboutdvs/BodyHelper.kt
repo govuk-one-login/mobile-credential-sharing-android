@@ -12,6 +12,8 @@ import kotlinx.collections.immutable.toPersistentList
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
+import uk.gov.android.ui.componentsv2.list.ListTitle
+import uk.gov.android.ui.componentsv2.list.TitleType
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
 import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2.Text
 import uk.gov.android.ui.theme.minimumTouchTarget
@@ -38,7 +40,6 @@ internal object BodyHelper {
     private fun String.introductionTexts(): List<Text> = listOf(
         R.string.more_about_dvs_body_1,
         R.string.more_about_dvs_body_2,
-        R.string.more_about_dvs_body_3
     ).map { resourceId ->
         stringResource(resourceId, this).removeDoubleFullStop()
     }.map(LeftAlignedScreenBodyV2::Text)
@@ -54,7 +55,13 @@ internal object BodyHelper {
         ListItem(text = bulletText)
     }.let { bulletItems ->
         LeftAlignedScreenBodyV2.BulletList(
-            items = bulletItems.toPersistentList()
+            items = bulletItems.toPersistentList(),
+            title = ListTitle(
+                text = stringResource(
+                    R.string.more_about_dvs_bullet_title, this
+                ).removeDoubleFullStop(),
+                titleType = TitleType.Text
+            )
         )
     }
 
