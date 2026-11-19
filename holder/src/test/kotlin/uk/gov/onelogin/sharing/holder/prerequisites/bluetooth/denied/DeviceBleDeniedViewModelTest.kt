@@ -3,10 +3,10 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.junit.Rule
-import org.junit.runner.RunWith
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
@@ -32,7 +31,6 @@ import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
 
-@RunWith(AndroidJUnit4::class)
 class DeviceBleDeniedViewModelTest {
 
     @get:Rule
@@ -120,6 +118,32 @@ class DeviceBleDeniedViewModelTest {
     fun `Rechecking prerequisites re-runs Preflight checks`() = runTest {
         viewModel.recheckPrerequisites().join()
         assertEquals(1, recheckCount)
+    }
+
+    @Test
+    fun `Resuming without having paused doesn't recheck prerequisites`() = runTest {
+        assertNull(viewModel.onScreenResumed())
+        assertEquals(0, recheckCount)
+    }
+
+    @Test
+    fun `Resuming after pausing rechecks prerequisites once`() = runTest {
+        viewModel.onScreenPaused()
+
+        viewModel.onScreenResumed()?.join()
+        assertNull(viewModel.onScreenResumed())
+
+        assertEquals(1, recheckCount)
+    }
+
+    @Test
+    fun `Each pause allows one recheck on the following resume`() = runTest {
+        repeat(2) {
+            viewModel.onScreenPaused()
+            viewModel.onScreenResumed()?.join()
+        }
+
+        assertEquals(2, recheckCount)
     }
 
     @Test

@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -14,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
+import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
 
 class DeviceBleDeniedScreenRule(
@@ -52,8 +55,17 @@ class DeviceBleDeniedScreenRule(
     }
 
     fun assertButtonsAreDisplayed() {
-        onTurnOnBluetoothButton().assertHasClickAction().assertIsDisplayed()
-        onCancelButton().assertHasClickAction().assertIsDisplayed()
+        onTurnOnBluetoothButton()
+            .assertHasClickAction()
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(minimumTouchTarget)
+            .assertHeightIsAtLeast(minimumTouchTarget)
+
+        onCancelButton()
+            .assertHasClickAction()
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(minimumTouchTarget)
+            .assertHeightIsAtLeast(minimumTouchTarget)
     }
 
     fun assertValidUi() {
