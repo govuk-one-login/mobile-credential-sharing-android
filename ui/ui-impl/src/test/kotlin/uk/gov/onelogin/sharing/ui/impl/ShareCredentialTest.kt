@@ -6,6 +6,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -32,6 +34,7 @@ import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharin
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.NonStartedHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
@@ -119,6 +122,42 @@ class ShareCredentialTest {
             onNodeWithContentDescription("Close").assertDoesNotExist()
         }
     }
+
+    @Test
+    @UiThreadTest
+    fun `Cancel and go back button on the consent screen opens the stop the check dialog`() =
+        runTest {
+            val presenter = FakeCredentialPresenter(
+                appGraph = appGraph,
+                orchestrator = FakeOrchestrator(
+                    initialHolderState = MutableStateFlow(
+                        HolderSessionState.AwaitingUserConsent(
+                            request = mockk(relaxed = true),
+                            presentation = ConsentPresentation(
+                                documents = emptyList(),
+                                privacyPolicyUrl = "https://verifier.example/privacy",
+                                organizationName = "Organisation Ltd"
+                            )
+                        )
+                    )
+                )
+            )
+
+            composeTestRule.run {
+                setContent { SetupExtendedShareCredential(presenter) }
+                waitForIdle()
+                onAllNodesWithText("Cancel and go back to documents").onFirst().performClick()
+                waitForIdle()
+            }
+
+            composeTestRule.waitUntil(
+                "Unexpected route found!: ${controller.currentDestination?.route}"
+            ) {
+                controller.currentDestination?.route
+                    ?.contains("HolderCancellationDialogRoute")
+                    ?: false
+            }
+        }
 
     @Test
     @UiThreadTest

@@ -93,6 +93,36 @@ enum class TranslatableStringsData(
             "cy" to "Troi Bluetooth ymlaen"
         )
     ),
+    STOP_CHECK_DIALOG_TITLE(
+        resourceId = R.string.stop_check_dialog_title,
+        translations = mapOf(
+            "en" to "Are you sure you want to stop the check?",
+            "cy" to "Ydych chi’n siŵr eich bod eisiau stopio’r gwiriad?"
+        )
+    ),
+    STOP_CHECK_DIALOG_BODY(
+        resourceId = R.string.stop_check_dialog_body,
+        translations = mapOf(
+            "en" to "You’ll end your connection with the person doing the check. " +
+                "Your details will not be shared.",
+            "cy" to "Byddwch yn dod â’ch cysylltiad â’r person sy’n gwneud y gwiriad i ben. " +
+                "Ni fydd eich manylion yn cael eu rhannu."
+        )
+    ),
+    STOP_CHECK_DIALOG_STOP_BUTTON(
+        resourceId = R.string.stop_check_dialog_stop_button,
+        translations = mapOf(
+            "en" to "Stop the check",
+            "cy" to "Stopio’r gwiriad"
+        )
+    ),
+    STOP_CHECK_DIALOG_CONTINUE_BUTTON(
+        resourceId = R.string.stop_check_dialog_continue_button,
+        translations = mapOf(
+            "en" to "Continue with the check",
+            "cy" to "Parhau gyda’r gwiriad"
+        )
+    ),
     TURN_ON_BLUETOOTH_BEFORE_SHARING(
         resourceId = R.string.turn_on_bluetooth_before_sharing,
         translations = mapOf(

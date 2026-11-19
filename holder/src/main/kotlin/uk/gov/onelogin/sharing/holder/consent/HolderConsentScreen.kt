@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.consent
 
 import android.net.Uri
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ internal fun HolderConsentScreen(
     viewModel: HolderConsentViewModel = metroViewModel()
 ) {
     val uiState: HolderConsentUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     HolderConsentContent(
         modifier = modifier,
@@ -55,7 +57,10 @@ internal fun HolderConsentScreen(
         onLoadMoreAboutDvs = viewModel::sendMoreAboutDvsScreenEvent,
         onOpenDvsPrivacyPolicyLink = viewModel::onOpenDvsPrivacyPolicy,
         onReadPrivacyNotice = viewModel::onReadPrivacyNotice,
-        onCancel = viewModel::onCancelAndGoBack,
+        onCancel = {
+            viewModel.onCancelAndGoBack()
+            backDispatcher?.onBackPressed()
+        },
         onDismissMoreAboutDvsScreen = viewModel::dismissMoreAboutDvsScreen
     )
 }
