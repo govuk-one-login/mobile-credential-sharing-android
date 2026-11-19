@@ -43,7 +43,7 @@ turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 uk-gov-logging = "1.0.1" # https://github.com/orgs/govuk-one-login/packages?repo_name=mobile-android-logging
 uk-gov-ui = "20.2.1" # https://github.com/govuk-one-login/mobile-android-ui/tags
 xzing = "3.5.4" # Changelog https://github.com/zxing/zxing/releases
-govuk-network = "0.20.0"
+govuk-network = "0.1.0"
 
 # Minimum safe versions for vulnerable build classpath transitive dependencies
 netty = "4.1.132.Final"

@@ -117,6 +117,7 @@ dependencies {
         libs.androidx.hilt.lifecycle.viewmodel.compose,
         projects.analytics,
         projects.core, // Remove once SDK prerequisites screen handles permissions
+        projects.credentialVerification, // Remove once CrlProvider is exposed through :sdk
         projects.sdk,
         projects.ui.uiApi,
         projects.ui.uiImpl,

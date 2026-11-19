@@ -5,62 +5,70 @@ import java.io.IOException
 import java.security.cert.CRLException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509CRL
-import uk.gov.android.network.api.v2.ApiRequest
-import uk.gov.android.network.client.v2.GenericHttpClient
-import uk.gov.android.network.client.v2.GenericResponseException
+import uk.gov.android.network.client.v3.RawHttpClient
 
 /**
- * Spike: fetches a CRL through the organisation's network library
- * ([GenericHttpClient], the low-level layer of `uk.gov.android:network`).
+ * Spike: fetches a CRL through the organisation's network library.
  *
- * Only the public, unauthenticated GET path is used. Auth, attestation and DPoP are
- * deliberately not involved.
+ * Uses the library's [RawHttpClient] (`uk.gov.android:network`, `client.v3`), which returns the
+ * body as unmodified bytes, exposes the response headers and keeps a persistent HTTP cache.
+ * Authentication, attestation and DPoP are not involved.
  *
- * The library's [uk.gov.android.network.client.v2.GenericHttpResponse] exposes the body as a
- * [String] and exposes no headers, so the bytes are recovered here as ISO-8859-1. That is only
- * lossless if the library decodes the body as ISO-8859-1, which is not guaranteed. See
- * [CrlFetchResult.Malformed].
+ * This class only locates and parses the bytes. Issuer, signature, coverage, date and
+ * revocation-entry checks belong to CoseVerification.
  */
-internal class CrlEndpointClient(private val httpClient: GenericHttpClient) {
+internal class CrlEndpointClient(private val httpClient: RawHttpClient) {
 
-    suspend fun fetch(url: String): CrlFetchResult {
+    suspend fun fetch(url: String, forceRevalidation: Boolean = false): CrlFetchResult {
         val response = try {
-            httpClient.request(ApiRequest.Get(url = url))
-        } catch (e: GenericResponseException) {
-            return CrlFetchResult.HttpError(status = e.response.status)
+            httpClient.get(url = url, forceRevalidation = forceRevalidation)
         } catch (e: IOException) {
             return CrlFetchResult.Unreachable(cause = e)
         }
 
-        val bytes = response.body.toByteArray(Charsets.ISO_8859_1)
+        if (response.status !in SUCCESS_RANGE) {
+            return CrlFetchResult.HttpError(status = response.status)
+        }
+
         return try {
             val crl = CertificateFactory.getInstance("X.509")
-                .generateCRL(ByteArrayInputStream(bytes)) as X509CRL
-            CrlFetchResult.Success(status = response.status, crl = crl, byteCount = bytes.size)
+                .generateCRL(ByteArrayInputStream(response.body)) as X509CRL
+            CrlFetchResult.Success(
+                status = response.status,
+                crl = crl,
+                byteCount = response.body.size,
+                cacheControl = response.header("Cache-Control")
+            )
         } catch (e: CRLException) {
             CrlFetchResult.Malformed(
                 status = response.status,
-                byteCount = bytes.size,
+                byteCount = response.body.size,
                 cause = e
             )
         }
     }
+
+    private companion object {
+        val SUCCESS_RANGE = 200..299
+    }
 }
 
-internal sealed interface CrlFetchResult {
+sealed interface CrlFetchResult {
     /** HTTP 2xx and the body parsed as a DER X.509 CRL. */
-    data class Success(val status: Int, val crl: X509CRL, val byteCount: Int) : CrlFetchResult
+    data class Success(
+        val status: Int,
+        val crl: X509CRL,
+        val byteCount: Int,
+        val cacheControl: String?
+    ) : CrlFetchResult
 
-    /**
-     * HTTP 2xx but the body did not parse as a CRL. With the current library this is the
-     * expected outcome when the String decoding was not byte-preserving.
-     */
+    /** HTTP 2xx but the body did not parse as a DER X.509 CRL. */
     data class Malformed(val status: Int, val byteCount: Int, val cause: Throwable) :
         CrlFetchResult
 
     /** Non-success status (3xx, 4xx, 5xx). */
     data class HttpError(val status: Int) : CrlFetchResult
 
-    /** Connection-level failure. */
+    /** Connection-level failure, including timeouts. */
     data class Unreachable(val cause: IOException) : CrlFetchResult
 }

@@ -13,6 +13,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -299,6 +300,7 @@ class HolderOrchestrator(
             }
 
             safeTransitionTo(HolderSessionState.ProcessingResponse)
+            delay(30.seconds)
             sendDeviceResponse(document = document, skDevice = submission.skDevice)
         } catch (e: CredentialSigningException.Recoverable) {
             // Neutral outcome: keep the session active on the consent screen.
@@ -494,7 +496,7 @@ class HolderOrchestrator(
     }
 
     @Suppress("LongMethod")
-    private fun handleMdocState(state: PeripheralBluetoothState) {
+    private suspend fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
 
         val currentState = sessionFlow.value.currentState.value
@@ -518,6 +520,8 @@ class HolderOrchestrator(
                 sessionTimer.start(INACTIVITY_TIMEOUT) { cancel() }
 
                 safeTransitionTo(HolderSessionState.ProcessingEstablishment)
+
+                delay(30.seconds)
                 appCoroutineScope.launch {
                     peripheralBluetoothTransport.stopAdvertising()
                 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The CRL distribution points in the integration certificate chain are plain http. CRLs are
+  signed, so integrity does not depend on transport security, but Android blocks cleartext
+  traffic by default. This is a host app decision: allow it only for the CRL hosts.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">dvs.verifier-ca.integration.account.gov.uk</domain>
+        <domain includeSubdomains="false">root.verifier-root-ca.integration.account.gov.uk</domain>
+    </domain-config>
+</network-security-config>

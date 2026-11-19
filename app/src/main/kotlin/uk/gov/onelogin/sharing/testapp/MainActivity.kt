@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import androidx.metrics.performance.JankStats
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.api.BuildConfig
 import uk.gov.logging.api.v3.Logger
@@ -27,6 +29,9 @@ import uk.gov.onelogin.sharing.testapp.credential.MockCredentials
 import uk.gov.onelogin.sharing.testapp.home.HomeRoute
 import uk.gov.onelogin.sharing.testapp.verifier.auth.issuer.IssuerRootCertificateProvider
 import uk.gov.onelogin.sharing.testapp.verifier.auth.reader.ReaderRootCertificateProvider
+import uk.gov.onelogin.sharing.verification.crl.CrlConfigurationException
+import uk.gov.onelogin.sharing.verification.crl.CrlFetchResult
+import uk.gov.onelogin.sharing.verification.crl.CrlPrefetchDownloader
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -62,6 +67,10 @@ class MainActivity : ComponentActivity() {
                 "Mock Credential",
                 mockCredentials.toString()
             )
+            // Opt-in demo: adb shell am start -n <pkg>/.MainActivity --ez crl_prefetch true
+            if (intent.getBooleanExtra(EXTRA_CRL_PREFETCH, false)) {
+                prefetchCrls()
+            }
         }
 
         setContent {
@@ -106,6 +115,31 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Demo of the host handing the SDK its CRL configuration (assets/credential-sharing-crl.json)
+     * and the SDK downloading each listed URL through the network library. Results go to logcat.
+     */
+    private fun prefetchCrls() {
+        lifecycleScope.launch {
+            try {
+                CrlPrefetchDownloader(applicationContext).downloadAll().forEach { (url, result) ->
+                    Log.i(CRL_TAG, "${url.substringAfterLast('/')} -> ${result.describe()}")
+                }
+            } catch (e: CrlConfigurationException) {
+                Log.e(CRL_TAG, "CRL configuration error: ${e.message}")
+            }
+        }
+    }
+
+    private fun CrlFetchResult.describe(): String = when (this) {
+        is CrlFetchResult.Success ->
+            "OK status=$status bytes=$byteCount cache-control=$cacheControl " +
+                "issuer=${crl.issuerX500Principal.name} nextUpdate=${crl.nextUpdate}"
+        is CrlFetchResult.Malformed -> "NOT A CRL status=$status bytes=$byteCount ($cause)"
+        is CrlFetchResult.HttpError -> "HTTP error $status"
+        is CrlFetchResult.Unreachable -> "UNREACHABLE ${cause.message}"
+    }
+
     override fun onPause() {
         super.onPause()
         jankStats.isTrackingEnabled = false
@@ -114,5 +148,10 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         jankStats.isTrackingEnabled = true
+    }
+
+    private companion object {
+        const val EXTRA_CRL_PREFETCH = "crl_prefetch"
+        const val CRL_TAG = "CrlPrefetch"
     }
 }
