@@ -27,6 +27,33 @@ interface Orchestrator : Resettable {
     interface Holder : Orchestrator {
         val holderSessionState: StateFlow<HolderSessionState>
 
+        /**
+         * Begins the User journey, or carries on with the current one. Safe to call whenever the
+         * journey's UI is (re)created:
+         * - [HolderSessionState.NotStarted]: begins the journey.
+         * - [HolderSessionState.Complete] after [dismiss]: begins a fresh session.
+         * - [HolderSessionState.Complete] before [dismiss]: does nothing, keeping the result.
+         * - Any in progress state: does nothing.
+         */
+        override fun start()
+
+        /**
+         * `true` once the User has dismissed a completed journey via [dismiss], signaling that the
+         * host should leave the journey.
+         *
+         * Cleared when a new session begins via [start] or [reset].
+         */
+        val isJourneyFinished: StateFlow<Boolean>
+
+        /**
+         * Acknowledges the terminal result of a completed journey.
+         *
+         * Reports [isJourneyFinished] once, without creating a new session, so that the current
+         * [HolderSessionState.Complete] result remains in place while the host navigates away.
+         * Does nothing when the current session isn't complete, or when already dismissed.
+         */
+        fun dismiss()
+
         suspend fun confirmConsent()
 
         suspend fun denyConsent()
@@ -65,5 +92,17 @@ interface Orchestrator : Resettable {
 
         fun recreateSessionOnStartMessage(journey: String): String =
             "Starting an Orchestrator $journey session after completing the previous journey"
+
+        fun dismissedJourneyMessage(journey: String): String =
+            "Dismissed the completed Orchestrator $journey journey"
+
+        fun cannotDismissIncompleteJourneyMessage(journey: String): String =
+            "Cannot dismiss the Orchestrator $journey journey as it hasn't completed"
+
+        fun keepCompletedJourneyOnStartMessage(journey: String): String =
+            "Keeping the completed Orchestrator $journey journey until it's dismissed"
+
+        fun continueJourneyOnStartMessage(journey: String): String =
+            "Continuing the in progress Orchestrator $journey journey"
     }
 }

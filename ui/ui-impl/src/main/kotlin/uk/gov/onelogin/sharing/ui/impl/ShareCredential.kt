@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -16,8 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,6 +35,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
@@ -54,9 +59,17 @@ import uk.gov.onelogin.sharing.uiimpl.R
  *
  * @param component The [CredentialPresenter] containing the app graph and configuration.
  * @param modifier Optional [Modifier] to apply to the root composable.
+ * @param onExitJourney Called once the User has dismissed a completed journey. The host
+ * should navigate away from this composable, such as by popping its back stack. When `null`, the
+ * SDK removes its own back handlers and dispatches a single back press to the host's
+ * [androidx.activity.OnBackPressedDispatcher] instead.
  */
 @Composable
-fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifier) {
+fun ShareCredential(
+    component: CredentialPresenter,
+    modifier: Modifier = Modifier,
+    onExitJourney: (() -> Unit)? = null
+) {
     val uiGraph = remember(component.appGraph, component.orchestrator) {
         createGraphFactory<HolderUiGraph.Factory>()
             .create(component.appGraph, component.orchestrator)
@@ -70,7 +83,8 @@ fun ShareCredential(component: CredentialPresenter, modifier: Modifier = Modifie
         holderSessionState = orchestrator.holderSessionState,
         modifier = modifier,
         navController = navController,
-        viewModelFactory = uiGraph.metroViewModelFactory
+        viewModelFactory = uiGraph.metroViewModelFactory,
+        onExitJourney = onExitJourney
     )
 }
 
@@ -89,10 +103,15 @@ internal fun ShareCredential(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    uiDispatcher: CoroutineContext = Dispatchers.Main
+    uiDispatcher: CoroutineContext = Dispatchers.Main,
+    onExitJourney: (() -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope { defaultDispatcher }
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
+    val currentOnExitJourney by rememberUpdatedState(onExitJourney)
+    val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+        ?.onBackPressedDispatcher
+    var exitViaBackPress by remember { mutableStateOf(false) }
 
     val onCancel: () -> Unit = {
         scope.launch {
@@ -112,10 +131,21 @@ internal fun ShareCredential(
     )
 
     LaunchedEffect(Unit) {
-        scope.launch {
-            if (holderSessionState.value is HolderSessionState.NotStarted) {
-                orchestrator.start()
-            }
+        withContext(defaultDispatcher) { orchestrator.start() }
+
+        orchestrator.isJourneyFinished.first { it }
+
+        val onFinished = currentOnExitJourney
+        if (onFinished != null) {
+            onFinished()
+        } else {
+            exitViaBackPress = true
+        }
+    }
+
+    if (exitViaBackPress) {
+        LaunchedEffect(Unit) {
+            backPressedDispatcher?.onBackPressed()
         }
     }
 
@@ -138,12 +168,14 @@ internal fun ShareCredential(
                     )
                 }
 
-                NavHost(
-                    navController = navController,
-                    startDestination = HolderRoutes,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    configureHolderRoutes()
+                if (!exitViaBackPress) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = HolderRoutes,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        configureHolderRoutes()
+                    }
                 }
             }
         }

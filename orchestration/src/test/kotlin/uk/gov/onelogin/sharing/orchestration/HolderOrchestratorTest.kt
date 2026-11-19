@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.CoreMatchers.sameInstance
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -121,6 +122,12 @@ class HolderOrchestratorTest {
     private val resetOrchestratorSessionLog = "Cleared Orchestrator holder session"
     private val startSessionAfterCompletionLog =
         "Starting an Orchestrator holder session after completing the previous journey"
+    private val dismissedJourneyLog = "Dismissed the completed Orchestrator holder journey"
+    private val cannotDismissIncompleteJourneyLog =
+        "Cannot dismiss the Orchestrator holder journey as it hasn't completed"
+    private val keepCompletedJourneyLog =
+        "Keeping the completed Orchestrator holder journey until it's dismissed"
+    private val continueJourneyLog = "Continuing the in progress Orchestrator holder journey"
 
     private var initialStates: MutableList<HolderSessionState> = mutableListOf(
         HolderSessionState.NotStarted,
@@ -272,7 +279,7 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `Starting the Orchestrator journey is possible when the journey is already complete`(
+    fun `Starting after dismissing a complete journey begins a fresh session`(
         @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
         state: HolderSessionState
     ) = runTest {
@@ -282,11 +289,14 @@ class HolderOrchestratorTest {
         backgroundScope.launch {
             orchestrator.holderSessionState.collect {}
         }
+        orchestrator.dismiss()
+
         orchestrator.start()
 
         assert(startSessionAfterCompletionLog in logger)
         assert(START_ORCHESTRATION_SUCCESS in logger)
         assert(START_ORCHESTRATION_ERROR !in logger)
+        assertThat(orchestrator.isJourneyFinished.value, equalTo(false))
 
         assertThat(
             orchestrator.holderSessionState.value,
@@ -295,14 +305,43 @@ class HolderOrchestratorTest {
     }
 
     @Test
-    fun `Orchestrator cannot be started when the User journey is already in progress`() = runTest {
-        val orchestrator = createOrchestrator()
+    fun `Starting a complete journey that hasn't been dismissed keeps the result`(
+        @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
+        state: HolderSessionState
+    ) = runTest {
+        initialStates[0] = state
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        val sessionBeforeStart = sessionFactory.getCurrentSession()
 
         orchestrator.start()
 
+        assert(keepCompletedJourneyLog in logger)
+        assert(startSessionAfterCompletionLog !in logger)
+        assert(START_ORCHESTRATION_SUCCESS !in logger)
+        assertThat(sessionFactory.getCurrentSession(), sameInstance(sessionBeforeStart))
+        assertThat(sessionFactory, currentSessionState(equalTo(state)))
+    }
+
+    @Test
+    fun `Starting an in progress journey carries on with it`() = runTest {
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
+        orchestrator.start()
+        val stateBeforeSecondStart = orchestrator.holderSessionState.value
+
         orchestrator.start()
 
-        assert(START_ORCHESTRATION_ERROR in logger)
+        assert(continueJourneyLog in logger)
+        assert(START_ORCHESTRATION_ERROR !in logger)
+        assertThat(
+            logger.count { it.message.startsWith("Performed holder prerequisite checks: ") },
+            equalTo(1)
+        )
+        assertThat(orchestrator.holderSessionState.value, equalTo(stateBeforeSecondStart))
     }
 
     @Test
@@ -368,6 +407,68 @@ class HolderOrchestratorTest {
             sessionFactory,
             currentSessionState(isNotStarted())
         )
+    }
+
+    @Test
+    fun `Dismissing a complete journey finishes it without creating a new session`(
+        @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
+        state: HolderSessionState
+    ) = runTest {
+        initialStates[0] = state
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        backgroundScope.launch {
+            orchestrator.holderSessionState.collect {}
+        }
+        val sessionBeforeDismissal = sessionFactory.getCurrentSession()
+
+        orchestrator.dismiss()
+
+        assertThat(orchestrator.isJourneyFinished.value, equalTo(true))
+        assertThat(sessionFactory.getCurrentSession(), sameInstance(sessionBeforeDismissal))
+        assertThat(sessionFactory, currentSessionState(equalTo(state)))
+        assert(dismissedJourneyLog in logger)
+    }
+
+    @Test
+    fun `Dismissing a complete journey more than once only reports it once`() = runTest {
+        initialStates[0] = HolderSessionState.Complete.Cancelled
+        val orchestrator = createOrchestrator()
+
+        orchestrator.dismiss()
+        orchestrator.dismiss()
+
+        assertThat(orchestrator.isJourneyFinished.value, equalTo(true))
+        assertThat(logger.count { it.message == dismissedJourneyLog }, equalTo(1))
+    }
+
+    @Test
+    fun `Dismissing an incomplete journey does nothing`(
+        @TestParameter(valuesProvider = CancellableHolderSessionStates::class)
+        state: HolderSessionState
+    ) = runTest {
+        initialStates[0] = state
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+
+        orchestrator.dismiss()
+
+        assertThat(orchestrator.isJourneyFinished.value, equalTo(false))
+        assertThat(sessionFactory, currentSessionState(equalTo(state)))
+        assert(cannotDismissIncompleteJourneyLog in logger)
+    }
+
+    @Test
+    fun `Resetting after dismissing clears the finished journey`() = runTest {
+        initialStates[0] = HolderSessionState.Complete.Cancelled
+        val sessionFactory = createSessionFactory()
+        val orchestrator = createOrchestrator(sessionFactory = sessionFactory)
+        orchestrator.dismiss()
+
+        orchestrator.reset()
+
+        assertThat(orchestrator.isJourneyFinished.value, equalTo(false))
+        assertThat(sessionFactory, currentSessionState(isNotStarted()))
     }
 
     @Test
@@ -1052,12 +1153,13 @@ class HolderOrchestratorTest {
         advanceUntilIdle()
         assertThat(orchestrator.holderSessionState.value, isAwaitingUserConsent())
 
-        // Cancel the in-flight session (marks the originating session complete) and then
-        // restart a fresh journey while the first signing job is still suspended.
+        // Cancel the in-flight session (marks the originating session complete), dismiss the
+        // result and then restart a fresh journey while the first signing job is still suspended.
         orchestrator.cancel()
         advanceUntilIdle()
         assertThat(orchestrator.holderSessionState.value, isCancelled())
 
+        orchestrator.dismiss()
         orchestrator.start()
         advanceUntilIdle()
         assertThat(orchestrator.holderSessionState.value, inPresentingEngagement())

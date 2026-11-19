@@ -197,9 +197,14 @@ The consumer adds the presenter's flow to its view hierarchy, which triggers the
 ```kotlin
 ShareCredential(
     component = presenter,
-    modifier = Modifier.fillMaxWidth()
+    modifier = Modifier.fillMaxWidth(),
+    onExitJourney = { navController.popBackStack() }
 )
 ```
+
+The SDK calls `onExitJourney` once the User dismisses a completed journey. Use it to navigate
+away from the share flow. When omitted, the SDK dispatches a single back press to the host's
+`OnBackPressedDispatcher` instead.
 
 ---
 
