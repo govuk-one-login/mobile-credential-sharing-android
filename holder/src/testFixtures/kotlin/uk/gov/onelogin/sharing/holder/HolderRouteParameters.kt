@@ -11,6 +11,7 @@ import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 
 class HolderRouteParameters : TestParametersValuesProvider() {
@@ -43,6 +44,16 @@ class HolderRouteParameters : TestParametersValuesProvider() {
                 GetReadyToShareRoute::class.java
             ).matches(
                 currentBackStackEntry?.toRoute<GetReadyToShareRoute>()
+            )
+        },
+        Triple(
+            "Holder device Bluetooth enable denied",
+            DeviceBleDeniedRoute
+        ) {
+            instanceOf<DeviceBleDeniedRoute>(
+                DeviceBleDeniedRoute::class.java
+            ).matches(
+                currentBackStackEntry?.toRoute<DeviceBleDeniedRoute>()
             )
         },
         Triple(

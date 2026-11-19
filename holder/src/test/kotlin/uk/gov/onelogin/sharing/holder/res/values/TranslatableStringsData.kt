@@ -23,6 +23,13 @@ enum class TranslatableStringsData(
                 "mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth."
         )
     ),
+    BLUETOOTH_IS_TURNED_OFF(
+        resourceId = R.string.bluetooth_is_turned_off,
+        translations = mapOf(
+            "en" to "Bluetooth is turned off",
+            "cy" to "Mae Bluetooth wedi’i droi i ffwrdd"
+        )
+    ),
     FIND_OUT_HOW_SHARING_WORKS(
         resourceId = R.string.find_out_how_sharing_works,
         translations = mapOf(
@@ -49,6 +56,13 @@ enum class TranslatableStringsData(
         translations = mapOf(
             "en" to "Sharing is currently unavailable",
             "cy" to "Nid yw rhannu ar gael ar hyn o bryd"
+        )
+    ),
+    TO_BE_ABLE_TO_SHARE_TURN_ON_BLUETOOTH(
+        resourceId = R.string.to_be_able_to_share_turn_on_bluetooth,
+        translations = mapOf(
+            "en" to "To be able to share, you need to turn on Bluetooth.",
+            "cy" to "I allu rhannu, mae angen i chi droi Bluetooth ymlaen."
         )
     ),
     TURN_ON_BLUETOOTH(
