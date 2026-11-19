@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.holder.qrcode.QrCodeScreenRule
 
 @RunWith(AndroidJUnit4::class)
@@ -21,7 +22,7 @@ class QrCodeScreenImageTest {
         composeTestRule.setContent {
             QrCodeScreenImage(qrPayload = "QR Data", modifier = Modifier.size(250.dp))
         }
-        val expectedQrCodeSize = 250.dp
+        val expectedQrCodeSize = 250.dp - spacingDouble * 2
         composeTestRule.assertQrCodeIsDisplayed()
         composeTestRule.assertQrCodeSizeIs(expectedQrCodeSize)
     }

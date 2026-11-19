@@ -15,11 +15,11 @@ class PortraitQrContentTest {
     val composeTestRule = QrCodeScreenRule(createComposeRule())
 
     @Test
-    fun `Shows screen content stack vertically`() = composeTestRule.run {
+    fun `Shows screen content stacked vertically`() = composeTestRule.run {
         setContent { GdsTheme { PortraitQrContent(qrPayload = "QR Data") } }
         composeTestRule.assertHeadingIsDisplayed()
         composeTestRule.assertQrCodeIsDisplayed()
-        composeTestRule.scrollToAndAssertBodyIsDisplayed()
         composeTestRule.assertPortraitLayout()
+        composeTestRule.scrollToAndAssertBodyIsDisplayed()
     }
 }

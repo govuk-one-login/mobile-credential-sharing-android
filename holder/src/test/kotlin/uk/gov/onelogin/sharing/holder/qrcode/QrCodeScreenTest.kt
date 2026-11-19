@@ -13,6 +13,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
@@ -165,7 +166,7 @@ class QrCodeScreenTest {
             composeTestRule.run {
                 setContent { Render() }
                 assertQrCodeIsFixed()
-                assertQrCodeSizeIs(250.dp)
+                assertQrCodeSizeIs(250.dp - spacingDouble * 2)
                 assertHeadingAndBodyAreScrollable()
             }
         }
