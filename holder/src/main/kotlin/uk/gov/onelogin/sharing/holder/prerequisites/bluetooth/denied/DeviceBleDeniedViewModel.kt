@@ -10,8 +10,6 @@ import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -41,9 +39,6 @@ class DeviceBleDeniedViewModel(
 ) : ViewModel(),
     ResolvePrerequisiteAction<HolderSessionState> by resolver {
 
-    private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()
-    val navigationEvent: SharedFlow<NavigationEvent?> = _navigationEvent
-
     val isClosing: StateFlow<Boolean> = orchestrator
         .holderSessionState
         .map { it !is HolderSessionState.Preflight }
@@ -64,9 +59,8 @@ class DeviceBleDeniedViewModel(
         resolve(launcher)
     }
 
-    fun exitJourney(): Job = viewModelScope.launch {
-        orchestrator.reset()
-        _navigationEvent.emit(NavigationEvent.ExitJourney)
+    fun exitJourney(): Job = viewModelScope.launch(dispatcher) {
+        orchestrator.cancel()
     }
 
     fun sendScreenEvent(screenName: String) = viewModelScope.launch(dispatcher) {
@@ -79,9 +73,5 @@ class DeviceBleDeniedViewModel(
 
     fun sendCancelEvent(buttonText: String) = viewModelScope.launch(dispatcher) {
         analyticsLogger.deviceBleDeniedCancelButton(buttonText = buttonText)
-    }
-
-    sealed interface NavigationEvent {
-        data object ExitJourney : NavigationEvent
     }
 }

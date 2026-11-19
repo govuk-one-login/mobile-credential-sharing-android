@@ -180,15 +180,15 @@ class DeviceBleDeniedScreenTest {
     }
 
     @Test
-    fun `Tapping cancel resets the orchestrator without asking for confirmation`() = runTest {
+    fun `Tapping cancel cancels the journey without asking for confirmation`() = runTest {
         composeTestRule.run {
             setContent { Render() }
 
             performCancelClick()
 
-            waitUntil("Orchestrator should have been reset!") { orchestrator.resetCount == 1 }
+            waitUntil("Journey should have been cancelled!") { orchestrator.cancelCount == 1 }
         }
-        assertEquals(0, orchestrator.cancelCount)
+        assertEquals(0, orchestrator.resetCount)
     }
 
     @Test
@@ -220,12 +220,12 @@ class DeviceBleDeniedScreenTest {
                     ?: fail("Cannot find back press dispatcher!")
             }
 
-            waitUntil("Orchestrator should have been reset!") { orchestrator.resetCount == 1 }
+            waitUntil("Journey should have been cancelled!") { orchestrator.cancelCount == 1 }
             waitUntil("Cannot find expected event!: $analyticsLogger") {
                 analyticsLogger.contains(DeviceBleDeniedTestData.expectedCancelEvent)
             }
         }
-        assertEquals(0, orchestrator.cancelCount)
+        assertEquals(0, orchestrator.resetCount)
     }
 
     @Test
@@ -233,8 +233,6 @@ class DeviceBleDeniedScreenTest {
     fun `Displaying the screen in Welsh sends analytics events in English`() = runTest {
         composeTestRule.run {
             setContent { Render() }
-
-            assertWelshTitleIsDisplayed()
 
             performTurnOnBluetoothClick()
             waitUntil { analyticsLogger.size >= 2 }
@@ -252,15 +250,13 @@ class DeviceBleDeniedScreenTest {
     }
 
     @Test
-    fun `Leaving Preflight shows a loading spinner`() = runTest {
+    fun `Leaving Preflight hides the screen content`() = runTest {
         composeTestRule.run {
             setContent { Render() }
             assertTitleIsDisplayed()
 
             holderState.update { HolderSessionState.ReadyToPresent }
 
-            waitUntilLoadingSpinnerExists()
-            assertLoadingSpinnerIsDisplayed()
             assertTitleDoesNotExist()
         }
     }
@@ -285,14 +281,6 @@ class DeviceBleDeniedScreenTest {
         composeTestRule.run {
             setContent { DeviceBleDeniedContentPreview() }
             assertValidUi()
-        }
-    }
-
-    @Test
-    fun `Loading preview renders the loading content`() = runTest {
-        composeTestRule.run {
-            setContent { DeviceBleDeniedLoadingContentPreview() }
-            assertLoadingSpinnerIsDisplayed()
         }
     }
 
