@@ -1,15 +1,11 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied
 
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,12 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -31,8 +24,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.componentsv2.heading.GdsHeading
@@ -46,11 +37,8 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
-import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedViewModel.NavigationEvent
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
-
-internal const val DEVICE_BLE_DENIED_SPINNER_TEST_TAG = "deviceBleDeniedSpinner"
 
 @Composable
 @Suppress("LongMethod")
@@ -63,13 +51,8 @@ internal fun DeviceBleDeniedScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
-    val onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
-    val mainScope = rememberCoroutineScope { Dispatchers.Main }
 
     val isLeaving: Boolean by viewModel.isClosing.collectAsStateWithLifecycle()
-    val navigationEvent by viewModel.navigationEvent.collectAsStateWithLifecycle(
-        initialValue = null
-    )
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
@@ -90,14 +73,6 @@ internal fun DeviceBleDeniedScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(navigationEvent) {
-        if (navigationEvent is NavigationEvent.ExitJourney) {
-            mainScope.launch {
-                onBackPressedDispatcherOwner?.onBackPressedDispatcher?.onBackPressed()
-            }
-        }
-    }
-
     val onCancel: () -> Unit = {
         viewModel.sendCancelEvent(
             context.getEnglishString(R.string.holder_device_ble_denied_cancel_button)
@@ -105,11 +80,10 @@ internal fun DeviceBleDeniedScreen(
         viewModel.exitJourney()
     }
 
-    BackHandler(enabled = navigationEvent == null, onBack = onCancel)
+    // Disabled once leaving, so a second back press can't cancel the journey twice.
+    BackHandler(enabled = !isLeaving, onBack = onCancel)
 
-    if (isLeaving) {
-        DeviceBleDeniedLoadingContent(modifier = modifier)
-    } else {
+    if (!isLeaving) {
         DeviceBleDeniedContent(
             modifier = modifier,
             onTurnOnBluetooth = {
@@ -187,29 +161,6 @@ internal fun DeviceBleDeniedContent(
     )
 }
 
-@Composable
-internal fun DeviceBleDeniedLoadingContent(
-    modifier: Modifier = Modifier,
-    progress: (() -> Float)? = null
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (progress != null) {
-            CircularProgressIndicator(
-                progress = progress,
-                modifier = Modifier.testTag(DEVICE_BLE_DENIED_SPINNER_TEST_TAG)
-            )
-        } else {
-            CircularProgressIndicator(
-                modifier = Modifier.testTag(DEVICE_BLE_DENIED_SPINNER_TEST_TAG)
-            )
-        }
-    }
-}
-
 @PreviewContent
 @Composable
 internal fun DeviceBleDeniedContentPreview() {
@@ -219,19 +170,6 @@ internal fun DeviceBleDeniedContentPreview() {
                 onTurnOnBluetooth = {},
                 onCancel = {},
                 modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-}
-
-@PreviewContent
-@Composable
-internal fun DeviceBleDeniedLoadingContentPreview() {
-    GdsTheme {
-        Surface {
-            DeviceBleDeniedLoadingContent(
-                modifier = Modifier.fillMaxSize(),
-                progress = { 0.7f }
             )
         }
     }

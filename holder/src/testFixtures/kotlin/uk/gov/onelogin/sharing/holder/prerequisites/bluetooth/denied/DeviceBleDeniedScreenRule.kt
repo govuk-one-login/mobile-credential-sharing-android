@@ -5,7 +5,6 @@ import android.content.res.Resources
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -43,21 +42,9 @@ class DeviceBleDeniedScreenRule(
             and hasRole(Role.Button)
     ).onFirst()
 
-    private val loadingSpinner = hasTestTag(DEVICE_BLE_DENIED_SPINNER_TEST_TAG)
-    fun onLoadingSpinner() = onNode(loadingSpinner)
-
     fun assertTitleIsDisplayed() = onTitle().assertIsDisplayed()
 
-    fun assertWelshTitleIsDisplayed() =
-        onNode(hasText("Mae Bluetooth wedi’i droi i ffwrdd") and isHeading()).assertIsDisplayed()
-
     fun assertTitleDoesNotExist() = onTitle().assertDoesNotExist()
-
-    fun assertLoadingSpinnerIsDisplayed() = onLoadingSpinner().assertIsDisplayed()
-
-    fun waitUntilLoadingSpinnerExists() = waitUntil {
-        onAllNodes(loadingSpinner).fetchSemanticsNodes().isNotEmpty()
-    }
 
     fun assertBodyIsDisplayed() {
         onFirstParagraph().assertIsDisplayed()

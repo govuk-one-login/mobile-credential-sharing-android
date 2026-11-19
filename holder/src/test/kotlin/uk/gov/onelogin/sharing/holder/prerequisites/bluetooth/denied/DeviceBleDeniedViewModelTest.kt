@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import app.cash.turbine.test
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -24,7 +23,6 @@ import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDe
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedTestData.SCREEN_ID
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedTestData.TURN_ON_BUTTON_TEXT
-import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedViewModel.NavigationEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -132,13 +130,11 @@ class DeviceBleDeniedViewModelTest {
     }
 
     @Test
-    fun `Exiting the journey resets the orchestrator and emits an exit event`() = runTest {
-        viewModel.navigationEvent.test {
-            viewModel.exitJourney()
-            assertEquals(NavigationEvent.ExitJourney, awaitItem())
-        }
-        assertEquals(1, orchestrator.resetCount)
-        assertEquals(0, orchestrator.cancelCount)
+    fun `Exiting the journey cancels it without resetting the orchestrator`() = runTest {
+        viewModel.exitJourney().join()
+
+        assertEquals(1, orchestrator.cancelCount)
+        assertEquals(0, orchestrator.resetCount)
     }
 
     @Test
