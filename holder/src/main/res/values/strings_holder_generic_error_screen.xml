@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_generic_error_body_1" translatable="false">@string/your_details_have_not_been_shared</string>
+    <string name="holder_generic_error_body_2" translatable="false">@string/you_may_be_able_to_use_a_physical_document_instead</string>
+    <string name="holder_generic_error_button" translatable="false">@string/go_back_to_documents</string>
+    <string name="holder_generic_error_title" translatable="false">@string/sharing_is_currently_unavailable</string>
+</resources>
