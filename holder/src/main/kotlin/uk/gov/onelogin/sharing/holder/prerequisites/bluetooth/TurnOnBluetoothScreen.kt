@@ -84,6 +84,7 @@ internal fun TurnOnBluetoothScreen(
 
 @Composable
 internal fun TurnOnBluetoothContent(onTurnOnBluetooth: () -> Unit, modifier: Modifier = Modifier) {
+    @Suppress("DEPRECATION")
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(R.string.holder_turn_on_bluetooth_title),

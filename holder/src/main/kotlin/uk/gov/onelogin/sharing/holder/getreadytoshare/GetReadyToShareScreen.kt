@@ -89,6 +89,7 @@ internal fun GetReadyToShareContent(
     onAllowBluetoothClick: () -> Unit = {},
     onFindOutMoreButtonClick: () -> Unit = {}
 ) {
+    @Suppress("DEPRECATION")
     LeftAlignedScreenV2(
         modifier = modifier,
         title = stringResource(R.string.get_ready_to_share_header),
