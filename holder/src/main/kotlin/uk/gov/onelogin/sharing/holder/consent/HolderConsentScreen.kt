@@ -5,11 +5,12 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,7 +29,7 @@ import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
 import uk.gov.android.ui.componentsv2.button.GdsButton
 import uk.gov.android.ui.componentsv2.heading.GdsHeading
 import uk.gov.android.ui.componentsv2.heading.GdsHeadingAlignment
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreen
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.spacingSingle
 import uk.gov.logging.api.analytics.extensions.getEnglishString
@@ -68,6 +69,7 @@ internal fun HolderConsentScreen(viewModel: HolderConsentViewModel = metroViewMo
     } ?: CircularProgressIndicator()
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HolderConsentContent(
     state: HolderConsentUiState,
@@ -88,7 +90,7 @@ internal fun HolderConsentContent(
             )
         },
         body = { horizontalPadding ->
-            consentBody(state, horizontalPadding, onReadPrivacyNotice)
+            ConsentBody(state, horizontalPadding, onReadPrivacyNotice)
         },
         primaryButton = {
             GdsButton(
@@ -115,57 +117,52 @@ internal fun HolderConsentContent(
     )
 }
 
-private fun LazyListScope.consentBody(
+@Composable
+private fun ColumnScope.ConsentBody(
     state: HolderConsentUiState,
     horizontalPadding: Dp,
     onReadPrivacyNotice: () -> Unit
 ) {
-    item {
-        Column(
-            modifier = Modifier.padding(horizontal = horizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(spacingSingle)
-        ) {
-            Text(
-                text = stringResource(
-                    R.string.holder_consent_organization_sentence,
-                    state.normalisedOrganizationName
-                ),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            GdsButton(
-                text = stringResource(
-                    R.string.holder_consent_screen_privacy_notice_link,
-                    state.organizationName
-                ),
-                buttonType = ButtonTypeV2.Secondary(),
-                onClick = onReadPrivacyNotice,
-                textAlign = TextAlign.Start,
-                contentPosition = Arrangement.Start,
-                contentModifier = Modifier.fillMaxWidth()
-            )
-        }
+    Column(
+        modifier = Modifier.padding(horizontal = horizontalPadding),
+        verticalArrangement = Arrangement.spacedBy(spacingSingle)
+    ) {
+        Text(
+            text = stringResource(
+                R.string.holder_consent_organization_sentence,
+                state.normalisedOrganizationName
+            ),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        GdsButton(
+            text = stringResource(
+                R.string.holder_consent_screen_privacy_notice_link,
+                state.organizationName
+            ),
+            buttonType = ButtonTypeV2.Secondary(),
+            onClick = onReadPrivacyNotice,
+            textAlign = TextAlign.Start,
+            contentPosition = Arrangement.Start,
+            contentModifier = Modifier.fillMaxWidth()
+        )
     }
     state.card?.let { card ->
-        item {
-            Text(
-                text = stringResource(R.string.holder_consent_screen_what_you_share_heading),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding)
-            )
-        }
-        item {
-            SharingTheme {
-                Box(modifier = Modifier.padding(horizontal = horizontalPadding)) {
-                    AgreeToShareCard(
-                        card = card,
-                        organizationName = state.organizationName
-                    )
-                }
+        Text(
+            text = stringResource(R.string.holder_consent_screen_what_you_share_heading),
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = horizontalPadding)
+        )
+        SharingTheme {
+            Box(modifier = Modifier.padding(horizontal = horizontalPadding)) {
+                AgreeToShareCard(
+                    card = card,
+                    organizationName = state.organizationName
+                )
             }
         }
     }
