@@ -47,6 +47,7 @@ import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.android.ui.theme.spacingTriple
 import uk.gov.logging.api.analytics.extensions.getEnglishString
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
@@ -54,7 +55,6 @@ import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentScreenPreviewParameters
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentUiState
 import uk.gov.onelogin.sharing.holder.consent.moreaboutdvs.BodyHelper.moreAboutDvsBodyContent
-import uk.gov.onelogin.sharing.core.R as coreR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
