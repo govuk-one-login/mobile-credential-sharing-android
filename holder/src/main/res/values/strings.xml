@@ -86,4 +86,9 @@
     <string name="consent_attr_driving_privileges">Vehicles you can drive</string>
     <string name="consent_attr_provisional_driving_privileges">Vehicles you can drive with your provisional licence</string>
     <string name="consent_attr_welsh_licence">If your licence is bilingual (English and Welsh)</string>
+    <string name="find_out_which_details_to_share">Find out which details you need to share</string>
+    <string name="show_qr_code_person_doing_check">Show the QR code to the person doing the check.</string>
+    <string name="qr_code_lets_them_send_list_of_details">It lets them send you a list of the details they need to check.</string>
+    <string name="review_list_before_agreeing_to_share">You’ll review this list before agreeing to share your details with them.</string>
+    <string name="qr_code_to_get_list_of_details">QR code to get the list of details you need to share</string>
 </resources>

@@ -11,6 +11,8 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.engagementPresentationStub
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs.hiddenEngagementPresentationStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.InvalidHolderSessionStateTransitions
@@ -108,43 +110,36 @@ class HolderSessionImplTest {
     }
 
     @Test
-    fun `updateEngagementDisplay hides the QR in place without a validated transition`() = runTest {
-        initialState = HolderSessionState.PresentingEngagement(qrData = "qr", showQr = true)
-
-        Assert.assertFalse(
-            HolderSessionState.PresentingEngagement::class in session.getAvailableTransitions()
-        )
-
-        session.updateEngagementDisplay(showQr = false)
-
-        MatcherAssert.assertThat(
-            session,
-            StateContainerMatchers.hasCurrentState(
-                HolderSessionState.PresentingEngagement(qrData = "qr", showQr = false)
+    fun `updateEngagementPresentation hides the QR in place without a validated transition`() =
+        runTest {
+            initialState = HolderSessionState.PresentingEngagement(
+                engagementPresentationStub.copy(qrPayload = "qr")
             )
-        )
-    }
+
+            Assert.assertFalse(
+                HolderSessionState.PresentingEngagement::class in session.getAvailableTransitions()
+            )
+
+            session.updateEngagementPresentation { it.withoutQr() }
+
+            MatcherAssert.assertThat(
+                session,
+                StateContainerMatchers.hasCurrentState(
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation(qrPayload = null, cancelRequiresConfirmation = false)
+                    )
+                )
+            )
+        }
 
     @Test
-    fun `updateEngagementDisplay can restore the QR to visible in place`() = runTest {
-        initialState = HolderSessionState.PresentingEngagement(qrData = "qr", showQr = false)
-
-        session.updateEngagementDisplay(showQr = true)
-
-        MatcherAssert.assertThat(
-            session,
-            StateContainerMatchers.hasCurrentState(
-                HolderSessionState.PresentingEngagement(qrData = "qr", showQr = true)
-            )
+    fun `updateEngagementPresentation is a no-op when the presentation matches`() = runTest {
+        val state = HolderSessionState.PresentingEngagement(
+            hiddenEngagementPresentationStub
         )
-    }
-
-    @Test
-    fun `updateEngagementDisplay is a no-op when the flag already matches`() = runTest {
-        val state = HolderSessionState.PresentingEngagement(qrData = "qr", showQr = true)
         initialState = state
 
-        session.updateEngagementDisplay(showQr = true)
+        session.updateEngagementPresentation { it.withoutQr() }
 
         MatcherAssert.assertThat(
             session,
@@ -153,13 +148,13 @@ class HolderSessionImplTest {
     }
 
     @Test
-    fun `updateEngagementDisplay is a no-op outside PresentingEngagement`(
+    fun `updateEngagementPresentation is a no-op outside PresentingEngagement`(
         @TestParameter(valuesProvider = CompleteHolderSessionStates::class)
         state: HolderSessionState
     ) = runTest {
         initialState = state
 
-        session.updateEngagementDisplay(showQr = false)
+        session.updateEngagementPresentation { it.withoutQr() }
 
         MatcherAssert.assertThat(
             session,

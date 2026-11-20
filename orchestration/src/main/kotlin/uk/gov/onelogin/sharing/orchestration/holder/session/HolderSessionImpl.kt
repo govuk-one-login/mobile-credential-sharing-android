@@ -35,14 +35,19 @@ class HolderSessionImpl(
         _sessionContext = update(_sessionContext)
     }
 
-    override fun updateEngagementDisplay(showQr: Boolean) {
-        val current = currentState.value
-        if (current is HolderSessionState.PresentingEngagement && current.showQr != showQr) {
+    override fun updateEngagementPresentation(
+        transform: (EngagementPresentation) -> EngagementPresentation
+    ) {
+        val current = currentState.value as? HolderSessionState.PresentingEngagement ?: return
+        val updated = transform(current.presentation)
+        if (updated != current.presentation) {
             logger.debug(
                 logTag,
-                "Updating engagement display in place (no transition): showQr=$showQr"
+                "Updating engagement presentation in place (no transition): " +
+                    "qrVisible=${updated.qrPayload != null}, " +
+                    "cancelRequiresConfirmation=${updated.cancelRequiresConfirmation}"
             )
-            update(current.copy(showQr = showQr))
+            update(current.copy(presentation = updated))
         }
     }
 

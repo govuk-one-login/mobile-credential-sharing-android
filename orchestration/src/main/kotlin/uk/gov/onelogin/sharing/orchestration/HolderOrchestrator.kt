@@ -58,6 +58,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.credential.ValidatedCredenti
 import uk.gov.onelogin.sharing.orchestration.holder.session.AuthenticatedReaderRequestFactory
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConfirmConsentUseCase
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationFactory
+import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSession
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionContext
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -192,7 +193,14 @@ class HolderOrchestrator(
 
             val qrCode = currentContext.qrCode
             if (qrCode.isNotEmpty()) {
-                safeTransitionTo(HolderSessionState.PresentingEngagement(qrCode))
+                safeTransitionTo(
+                    HolderSessionState.PresentingEngagement(
+                        EngagementPresentation(
+                            qrPayload = qrCode,
+                            cancelRequiresConfirmation = false
+                        )
+                    )
+                )
             }
         } else {
             val checkResponse = prerequisiteCheck[0]
@@ -457,7 +465,7 @@ class HolderOrchestrator(
     }
 
     private fun enterGraceWindow() {
-        sessionFlow.value.updateEngagementDisplay(showQr = false)
+        sessionFlow.value.updateEngagementPresentation { it.withoutQr() }
         engagementTimer.start(engagementTimingPolicy.graceDelay) {
             refreshEngagementSession()
         }

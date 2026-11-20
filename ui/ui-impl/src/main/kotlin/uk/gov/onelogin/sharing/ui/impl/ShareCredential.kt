@@ -1,6 +1,8 @@
 package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -16,9 +18,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -30,6 +37,7 @@ import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -94,14 +102,29 @@ internal fun ShareCredential(
     val scope = rememberCoroutineScope { defaultDispatcher }
     val state: HolderSessionState by holderSessionState.collectAsStateWithLifecycle()
 
+    val animationScope = rememberCoroutineScope()
+    val dismissOffset = remember { Animatable(0f) }
+    var contentHeight by remember { mutableIntStateOf(0) }
+    var cancelJob by remember { mutableStateOf<Job?>(null) }
+    var dismissJob by remember { mutableStateOf<Job?>(null) }
+
+    val verticalDownAnimation: () -> Job = {
+        dismissJob ?: animationScope.launch {
+            dismissOffset.animateTo(targetValue = contentHeight.toFloat())
+        }.also { dismissJob = it }
+    }
+
     val onCancel: () -> Unit = {
-        scope.launch {
-            if (state.shouldConfirmCancellation()) {
-                withContext(uiDispatcher) {
-                    navController.navigateToHolderUserCancellationDialog()
+        if (dismissJob == null && cancelJob?.isActive != true) {
+            scope.launch {
+                if (state.shouldConfirmCancellation()) {
+                    withContext(uiDispatcher) {
+                        navController.navigateToHolderUserCancellationDialog()
+                    }
+                } else {
+                    orchestrator.cancel()
+                    withContext(uiDispatcher) { verticalDownAnimation() }
                 }
-            } else {
-                orchestrator.cancel()
             }
         }
     }
@@ -122,7 +145,11 @@ internal fun ShareCredential(
     CompositionLocalProvider(
         LocalMetroViewModelFactory provides viewModelFactory
     ) {
-        Surface(modifier = modifier) {
+        Surface(
+            modifier = modifier
+                .onSizeChanged { contentHeight = it.height }
+                .graphicsLayer { translationY = dismissOffset.value }
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
