@@ -11,4 +11,7 @@ private object ModulePackagePreviewsProvider : PackagePreviewsProvider()
 class ScreenshotTest(
     @TestParameter(valuesProvider = ModulePackagePreviewsProvider::class)
     preview: ComposablePreview<AndroidPreviewInfo>
-) : BaseRoborazziScreenshotTest(preview)
+) : BaseRoborazziScreenshotTest(preview) {
+
+    override val manualClockPreviewClassSimpleNames: Set<String> = setOf("LoadingScreenKt")
+}

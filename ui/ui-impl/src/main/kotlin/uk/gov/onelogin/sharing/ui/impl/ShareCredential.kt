@@ -149,7 +149,9 @@ internal fun ShareCredential(
         }
     }
 
-    BackHandler(state.userCanCancel(), onBack = onCancel)
+    BackHandler(enabled = state.userCanCancel() || state.blocksSystemBack()) {
+        if (state.userCanCancel()) onCancel()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

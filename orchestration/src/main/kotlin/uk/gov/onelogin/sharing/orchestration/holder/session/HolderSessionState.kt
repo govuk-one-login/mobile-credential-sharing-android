@@ -21,9 +21,37 @@ sealed class HolderSessionState :
      */
     override fun isComplete(): Boolean = this is Complete
 
-    override fun userCanCancel(): Boolean = this::class in cancellableStates
+    override fun userCanCancel(): Boolean = when (this) {
+        is ProcessingEstablishment -> presentation.isCancellable
+        is ProcessingResponse -> presentation.isCancellable
+        is AwaitingVerifierResolution -> presentation.isCancellable
+        else -> this::class in cancellableStates
+    }
     override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
-    override fun hideCloseButton(): Boolean = this::class in hiddenCloseButtonStates
+
+    override fun hideCloseButton(): Boolean = when (this) {
+        is ProcessingEstablishment -> !presentation.showCloseButton
+        is ProcessingResponse -> !presentation.showCloseButton
+        is AwaitingVerifierResolution -> !presentation.showCloseButton
+        else -> this::class in hiddenCloseButtonStates
+    }
+
+    /**
+     * Whether a system back press should be intercepted and ignored for this state.
+     *
+     * This is the loading-screen states' counterpart to [userCanCancel]: when a loading phase is
+     * not cancellable (for example "Sharing your details", where an in-flight transaction must not
+     * be interrupted), the User must remain on the screen, so system back is swallowed rather than
+     * navigating away.
+     *
+     * @return `true` when a loading phase is non-cancellable. Otherwise `false`.
+     */
+    fun blocksSystemBack(): Boolean = when (this) {
+        is ProcessingEstablishment -> !presentation.isCancellable
+        is ProcessingResponse -> !presentation.isCancellable
+        is AwaitingVerifierResolution -> !presentation.isCancellable
+        else -> false
+    }
 
     /**
      * Null-value object declaring that a User hasn't started a digital credential verification
@@ -80,8 +108,13 @@ sealed class HolderSessionState :
      * processing establishment begins.
      *
      * The digital credential transfers between devices during this state.
+     *
+     * @param presentation The loading screen presentation. Defaults to
+     * [ProgressPresentation.GettingDetails] ("Getting list of details", cancellation available).
      */
-    data object ProcessingEstablishment : HolderSessionState()
+    data class ProcessingEstablishment(
+        val presentation: ProgressPresentation = ProgressPresentation.GettingDetails
+    ) : HolderSessionState()
 
     /**
      * State for when a successful connection and processing establishment occurs,
@@ -100,14 +133,28 @@ sealed class HolderSessionState :
     /**
      * State for when the consenting User is generating the proof before completing the
      * Holder User journey.
+     *
+     * @param presentation The loading screen presentation. Defaults to
+     * [ProgressPresentation.SharingDetails] ("Sharing your details", cancellation unavailable).
      */
-    data object ProcessingResponse : HolderSessionState()
+    data class ProcessingResponse(
+        val presentation: ProgressPresentation = ProgressPresentation.SharingDetails
+    ) : HolderSessionState()
 
     /**
      * State for when the Holder has sent the DeviceResponse to the Verifier and is
      * awaiting the Verifier to close the session.
+     *
+     * Carries the same [ProgressPresentation.SharingDetails] as [ProcessingResponse] so the User
+     * continues to see "Sharing your details" with cancellation unavailable; the screen does not
+     * change when the response is sent.
+     *
+     * @param presentation The loading screen presentation. Defaults to
+     * [ProgressPresentation.SharingDetails] ("Sharing your details", cancellation unavailable).
      */
-    data object AwaitingVerifierResolution : HolderSessionState()
+    data class AwaitingVerifierResolution(
+        val presentation: ProgressPresentation = ProgressPresentation.SharingDetails
+    ) : HolderSessionState()
 
     /**
      * State for when the Holder has sent a SessionData(status: 20) termination message
@@ -170,15 +217,16 @@ sealed class HolderSessionState :
         @JvmStatic
         private val cancelConfirmationRequired = listOf(
             AwaitingUserConsent::class,
-            AwaitingVerifierResolution::class,
             ProcessingEstablishment::class,
-            ProcessingResponse::class
+            ProcessingResponse::class,
+            AwaitingVerifierResolution::class
         )
 
         @JvmStatic
         private val cancellableStates = listOf(
             Preflight::class,
-            PresentingEngagement::class
+            PresentingEngagement::class,
+            AwaitingUserConsent::class
         ) + cancelConfirmationRequired
 
         @JvmStatic
