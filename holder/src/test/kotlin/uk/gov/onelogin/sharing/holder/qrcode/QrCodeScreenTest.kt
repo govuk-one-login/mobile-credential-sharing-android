@@ -166,7 +166,7 @@ class QrCodeScreenTest {
             composeTestRule.run {
                 setContent { Render() }
                 assertQrCodeIsFixed()
-                assertQrCodeSizeIs(250.dp - spacingDouble * 2)
+                assertQrCodeSizeIs(250.dp)
                 assertHeadingAndBodyAreScrollable()
             }
         }

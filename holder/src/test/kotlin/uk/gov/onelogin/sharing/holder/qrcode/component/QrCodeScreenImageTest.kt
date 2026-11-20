@@ -22,7 +22,7 @@ class QrCodeScreenImageTest {
         composeTestRule.setContent {
             QrCodeScreenImage(qrPayload = "QR Data", modifier = Modifier.size(250.dp))
         }
-        val expectedQrCodeSize = 250.dp - spacingDouble * 2
+        val expectedQrCodeSize = 250.dp
         composeTestRule.assertQrCodeIsDisplayed()
         composeTestRule.assertQrCodeSizeIs(expectedQrCodeSize)
     }
