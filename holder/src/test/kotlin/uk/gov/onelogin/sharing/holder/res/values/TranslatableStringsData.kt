@@ -76,13 +76,6 @@ enum class TranslatableStringsData(
             "cy" to "Paratoi i rannu"
         )
     ),
-    GO_BACK_TO_DOCUMENTS(
-        resourceId = R.string.go_back_to_documents,
-        translations = mapOf(
-            "en" to "Go back to documents",
-            "cy" to "Ewch yn ôl i dogfennau"
-        )
-    ),
     SHARING_IS_CURRENTLY_UNAVAILABLE(
         resourceId = R.string.sharing_is_currently_unavailable,
         translations = mapOf(
