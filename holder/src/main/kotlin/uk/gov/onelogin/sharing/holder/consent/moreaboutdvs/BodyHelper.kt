@@ -38,7 +38,7 @@ internal object BodyHelper {
     @Composable
     private fun String.introductionTexts(): List<Text> = listOf(
         R.string.more_about_dvs_body_1,
-        R.string.more_about_dvs_body_2,
+        R.string.more_about_dvs_body_2
     ).map { resourceId ->
         stringResource(resourceId, this).removeDoubleFullStop()
     }.map(LeftAlignedScreenBodyV2::Text)
@@ -57,7 +57,8 @@ internal object BodyHelper {
             items = bulletItems.toPersistentList(),
             title = ListTitle(
                 text = stringResource(
-                    R.string.more_about_dvs_bullet_title, this
+                    R.string.more_about_dvs_bullet_title,
+                    this
                 ).removeDoubleFullStop(),
                 titleType = TitleType.Text
             )
