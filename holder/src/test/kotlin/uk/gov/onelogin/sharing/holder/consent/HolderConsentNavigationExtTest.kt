@@ -1,0 +1,169 @@
+package uk.gov.onelogin.sharing.holder.consent
+
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.test.performClick
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.testing.TestNavHostController
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
+import com.google.testing.junit.testparameterinjector.TestParameter
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.runTest
+import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
+import uk.gov.android.ui.theme.m3.GdsTheme
+import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub
+import uk.gov.onelogin.sharing.holder.StubMetroViewModelFactory
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configureHolderConsentScreen
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
+import uk.gov.onelogin.sharing.holder.navigation.TestNavHostControllerHelper.prepareController
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentDocumentSingleton
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentNamespaces
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentationTestData.createConsentPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
+
+@RunWith(RobolectricTestParameterInjector::class)
+class HolderConsentNavigationExtTest {
+
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
+
+    @get:Rule
+    val composeTestRule = HolderConsentScreenRule()
+
+    private val holderState = MutableStateFlow<HolderSessionState>(
+        HolderSessionState.NotStarted
+    )
+
+    private var confirmConsentCount = 0
+
+    private val orchestrator = FakeOrchestrator(
+        initialHolderState = holderState,
+        onConfirmConsent = { confirmConsentCount++ }
+    )
+
+    private val viewModel by lazy {
+        HolderConsentViewModel(
+            orchestrator = orchestrator,
+            analyticsLogger = FakeAnalyticsLogger(),
+            dispatcher = dispatcherRule.testDispatcher
+        )
+    }
+
+    private val viewModelFactory: MetroViewModelFactory = StubMetroViewModelFactory(
+        viewModelProviders = mapOf(
+            HolderConsentViewModel::class to { viewModel }
+        )
+    )
+
+    private val attributesWithoutRetain = listOf(
+        MdlAttribute.FamilyName,
+        MdlAttribute.DocumentNumber,
+        MdlAttribute.DrivingPrivileges,
+        MdlAttribute.IssueDate,
+        MdlAttribute.ExpiryDate,
+        MdlAttribute.Portrait
+    ).associateWith { false }
+
+    private val presentationWithoutRetain = createConsentPresentation(
+        documents = createConsentDocumentSingleton(
+            namespaces = createConsentNamespaces(
+                elements = attributesWithoutRetain
+            )
+        )
+    )
+
+    private lateinit var navController: TestNavHostController
+    private var onBackPressedDispatcherOwner: OnBackPressedDispatcherOwner? = null
+
+    @Test
+    fun `Back button behaviour is handled at a higher level`(
+        @TestParameter action: (
+            HolderConsentScreenRule,
+            TestNavHostController,
+            OnBackPressedDispatcherOwner?
+        ) -> Unit = namedTestValues(
+            "Popping navigation backstack" to { _, controller, _ ->
+                controller.popBackStack()
+            },
+            "Performing device back press" to { _, _, dispatcher ->
+                dispatcher?.onBackPressedDispatcher?.onBackPressed()
+            }
+        )
+    ) = runTest(dispatcherRule.testDispatcher) {
+        holderState.update {
+            HolderSessionState.AwaitingUserConsent(
+                request = DeviceRequestStub.deviceRequestStub,
+                presentation = presentationWithoutRetain
+            )
+        }
+
+        composeTestRule.run {
+            setContent {
+                navController = prepareController(LocalContext.current)
+                onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
+                Render()
+            }
+
+            onNodeWithRole(Role.Button).performClick()
+            assertValidUi(presentationWithoutRetain)
+
+            runOnUiThread {
+                action(composeTestRule, navController, onBackPressedDispatcherOwner)
+            }
+            waitForIdle()
+
+            assertThat(
+                navController.currentDestination?.route,
+                equalTo("previous")
+            )
+        }
+    }
+
+    @Composable
+    private fun Render() {
+        CompositionLocalProvider(
+            LocalMetroViewModelFactory provides viewModelFactory
+        ) {
+            GdsTheme {
+                NavHost(
+                    modifier = Modifier.fillMaxSize(),
+                    navController = navController,
+                    startDestination = "previous"
+                ) {
+                    composable("previous") {
+                        Button(
+                            onClick = {
+                                navController.navigateToHolderConsentScreen()
+                            }
+                        ) {
+                            Text("Navigate")
+                        }
+                    }
+                    configureHolderConsentScreen()
+                }
+            }
+        }
+    }
+}

@@ -10,10 +10,11 @@ import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRout
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionRoute
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
-import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorRoute
+import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedRoute
 import uk.gov.onelogin.sharing.holder.qrcode.QrCodeRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
@@ -119,6 +120,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
+                "Failure: Unrecoverable Bluetooth prerequisite",
+                HolderSessionStateStubs.restrictedBluetoothFailure
+            ) {
+                instanceOf<BleRestrictedRoute>(
+                    BleRestrictedRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<BleRestrictedRoute>()
+                )
+            },
+            Triple(
                 "Failure: Generic -> Unrecoverable error",
                 HolderSessionState.Complete.Failed(
                     SessionError(
@@ -127,10 +138,10 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     )
                 )
             ) {
-                instanceOf<UnrecoverableHolderErrorRoute>(
-                    UnrecoverableHolderErrorRoute::class.java
+                instanceOf<GenericHolderErrorRoute>(
+                    GenericHolderErrorRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<UnrecoverableHolderErrorRoute>()
+                    currentBackStackEntry?.toRoute<GenericHolderErrorRoute>()
                 )
             },
             Triple(

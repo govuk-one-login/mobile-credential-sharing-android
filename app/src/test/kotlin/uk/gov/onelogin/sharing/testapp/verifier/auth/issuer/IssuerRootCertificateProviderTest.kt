@@ -54,4 +54,18 @@ class IssuerRootCertificateProviderTest {
         assertNotNull(certificate)
         assertEquals("X.509", certificate.type)
     }
+
+    @Test
+    fun `Resolves the DVLA integration root certificate asset`() = runTest {
+        provider.update(IssuerRootOption.DVLA_ROOT_INTEGRATION)
+
+        val certificate = provider.trustedRootCertificate()
+
+        assertNotNull(certificate)
+        assertEquals("CN=mDL IACA Root,C=GB", certificate.subjectX500Principal.name)
+        assertEquals(
+            certificate.subjectX500Principal,
+            certificate.issuerX500Principal
+        )
+    }
 }

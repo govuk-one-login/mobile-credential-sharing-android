@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.onelogin.sharing.core.R as coreR
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.HolderRoutes.configureHolderRoutes
 import uk.gov.onelogin.sharing.holder.MonitorHolderSessionState
@@ -52,7 +53,6 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.sdk.api.presenter.CredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.ShareCredentialAnalytics.closeButton
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
-import uk.gov.onelogin.sharing.uiimpl.R
 
 /**
  * Composable entry point for the Holder role (credential sharing).
@@ -194,7 +194,7 @@ internal fun CloseButtonAppBar(
             if (showClose) {
                 IconButton(onCancel) {
                     Icon(
-                        painter = painterResource(R.drawable.filled_close),
+                        painter = painterResource(coreR.drawable.filled_close),
                         contentDescription = "Close",
                         tint = GdsLocalColorScheme.current.topBarIcon
                     )

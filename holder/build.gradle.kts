@@ -56,6 +56,7 @@ dependencies {
     ).forEach(::api)
 
     listOf(
+        libs.androidx.browser,
         libs.androidx.lifecycle.viewmodel.compose,
         libs.androidx.material3.adaptive,
         libs.metro.viewmodel.compose,

@@ -17,12 +17,15 @@ import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluet
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
-import uk.gov.onelogin.sharing.holder.error.UnrecoverableHolderErrorNavigationExt.navigateToUnrecoverableHolderError
+import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.navigateToTurnOnBluetooth
 import uk.gov.onelogin.sharing.holder.qrcode.QrCodeNavigationExt.navigateToQrCodeScreen
 import uk.gov.onelogin.sharing.holder.qrcode.QrCodeRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.navigateToBleRestricted
+import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
+import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -184,8 +187,14 @@ private fun handleHolderSessionFailure(
                 BluetoothSessionError.BluetoothConnectionError
             )
         )
+    } else if (state.isUnrecoverableBluetoothPrerequisite()) {
+        navController.navigateToBleRestricted {
+            popUpTo<HolderRoutes> {
+                inclusive = true
+            }
+        }
     } else {
-        navController.navigateToUnrecoverableHolderError {
+        navController.navigateToGenericHolderError {
             popUpTo<HolderRoutes> {
                 inclusive = true
             }

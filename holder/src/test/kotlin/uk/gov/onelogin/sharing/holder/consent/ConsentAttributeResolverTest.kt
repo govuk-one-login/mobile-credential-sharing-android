@@ -3,6 +3,8 @@ package uk.gov.onelogin.sharing.holder.consent
 import kotlin.test.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.DisplayAttribute
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
 class ConsentAttributeResolverTest {

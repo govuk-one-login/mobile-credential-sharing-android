@@ -1,9 +1,11 @@
 package uk.gov.onelogin.sharing.holder.consent
 
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentAttributeResolver
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentAttribute
 
 /**
- * Shared sample data and builder for [AgreeToShareCard] tests.
+ * Shared sample data and builder for [uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.AgreeToShareCard] tests.
  */
 object AgreeToShareCardSamples {
 
