@@ -148,6 +148,17 @@ sealed class HolderSessionState :
          */
         data class Failed(val error: SessionError) : Complete(error.message) {
             val sessionReason: SessionErrorReason get() = error.reason
+
+            /**
+             * `true` when this failure is an
+             * [SessionErrorReason.UnrecoverablePrerequisite] caused by Bluetooth being unavailable
+             * in a way the user cannot recover from within the app (i.e. parental controls or
+             * device management restricting Bluetooth).
+             */
+            fun isUnrecoverableBluetoothPrerequisite(): Boolean =
+                (sessionReason as? SessionErrorReason.UnrecoverablePrerequisite)
+                    ?.any { it.prerequisite == Prerequisite.BLUETOOTH && !it.isRecoverable() }
+                    ?: false
         }
 
         /**
