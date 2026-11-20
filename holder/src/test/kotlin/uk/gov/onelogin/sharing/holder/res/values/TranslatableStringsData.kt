@@ -62,13 +62,6 @@ enum class TranslatableStringsData(
                 "gofynnwch i weinyddwr ganiatáu Bluetooth."
         )
     ),
-    GO_BACK_TO_DOCUMENTS(
-        resourceId = R.string.go_back_to_documents,
-        translations = mapOf(
-            "en" to "Go back to documents",
-            "cy" to "Ewch yn ôl i ddogfennau"
-        )
-    ),
     GET_READY_TO_SHARE(
         resourceId = R.string.get_ready_to_share,
         translations = mapOf(
