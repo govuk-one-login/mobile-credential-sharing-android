@@ -6,22 +6,35 @@ import org.junit.Test
 import uk.gov.onelogin.sharing.verification.crl.CrlFixtures.DAY
 import uk.gov.onelogin.sharing.verification.crl.CrlFixtures.NOW
 
+/**
+ * Unit tests for [CrlDecoder]. Validates that [CrlDecoder.readValidity] correctly reads dates
+ * from DER CRL bytes and returns null for unreadable or incomplete input.
+ */
 class CrlDecoderTest {
+
     @Test
-    fun `reads this update and next update`() {
+    fun `reads thisUpdate and nextUpdate from a valid DER CRL`() {
         val bytes = CrlFixtures.crl(thisUpdate = NOW - DAY, nextUpdate = NOW + DAY)
 
-        assertEquals(CrlValidity(NOW - DAY, NOW + DAY), CrlDecoder.readValidity(bytes))
+        val validity = CrlDecoder.readValidity(bytes)
+
+        assertEquals(CrlValidity(thisUpdate = NOW - DAY, nextUpdate = NOW + DAY), validity)
     }
 
     @Test
-    fun `crl without next update is unreadable`() {
-        assertNull(CrlDecoder.readValidity(CrlFixtures.crl(NOW - DAY, nextUpdate = null)))
+    fun `returns null when nextUpdate is absent`() {
+        val bytes = CrlFixtures.crl(thisUpdate = NOW - DAY, nextUpdate = null)
+
+        assertNull(CrlDecoder.readValidity(bytes))
     }
 
     @Test
-    fun `non crl bytes are unreadable`() {
+    fun `returns null for a non-CRL byte sequence`() {
         assertNull(CrlDecoder.readValidity("not a crl".toByteArray()))
+    }
+
+    @Test
+    fun `returns null for an empty byte array`() {
         assertNull(CrlDecoder.readValidity(ByteArray(0)))
     }
 }

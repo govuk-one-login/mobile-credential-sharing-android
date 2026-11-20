@@ -33,3 +33,21 @@ internal enum class CrlLookupFailure {
     /** The server answered with something other than HTTP 200. */
     RESPONSE
 }
+
+/**
+ * Retrieval seam between [CrlProvider] / `CoseVerification` and the underlying HTTP transport.
+ * Implementations must not validate CRL contents.
+ */
+internal interface CrlFetcher {
+    /**
+     * @param url Absolute http(s) URL of a CRL distribution point
+     * @param forceRevalidation When true, bypasses the HTTP freshness window and checks with the
+     *   server even if the cached copy is still HTTP-fresh
+     */
+    suspend fun getCrl(url: String, forceRevalidation: Boolean = false): CrlLookup
+}
+
+/** Clock seam to support deterministic tests and future trusted-time injection (`WLT-SecReq-010`). */
+fun interface TimeProvider {
+    fun currentTimeMillis(): Long
+}

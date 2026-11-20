@@ -10,11 +10,22 @@ import java.net.URISyntaxException
 import uk.gov.onelogin.sharing.verification.crl.CrlConfigurationException.InvalidResource
 import uk.gov.onelogin.sharing.verification.crl.CrlConfigurationException.MissingResource
 
+fun interface CrlConfigurationSource {
+    @Throws(CrlConfigurationException::class)
+    fun load(): CrlConfiguration
+}
+
+class AssetCrlConfigurationSource(
+    private val context: Context
+) : CrlConfigurationSource {
+    override fun load(): CrlConfiguration = CrlConfiguration.load(context)
+}
+
 /**
  * CRL configuration supplied by the host app as `assets/credential-sharing-crl.json`:
  *
  * ```json
- * { "prefetchURLs": ["http://example.gov.uk/crl/abc.crl"] }
+ * { "prefetchURLs": ["[http://example.gov.uk/crl/abc.crl](http://example.gov.uk/crl/abc.crl)"] }
  * ```
  *
  * `prefetchURLs` is mandatory and may be empty. Every entry must be an absolute http or https
