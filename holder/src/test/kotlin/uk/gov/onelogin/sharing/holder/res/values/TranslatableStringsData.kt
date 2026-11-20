@@ -30,6 +30,45 @@ enum class TranslatableStringsData(
             "cy" to "Darganfyddwch sut mae rhannu yn gweithio"
         )
     ),
+    BLUETOOTH_IS_RESTRICTED(
+        resourceId = R.string.bluetooth_is_restricted,
+        translations = mapOf(
+            "en" to "Bluetooth is restricted",
+            "cy" to "Mae Bluetooth wedi’i gyfyngu"
+        )
+    ),
+    YOU_CANNOT_SHARE_YOUR_DETAILS(
+        resourceId = R.string.you_cannot_share_your_details,
+        translations = mapOf(
+            "en" to "This means you cannot share your details.",
+            "cy" to "Mae hyn yn golygu na allwch rannu eich manylion."
+        )
+    ),
+    TURN_OFF_PARENTAL_CONTROLS_RESTRICTING_BLUETOOTH(
+        resourceId = R.string.turn_off_parental_controls_restricting_bluetooth,
+        translations = mapOf(
+            "en" to "If this phone has parental controls restricting Bluetooth, " +
+                "turn them off in your phone settings.",
+            "cy" to "Os oes gan y ffôn hwn reolaethau rhieni sy’n cyfyngu ar Bluetooth, " +
+                "diffoddwch nhw yng ngosodiadau eich ffôn."
+        )
+    ),
+    ASK_ADMINISTRATOR_TO_ALLOW_BLUETOOTH(
+        resourceId = R.string.ask_administrator_to_allow_bluetooth,
+        translations = mapOf(
+            "en" to "If an organisation manages this phone, " +
+                "ask an administrator to allow Bluetooth.",
+            "cy" to "Os yw sefydliad yn rheoli’r ffôn hwn, " +
+                "gofynnwch i weinyddwr ganiatáu Bluetooth."
+        )
+    ),
+    GO_BACK_TO_DOCUMENTS(
+        resourceId = R.string.go_back_to_documents,
+        translations = mapOf(
+            "en" to "Go back to documents",
+            "cy" to "Ewch yn ôl i ddogfennau"
+        )
+    ),
     GET_READY_TO_SHARE(
         resourceId = R.string.get_ready_to_share,
         translations = mapOf(
