@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.orchestration.holder.session
 
+import uk.gov.onelogin.sharing.orchestration.verificationrequest.MdlAttribute
+
 /**
  * The information shown to the User on the consent screen.
  *
@@ -22,17 +24,30 @@ data class ConsentPresentation(
      */
     val normalisedOrganizationName: String
         get() = organizationName.trim().trimEnd('.').trimEnd() + "."
+
+    val attributeCount: Int
+        get() = documents.sumOf(ConsentDocument::attributeCount)
+
+    val firstDocumentAttributes: List<ConsentAttribute>?
+        get() = documents.firstOrNull()?.let(ConsentDocument::namespaceAttributes)
 }
 
 /**
  * A single requested document type and its filtered namespaces.
  */
-data class ConsentDocument(val docType: String, val namespaces: List<ConsentNamespace>)
+data class ConsentDocument(val docType: String, val namespaces: List<ConsentNamespace>) {
+    val attributeCount: Int
+        get() = namespaces.sumOf(ConsentNamespace::attributeCount)
+    val namespaceAttributes: List<ConsentAttribute>
+        get() = namespaces.flatMap(ConsentNamespace::attributes)
+}
 
 /**
  * A single namespace and the filtered attributes retained within it.
  */
-data class ConsentNamespace(val nameSpace: String, val attributes: List<ConsentAttribute>)
+data class ConsentNamespace(val nameSpace: String, val attributes: List<ConsentAttribute>) {
+    val attributeCount: Int get() = attributes.count()
+}
 
 /**
  * A single attribute that will be shared with the Verifier.
@@ -47,4 +62,25 @@ data class ConsentAttribute(
     val elementIdentifier: String,
     val intentToRetain: Boolean,
     val nameSpace: String
-)
+) {
+
+    internal constructor(
+        entry: Map.Entry<MdlAttribute, Boolean>,
+        namespace: String
+    ) : this(
+        elementIdentifier = entry.key.value,
+        intentToRetain = entry.value,
+        nameSpace = namespace
+    )
+
+    companion object {
+        fun Map<MdlAttribute, Boolean>.toConsentAttributes(
+            nameSpace: String
+        ): List<ConsentAttribute> = map { entry ->
+            ConsentAttribute(
+                entry = entry,
+                namespace = nameSpace
+            )
+        }
+    }
+}

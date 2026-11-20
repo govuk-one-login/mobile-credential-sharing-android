@@ -1,6 +1,6 @@
 @file:Suppress("TooManyFunctions")
 
-package uk.gov.onelogin.sharing.holder.consent
+package uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

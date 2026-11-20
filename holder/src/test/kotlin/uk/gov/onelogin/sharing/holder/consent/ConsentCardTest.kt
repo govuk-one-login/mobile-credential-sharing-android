@@ -2,6 +2,9 @@ package uk.gov.onelogin.sharing.holder.consent
 
 import kotlin.test.assertEquals
 import org.junit.Test
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.DisplayAttribute
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.RetentionVariant
 
 class ConsentCardTest {
 

@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.consent
+package uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard
 
 import androidx.annotation.StringRes
 import uk.gov.onelogin.sharing.holder.R

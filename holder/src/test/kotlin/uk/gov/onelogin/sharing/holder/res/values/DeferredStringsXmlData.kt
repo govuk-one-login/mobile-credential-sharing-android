@@ -119,5 +119,53 @@ enum class DeferredStringsXmlData(
     HOLDER_STOP_CHECK_DIALOG_CONTINUE_BUTTON(
         defersTo = R.string.stop_check_dialog_continue_button,
         resourceId = R.string.holder_stop_check_dialog_continue_button
+    ),
+    MORE_ABOUT_DVS_TITLE(
+        defersTo = R.string.more_about_dvs,
+        resourceId = R.string.more_about_dvs_title
+    ),
+    MORE_ABOUT_DVS_BODY_1(
+        defersTo = R.string.the_person_checking_is_using_an_app_powered_by_dvs,
+        resourceId = R.string.more_about_dvs_body_1
+    ),
+    MORE_ABOUT_DVS_BODY_2(
+        defersTo = R.string.dvs_is_trusted_to_receive_and_store_details,
+        resourceId = R.string.more_about_dvs_body_2
+    ),
+    MORE_ABOUT_DVS_BULLET_TITLE(
+        defersTo = R.string.dvs_is_certified_under_uk_digital_verification_services_meaning_that,
+        resourceId = R.string.more_about_dvs_bullet_title
+    ),
+    MORE_ABOUT_DVS_BULLET_1(
+        defersTo = R.string.use_encryption_when_storing_your_details,
+        resourceId = R.string.more_about_dvs_bullet_1
+    ),
+    MORE_ABOUT_DVS_BULLET_2(
+        defersTo = R.string.keep_your_details_only_as_long_as_needed,
+        resourceId = R.string.more_about_dvs_bullet_2
+    ),
+    MORE_ABOUT_DVS_BULLET_3(
+        defersTo = R.string.never_use_your_details_for_marketing_purposes,
+        resourceId = R.string.more_about_dvs_bullet_3
+    ),
+    MORE_ABOUT_DVS_PRIVACY_SUBHEADING(
+        defersTo = R.string.dvs_s_privacy_notice,
+        resourceId = R.string.more_about_dvs_privacy_subheading
+    ),
+    MORE_ABOUT_DVS_PRIVACY_BULLET_1(
+        defersTo = R.string.how_long_they_will_keep_your_details,
+        resourceId = R.string.more_about_dvs_privacy_bullet_1
+    ),
+    MORE_ABOUT_DVS_PRIVACY_BULLET_2(
+        defersTo = R.string.how_your_details_can_be_used,
+        resourceId = R.string.more_about_dvs_privacy_bullet_2
+    ),
+    MORE_ABOUT_DVS_PRIVACY_NOTICE_LINK(
+        defersTo = R.string.dvs_s_privacy_notice,
+        resourceId = R.string.more_about_dvs_privacy_policy_link
+    ),
+    MORE_ABOUT_DVS_PRIVACY_BODY(
+        defersTo = R.string.read_dvs_s_privacy_policy_to_find_out,
+        resourceId = R.string.more_about_dvs_privacy_body
     )
 }

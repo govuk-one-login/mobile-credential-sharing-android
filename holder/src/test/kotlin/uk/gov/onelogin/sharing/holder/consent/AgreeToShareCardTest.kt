@@ -9,6 +9,8 @@ import uk.gov.onelogin.sharing.core.presentation.theme.SharingTheme
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.ORGANIZATION_NAME
 import uk.gov.onelogin.sharing.holder.consent.AgreeToShareCardSamples.card
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.AgreeToShareCard
+import uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard.ConsentCard
 
 @RunWith(RobolectricTestRunner::class)
 class AgreeToShareCardTest {
