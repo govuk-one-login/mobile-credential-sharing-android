@@ -37,7 +37,7 @@ import kotlin.test.Test
 class UnfulfillableErrorNavigationExtTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = UnfulfillableErrorScreenRule()
 
     private lateinit var controller: TestNavHostController
     private var onBackPressedDispatcherOwner: OnBackPressedDispatcherOwner? = null

@@ -35,6 +35,7 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplate
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorViewModel.NavigationEvent as ViewModelEvent
 
 @Composable
@@ -104,27 +105,10 @@ internal fun GenericErrorScreenContent(
     modifier: Modifier = Modifier,
     onGoBackToDocumentsClick: () -> Unit = {}
 ) {
-    ErrorScreen(
+
+    ErrorScreenTemplate(
         modifier = modifier,
-        icon = { horizontalPadding ->
-            GdsIcon(
-                image = ImageVector.vectorResource(ErrorScreenIcon.ErrorIcon.icon),
-                contentDescription = stringResource(ErrorScreenIcon.ErrorIcon.description),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding),
-                color = colorScheme.onBackground
-            )
-        },
-        title = { horizontalPadding ->
-            GdsHeading(
-                text = stringResource(R.string.holder_generic_error_title),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding),
-                textAlign = GdsHeadingAlignment.CenterAligned
-            )
-        },
+        titleText = stringResource(R.string.holder_generic_error_title),
         body = { itemPadding ->
             listOf(
                 R.string.holder_generic_error_body_1,
@@ -142,15 +126,7 @@ internal fun GenericErrorScreenContent(
                 }
             }
         },
-        supportingText = null,
-        primaryButton = {
-            GdsButton(
-                text = stringResource(R.string.holder_generic_error_button),
-                buttonType = ButtonTypeV2.Primary(),
-                onClick = onGoBackToDocumentsClick,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        onGoBackToDocumentsClick = onGoBackToDocumentsClick
     )
 }
 

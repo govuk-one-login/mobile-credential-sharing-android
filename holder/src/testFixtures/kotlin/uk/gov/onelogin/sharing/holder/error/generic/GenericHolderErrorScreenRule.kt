@@ -16,13 +16,14 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateRule
 
 class GenericHolderErrorScreenRule(
     composeTestRule: ComposeContentTestRule = createComposeRule(),
     private val resources: Resources = ApplicationProvider
         .getApplicationContext<Context>()
         .resources
-) : ComposeContentTestRule by composeTestRule {
+) : ErrorScreenTemplateRule(composeTestRule, resources) {
 
     fun assertValidBody1(useUnmergedTree: Boolean = false) = onBody1(useUnmergedTree)
         .assertExists()
@@ -30,19 +31,7 @@ class GenericHolderErrorScreenRule(
     fun assertValidBody2(useUnmergedTree: Boolean = false) = onBody2(useUnmergedTree)
         .assertExists()
 
-    fun assertValidButton(useUnmergedTree: Boolean = true) = onButton(useUnmergedTree)
-        .assertExists()
-        .assertHasClickAction()
-        .assertIsEnabled()
-        .assertIsDisplayed()
-        .assertWidthIsAtLeast(minimumTouchTarget)
-        .assertHeightIsAtLeast(minimumTouchTarget)
-
-    fun assertValidTitle(useUnmergedTree: Boolean = false) = onTitle(useUnmergedTree)
-        .assertExists()
-        .assert(isHeading())
-
-    fun assertValidUi(useUnmergedTree: Boolean = false) {
+    override fun assertValidUi(useUnmergedTree: Boolean) {
         assertValidBody1(useUnmergedTree)
         assertValidBody2(useUnmergedTree)
         assertValidButton(useUnmergedTree)
@@ -59,16 +48,8 @@ class GenericHolderErrorScreenRule(
         useUnmergedTree = useUnmergedTree
     )
 
-    fun onButton(useUnmergedTree: Boolean = true) = onNodeWithText(
-        resources.getString(R.string.holder_generic_error_button),
-        useUnmergedTree = useUnmergedTree
-    )
-
-    fun onTitle(useUnmergedTree: Boolean = false) = onNodeWithText(
+    override fun onTitle(useUnmergedTree: Boolean) = onNodeWithText(
         resources.getString(R.string.holder_generic_error_title),
         useUnmergedTree = useUnmergedTree
     )
-
-    fun performGoBackToDocumentsClick(useUnmergedTree: Boolean = true) = onButton(useUnmergedTree)
-        .performClick()
 }
