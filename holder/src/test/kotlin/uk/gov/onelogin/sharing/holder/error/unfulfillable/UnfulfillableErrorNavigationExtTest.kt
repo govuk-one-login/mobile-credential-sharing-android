@@ -20,6 +20,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -31,6 +32,8 @@ import uk.gov.onelogin.sharing.holder.TestViewModelFactory
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.configureUnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
 import uk.gov.onelogin.sharing.holder.navigation.TestNavHostControllerHelper.prepareController
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import kotlin.test.Test
 
 @RunWith(RobolectricTestParameterInjector::class)
@@ -42,9 +45,20 @@ class UnfulfillableErrorNavigationExtTest {
     private lateinit var controller: TestNavHostController
     private var onBackPressedDispatcherOwner: OnBackPressedDispatcherOwner? = null
 
+    private val initialHolderSessionState: HolderSessionState = HolderSessionState.Complete.Success(
+        HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
+    )
+
+    private val orchestrator by lazy {
+        FakeOrchestrator(
+            initialHolderState = MutableStateFlow(initialHolderSessionState)
+        )
+    }
+
     private val viewModel by lazy {
         UnfulfillableErrorViewModel(
-            analyticsLogger = mockk(relaxed = true)
+            analyticsLogger = mockk(relaxed = true),
+            orchestrator = orchestrator
         )
     }
 
