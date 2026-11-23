@@ -23,6 +23,13 @@ enum class TranslatableStringsData(
                 "mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth."
         )
     ),
+    DETAILS_REQUESTED_NOT_AVAILABLE(
+        resourceId = R.string.details_requested_not_available,
+        translations = mapOf(
+            "en" to "Details requested not available",
+            "cy" to "Nid yw’r manylion a ofynnwyd amdanynt ar gael"
+        )
+    ),
     FIND_OUT_HOW_SHARING_WORKS(
         resourceId = R.string.find_out_how_sharing_works,
         translations = mapOf(

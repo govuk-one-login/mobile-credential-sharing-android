@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_unfulfillable_error_title" translatable="false">@string/details_requested_not_available</string>
+</resources>

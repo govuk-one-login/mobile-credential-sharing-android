@@ -4,6 +4,7 @@
     <string name="allow_bluetooth_before_sharing_details">Cyn y gallwch rannu manylion o’ch trwydded yrru’r DU, mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth.</string>
     <string name="ask_administrator_to_allow_bluetooth">Os yw sefydliad yn rheoli’r ffôn hwn, gofynnwch i weinyddwr ganiatáu Bluetooth.</string>
     <string name="bluetooth_is_restricted">Mae Bluetooth wedi’i gyfyngu</string>
+    <string name="details_requested_not_available">Nid yw’r manylion a ofynnwyd amdanynt ar gael</string>
     <string name="dvs_is_certified_under_uk_digital_verification_services_meaning_that">Mae %1$s wedi’i ardystio o dan Fframwaith Ymddiriedaeth Gwasanaethau Gwirio Digidol y DU. Mae hyn yn golygu bod yn rhaid iddynt:</string>
     <string name="dvs_is_trusted_to_receive_and_store_details">Mae llywodraeth y DU yn ymddiried yn %1$s i dderbyn a storio eich manylion yn ddiogel.</string>
     <string name="dvs_s_privacy_notice">Hysbysiad preifatrwydd %1$s</string>

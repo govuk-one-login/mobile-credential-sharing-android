@@ -167,5 +167,9 @@ enum class DeferredStringsXmlData(
     MORE_ABOUT_DVS_PRIVACY_BODY(
         defersTo = R.string.read_dvs_s_privacy_policy_to_find_out,
         resourceId = R.string.more_about_dvs_privacy_body
-    )
+    ),
+    HOLDER_UNFULFILLABLE_ERROR_TITLE(
+        defersTo = R.string.details_requested_not_available,
+        resourceId = R.string.holder_unfulfillable_error_title
+    ),
 }

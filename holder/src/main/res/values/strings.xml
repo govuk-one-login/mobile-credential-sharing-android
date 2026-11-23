@@ -9,6 +9,7 @@
     <string name="bluetooth_turned_off_holder">Bluetooth was turned off on holder device during session</string>
     <string name="checking_journey_requirements">Checking journey requirements...</string>
     <string name="creating_qr_code">Creating QR code...</string>
+    <string name="details_requested_not_available">Details requested not available</string>
     <string name="dvs_is_certified_under_uk_digital_verification_services_meaning_that">%1$s is certified under the UK Digital Verification Services Trust Framework. This means they must:</string>
     <string name="dvs_is_trusted_to_receive_and_store_details">%1$s is trusted by the UK government to receive and store your details securely.</string>
     <string name="dvs_s_privacy_notice">%1$s’s privacy notice</string>
