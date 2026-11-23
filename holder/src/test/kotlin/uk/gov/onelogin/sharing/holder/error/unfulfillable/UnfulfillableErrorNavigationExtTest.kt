@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
@@ -18,18 +17,14 @@ import androidx.navigation.toRoute
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
 import kotlinx.coroutines.test.runTest
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.holder.HolderRoutes
-import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenRule
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.configureUnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
-import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.navigation.TestNavHostControllerHelper.prepareController
 import kotlin.test.Test
 
@@ -69,9 +64,9 @@ class UnfulfillableErrorNavigationExtTest {
             TestNavHostController,
             OnBackPressedDispatcherOwner?
         ) -> Unit = namedTestValues(
-//            "Tapping primary button" to { rule, _, _ ->
-//                rule.performGoBackToDocumentsClick()
-//            },
+            "Tapping primary button" to { rule, _, _ ->
+                rule.performButtonClick()
+            },
             "Popping navigation backstack" to { _, controller, _ ->
                 controller.popBackStack()
             },

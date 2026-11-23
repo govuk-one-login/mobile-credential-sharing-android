@@ -205,6 +205,7 @@ private fun convertSuccessStateToNavigation(
     navController: NavHostController,
     exitJourneyOptions: NavOptionsBuilder.() -> Unit
 ): () -> Unit = when (state.successReason) {
+    // DCMAW-24155: Update to use specific route
     SuccessReason.UnfulfillableRequest -> {
         {
             navController.navigateToHolderSuccessScreen {
