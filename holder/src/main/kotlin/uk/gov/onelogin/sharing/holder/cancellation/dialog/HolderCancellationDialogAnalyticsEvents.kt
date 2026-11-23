@@ -1,9 +1,7 @@
 package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
-import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
+import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
 
 /**
  * GA4 analytics identities for the "stop the check" confirmation dialog.
@@ -13,13 +11,11 @@ import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharin
  */
 internal object HolderCancellationDialogAnalyticsEvents {
 
-    internal fun AnalyticsLogger.stopTheCheckButton(text: String) = Button(
-        text = text,
-        params = walletSharingRequiredParameters
-    ).let(this::logEventV3Dot1)
+    internal fun AnalyticsLogger.stopTheCheckButton(text: String) = buttonEvent(
+        text = text
+    )
 
-    internal fun AnalyticsLogger.continueWithTheCheckButton(text: String) = Button(
-        text = text,
-        params = walletSharingRequiredParameters
-    ).let(this::logEventV3Dot1)
+    internal fun AnalyticsLogger.continueWithTheCheckButton(text: String) = buttonEvent(
+        text = text
+    )
 }
