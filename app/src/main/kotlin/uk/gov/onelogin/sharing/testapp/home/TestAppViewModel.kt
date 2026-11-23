@@ -11,9 +11,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
 import uk.gov.logging.api.v3dot1.model.TrackEvent
-import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
+import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.screenEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
 @HiltViewModel
@@ -48,11 +47,10 @@ class TestAppViewModel(
     }
 
     fun sendScreenEvent() = viewModelScope.launch(ioDispatcher) {
-        Screen(
-            name = "Credential Sharing Test App",
-            id = "TestAppScreen",
-            params = walletSharingRequiredParameters
-        ).let(analyticsLogger::logEventV3Dot1)
+        analyticsLogger.screenEvent(
+            title = "Credential Sharing Test App",
+            id = "TestAppScreen"
+        )
     }
 
     sealed interface NavigationEvent {
