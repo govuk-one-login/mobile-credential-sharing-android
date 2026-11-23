@@ -168,6 +168,14 @@ enum class DeferredStringsXmlData(
         defersTo = R.string.read_dvs_s_privacy_policy_to_find_out,
         resourceId = R.string.more_about_dvs_privacy_body
     ),
+    HOLDER_UNFULFILLABLE_ERROR_BODY_1(
+        defersTo = R.string.the_person_doing_the_check_asked_for_details_not_on_your_documents,
+        resourceId = R.string.holder_unfulfillable_error_body_1
+    ),
+    HOLDER_UNFULFILLABLE_ERROR_BODY_2(
+        defersTo = R.string.you_may_be_able_to_use_a_physical_document_instead,
+        resourceId = R.string.holder_unfulfillable_error_body_2
+    ),
     HOLDER_UNFULFILLABLE_ERROR_TITLE(
         defersTo = R.string.details_requested_not_available,
         resourceId = R.string.holder_unfulfillable_error_title

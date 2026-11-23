@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="holder_unfulfillable_error_title" translatable="false">@string/details_requested_not_available</string>
+    <string name="holder_unfulfillable_error_body_1" translatable="false">@string/the_person_doing_the_check_asked_for_details_not_on_your_documents</string>
+    <string name="holder_unfulfillable_error_body_2" translatable="false">@string/you_may_be_able_to_use_a_physical_document_instead</string>
 </resources>

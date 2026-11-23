@@ -24,6 +24,7 @@
     <string name="stop_check_dialog_stop_button">Stopio’r gwiriad</string>
     <string name="stop_check_dialog_title">Ydych chi’n siŵr eich bod eisiau stopio’r gwiriad?</string>
     <string name="the_person_checking_is_using_an_app_powered_by_dvs">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap sy’n cael ei bweru gan %1$s.</string>
+    <string name="the_person_doing_the_check_asked_for_details_not_on_your_documents">Gofynnodd y person sy’n gwneud y gwiriad am fanylion nad ydynt ar eich dogfennau.</string>
     <string name="turn_off_parental_controls_restricting_bluetooth">Os oes gan y ffôn hwn reolaethau rhieni sy’n cyfyngu ar Bluetooth, diffoddwch nhw yng ngosodiadau eich ffôn.</string>
     <string name="turn_on_bluetooth">Troi Bluetooth ymlaen</string>
     <string name="turn_on_bluetooth_before_sharing">Cyn y gallwch rannu, mae angen i chi droi Bluetooth ymlaen.</string>

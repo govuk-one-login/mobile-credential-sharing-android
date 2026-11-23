@@ -3,10 +3,6 @@ package uk.gov.onelogin.sharing.holder.error.generic
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,7 +10,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +21,7 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplate
+import uk.gov.onelogin.sharing.holder.error.createErrorBodyText
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorViewModel.NavigationEvent as ViewModelEvent
 
 @Composable
@@ -99,21 +95,12 @@ internal fun GenericErrorScreenContent(
     ErrorScreenTemplate(
         modifier = modifier,
         titleText = stringResource(R.string.holder_generic_error_title),
-        body = { itemPadding ->
+        body = { padding ->
             listOf(
                 R.string.holder_generic_error_body_1,
                 R.string.holder_generic_error_body_2
             ).forEach { resourceId ->
-                item {
-                    Text(
-                        stringResource(resourceId),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = itemPadding),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+                createErrorBodyText(resourceId, padding)
             }
         },
         onGoBackToDocumentsClick = onGoBackToDocumentsClick

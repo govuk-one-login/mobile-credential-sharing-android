@@ -12,7 +12,7 @@ import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplate
-import uk.gov.onelogin.sharing.holder.error.generic.GenericErrorScreenContent
+import uk.gov.onelogin.sharing.holder.error.createErrorBodyText
 
 @Composable
 internal fun UnfulfillableErrorScreen(
@@ -30,6 +30,14 @@ internal fun UnfulfillableErrorScreen(
     ErrorScreenTemplate(
         modifier = modifier,
         titleText = stringResource(R.string.holder_unfulfillable_error_title),
+        body = { padding ->
+            listOf(
+                R.string.holder_unfulfillable_error_body_1,
+                R.string.holder_unfulfillable_error_body_2
+            ).forEach { resourceId ->
+                createErrorBodyText(resourceId, padding)
+            }
+        },
         onGoBackToDocumentsClick = onExitJourney
     )
 }
