@@ -12,6 +12,7 @@ import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
+import uk.gov.onelogin.sharing.holder.error.NavigationEvent
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.BUTTON_TEXT
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
@@ -64,7 +65,7 @@ class GenericHolderErrorViewModelTest {
 
             assertThat(
                 expectMostRecentItem(),
-                equalTo(GenericHolderErrorViewModel.NavigationEvent.ExitJourney)
+                equalTo(NavigationEvent.ExitJourney)
             )
         }
     }

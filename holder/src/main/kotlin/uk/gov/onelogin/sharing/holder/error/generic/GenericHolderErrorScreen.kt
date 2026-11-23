@@ -22,7 +22,7 @@ import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplate
 import uk.gov.onelogin.sharing.holder.error.createErrorBodyText
-import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorViewModel.NavigationEvent as ViewModelEvent
+import uk.gov.onelogin.sharing.holder.error.NavigationEvent
 
 @Composable
 internal fun GenericHolderErrorScreen(
@@ -68,7 +68,7 @@ internal fun GenericHolderErrorScreen(
 
     LaunchedEffect(navigationEvent) {
         when (navigationEvent) {
-            is ViewModelEvent.ExitJourney -> {
+            is NavigationEvent.ExitJourney -> {
                 R.string.holder_generic_error_button
                     .let(context::getEnglishString)
                     .let(viewModel::sendButtonEvent)

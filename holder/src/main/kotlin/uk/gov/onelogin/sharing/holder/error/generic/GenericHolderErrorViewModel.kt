@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
 import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
 import uk.gov.onelogin.sharing.core.HolderUiScope
+import uk.gov.onelogin.sharing.holder.error.NavigationEvent
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorAnalyticsEvents.genericHolderErrorScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -40,9 +41,5 @@ class GenericHolderErrorViewModel(
         val reason = (orchestrator.holderSessionState.value as? HolderSessionState.Complete.Failed)
             ?.reason ?: ""
         analyticsLogger.genericHolderErrorScreen(name, reason)
-    }
-
-    sealed interface NavigationEvent {
-        data object ExitJourney : NavigationEvent
     }
 }
