@@ -1,12 +1,8 @@
 package uk.gov.onelogin.sharing.holder.consent
 
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
-import uk.gov.logging.api.v3dot1.model.TrackEvent
-import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
-import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
+import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
 import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.screenEvent
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
 internal object HolderConsentAnalyticsEvents {
 
@@ -17,20 +13,17 @@ internal object HolderConsentAnalyticsEvents {
         id = SCREEN_ID
     )
 
-    internal fun AnalyticsLogger.readPrivacyNoticeButton() = Button(
-        text = "Read about DVS and their privacy notice",
-        params = walletSharingRequiredParameters
-    ).let(this::logEventV3Dot1)
+    internal fun AnalyticsLogger.readPrivacyNoticeButton() = buttonEvent(
+        text = "Read about DVS and their privacy notice"
+    )
 
-    internal fun AnalyticsLogger.agreeAndShareButton() = Button(
-        text = "Agree and share details",
-        params = walletSharingRequiredParameters
-    ).let(this::logEventV3Dot1)
+    internal fun AnalyticsLogger.agreeAndShareButton() = buttonEvent(
+        text = "Agree and share details"
+    )
 
-    internal fun AnalyticsLogger.cancelAndGoBackButton() = Button(
-        text = "Cancel and go back to documents",
-        params = walletSharingRequiredParameters
-    ).let(this::logEventV3Dot1)
+    internal fun AnalyticsLogger.cancelAndGoBackButton() = buttonEvent(
+        text = "Cancel and go back to documents"
+    )
 
     internal fun AnalyticsLogger.moreAboutDvsScreen(name: String) = screenEvent(
         title = name,
