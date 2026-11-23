@@ -1,4 +1,4 @@
-package uk.gov.onelogin.sharing.holder.consent
+package uk.gov.onelogin.sharing.holder.consent.reviewwhatyouwillshare.consentcard
 
 /**
  * Which retention variant of the Agree to Share card to show derived from the attributes'

@@ -15,6 +15,13 @@ object FakeOrchestratorMatchers {
             it?.cancelCount
         }
 
+    fun hasConfirmConsentCount(expected: Int) = hasConfirmConsentCount(equalTo(expected))
+
+    fun hasConfirmConsentCount(matcher: Matcher<in Int>): Matcher<in FakeOrchestrator> =
+        FakeOrchestratorMatcher(matcher) {
+            it?.confirmConsentCount
+        }
+
     fun hasDenyConsentCount(expected: Int) = hasDenyConsentCount(equalTo(expected))
 
     fun hasDenyConsentCount(matcher: Matcher<in Int>): Matcher<in FakeOrchestrator> =

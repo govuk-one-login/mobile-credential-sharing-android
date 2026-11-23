@@ -2,22 +2,37 @@
 <resources>
     <string name="allow_bluetooth">Caniatáu Bluetooth</string>
     <string name="allow_bluetooth_before_sharing_details">Cyn y gallwch rannu manylion o’ch trwydded yrru’r DU, mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth.</string>
+    <string name="ask_administrator_to_allow_bluetooth">Os yw sefydliad yn rheoli’r ffôn hwn, gofynnwch i weinyddwr ganiatáu Bluetooth.</string>
+    <string name="bluetooth_is_restricted">Mae Bluetooth wedi’i gyfyngu</string>
+    <string name="dvs_is_certified_under_uk_digital_verification_services_meaning_that">Mae %1$s wedi’i ardystio o dan Fframwaith Ymddiriedaeth Gwasanaethau Gwirio Digidol y DU. Mae hyn yn golygu bod yn rhaid iddynt:</string>
+    <string name="dvs_is_trusted_to_receive_and_store_details">Mae llywodraeth y DU yn ymddiried yn %1$s i dderbyn a storio eich manylion yn ddiogel.</string>
+    <string name="dvs_s_privacy_notice">Hysbysiad preifatrwydd %1$s</string>
     <string name="find_out_how_sharing_works">Darganfyddwch sut mae rhannu yn gweithio</string>
     <string name="get_ready_to_share">Paratoi i rannu</string>
     <string name="go_back_to_documents">Ewch yn ôl i dogfennau</string>
     <string name="holder_consent_organization_sentence">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap cymeradwy wedi’i bweru gan %1$s</string>
+    <string name="how_long_they_will_keep_your_details" translatable="true">am faint o amser y byddant yn cadw eich manylion</string>
+    <string name="how_your_details_can_be_used" translatable="true">sut y gall eich manylion gael ei ddefnyddio</string>
+    <string name="keep_your_details_only_as_long_as_needed" translatable="true">cadw eich manylion ond cyhyd ag y mae angen</string>
+    <string name="more_about_dvs">Mwy am %1$s</string>
+    <string name="never_use_your_details_for_marketing_purposes" translatable="true">peidio byth â defnyddio’ch manylion at ddibenion marchnata</string>
+    <string name="read_dvs_s_privacy_policy_to_find_out" translatable="true">Darllenwch hysbysiad preifatrwydd %1$s i ddarganfod:</string>
     <string name="sharing_is_currently_unavailable">Nid yw rhannu ar gael ar hyn o bryd</string>
+    <string name="stop_check_dialog_body">Byddwch yn dod â’ch cysylltiad â’r person sy’n gwneud y gwiriad i ben. Ni fydd eich manylion yn cael eu rhannu.</string>
+    <string name="stop_check_dialog_continue_button">Parhau gyda’r gwiriad</string>
+    <string name="stop_check_dialog_stop_button">Stopio’r gwiriad</string>
+    <string name="stop_check_dialog_title">Ydych chi’n siŵr eich bod eisiau stopio’r gwiriad?</string>
+    <string name="the_person_checking_is_using_an_app_powered_by_dvs">Mae’r person sy’n gwneud y gwiriad yn defnyddio ap sy’n cael ei bweru gan %1$s.</string>
+    <string name="turn_off_parental_controls_restricting_bluetooth">Os oes gan y ffôn hwn reolaethau rhieni sy’n cyfyngu ar Bluetooth, diffoddwch nhw yng ngosodiadau eich ffôn.</string>
     <string name="turn_on_bluetooth">Troi Bluetooth ymlaen</string>
     <string name="turn_on_bluetooth_before_sharing">Cyn y gallwch rannu, mae angen i chi droi Bluetooth ymlaen.</string>
+    <string name="use_encryption_when_storing_your_details" translatable="true">ddefnyddio amgryptio wrth storio’ch manylion</string>
     <string name="use_qr_code_to_connect_next">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf.</string>
+    <string name="you_cannot_share_your_details">Mae hyn yn golygu na allwch rannu eich manylion.</string>
     <string name="you_may_be_able_to_use_a_physical_document_instead">Efallai y gallwch ddefnyddio dogfen gorfforol yn lle hynny.</string>
     <string name="you_will_connect_via_qr_later">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny yn nes ymlaen.</string>
     <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>
     <string name="your_details_have_not_been_shared">Nid yw eich manylion wedi’u rhannu.</string>
-    <string name="stop_check_dialog_title">Ydych chi’n siŵr eich bod eisiau stopio’r gwiriad?</string>
-    <string name="stop_check_dialog_body">Byddwch yn dod â’ch cysylltiad â’r person sy’n gwneud y gwiriad i ben. Ni fydd eich manylion yn cael eu rhannu.</string>
-    <string name="stop_check_dialog_stop_button">Stopio’r gwiriad</string>
-    <string name="stop_check_dialog_continue_button">Parhau gyda’r gwiriad</string>
 
     <!-- Consent card -->
     <plurals name="consent_card_heading">
