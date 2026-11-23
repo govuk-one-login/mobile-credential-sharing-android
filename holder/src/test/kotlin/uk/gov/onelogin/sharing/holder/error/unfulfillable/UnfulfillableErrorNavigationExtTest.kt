@@ -5,6 +5,7 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -16,6 +17,9 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -23,6 +27,7 @@ import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.holder.HolderRoutes
+import uk.gov.onelogin.sharing.holder.TestViewModelFactory
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.configureUnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
 import uk.gov.onelogin.sharing.holder.navigation.TestNavHostControllerHelper.prepareController
@@ -36,6 +41,20 @@ class UnfulfillableErrorNavigationExtTest {
 
     private lateinit var controller: TestNavHostController
     private var onBackPressedDispatcherOwner: OnBackPressedDispatcherOwner? = null
+
+    private val viewModel by lazy {
+        UnfulfillableErrorViewModel(
+            analyticsLogger = mockk(relaxed = true)
+        )
+    }
+
+    private val viewModelFactory: MetroViewModelFactory by lazy {
+        TestViewModelFactory(
+            viewModelProviders = mapOf(
+                UnfulfillableErrorViewModel::class to { viewModel }
+            )
+        )
+    }
 
     @Test
     fun `Correctly configures unfulfillable error route`() = runTest {
@@ -102,20 +121,24 @@ class UnfulfillableErrorNavigationExtTest {
 
     @Composable
     private fun Render() {
-        GdsTheme {
-            NavHost(
-                navController = controller,
-                startDestination = "start"
-            ) {
-                startRouteButton {
-                    controller.navigate(HolderRoutes)
-                }
+        CompositionLocalProvider(
+            LocalMetroViewModelFactory provides viewModelFactory
+        ) {
+            GdsTheme {
+                NavHost(
+                    navController = controller,
+                    startDestination = "start"
+                ) {
+                    startRouteButton {
+                        controller.navigate(HolderRoutes)
+                    }
 
-                stubHolderRoute {
-                    controller.navigateToUnfulfillableError()
-                }
+                    stubHolderRoute {
+                        controller.navigateToUnfulfillableError()
+                    }
 
-                configureUnfulfillableErrorRoute()
+                    configureUnfulfillableErrorRoute()
+                }
             }
         }
     }
