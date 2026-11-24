@@ -83,7 +83,6 @@ class ShareCredentialTest {
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
@@ -163,7 +162,7 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button navigates to confirmation dialog for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
+            "Processing establishment" to HolderSessionState.ProcessingEstablishment
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -211,6 +210,7 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button doesn't exist for complete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Cancelled" to HolderSessionState.Complete.Cancelled,
             "Failed" to HolderSessionState.Complete.Failed(
                 SessionError(
@@ -392,7 +392,7 @@ class ShareCredentialTest {
             "Current route: ${controller.currentDestination?.route}"
         ) {
             controller.currentDestination?.route
-                ?.contains("AwaitingVerifierResolution") == true
+                ?.contains("DetailsShared") == true
         }
 
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
