@@ -14,8 +14,8 @@ import uk.gov.android.ui.componentsv2.heading.GdsHeadingStyle
 import uk.gov.android.ui.componentsv2.list.ListItem
 import uk.gov.android.ui.componentsv2.list.ListTitle
 import uk.gov.android.ui.componentsv2.list.TitleType
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2.Text
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreenBody
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreenBody.Text
 import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.android.ui.theme.spacingDouble
 import uk.gov.onelogin.sharing.holder.R
@@ -25,7 +25,7 @@ internal object BodyHelper {
     @Composable
     internal fun String.moreAboutDvsBodyContent(
         onPrivacyPolicyLinkClick: () -> Unit
-    ): PersistentList<LeftAlignedScreenBodyV2> = (
+    ): PersistentList<LeftAlignedScreenBody> = (
         introductionTexts() +
             introductionBullets() +
             privacyNoticeSubheading() +
@@ -41,10 +41,10 @@ internal object BodyHelper {
         R.string.more_about_dvs_body_2
     ).map { resourceId ->
         stringResource(resourceId, this).removeDoubleFullStop()
-    }.map(LeftAlignedScreenBodyV2::Text)
+    }.map(LeftAlignedScreenBody::Text)
 
     @Composable
-    private fun String.introductionBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
+    private fun String.introductionBullets(): LeftAlignedScreenBody.BulletList = listOf(
         R.string.more_about_dvs_bullet_1,
         R.string.more_about_dvs_bullet_2,
         R.string.more_about_dvs_bullet_3
@@ -53,7 +53,7 @@ internal object BodyHelper {
     }.map { bulletText ->
         ListItem(text = bulletText)
     }.let { bulletItems ->
-        LeftAlignedScreenBodyV2.BulletList(
+        LeftAlignedScreenBody.BulletList(
             items = bulletItems.toPersistentList(),
             title = ListTitle(
                 text = stringResource(
@@ -66,8 +66,8 @@ internal object BodyHelper {
     }
 
     @Composable
-    private fun String.privacyNoticeSubheading(): LeftAlignedScreenBodyV2.Title =
-        LeftAlignedScreenBodyV2.Title(
+    private fun String.privacyNoticeSubheading(): LeftAlignedScreenBody.Title =
+        LeftAlignedScreenBody.Title(
             text = stringResource(R.string.more_about_dvs_privacy_subheading, this),
             modifier = Modifier.padding(top = spacingDouble),
             style = GdsHeadingStyle.Title2,
@@ -75,7 +75,7 @@ internal object BodyHelper {
         )
 
     @Composable
-    private fun String.privacyNoticeBullets(): LeftAlignedScreenBodyV2.BulletList = listOf(
+    private fun String.privacyNoticeBullets(): LeftAlignedScreenBody.BulletList = listOf(
         R.string.more_about_dvs_privacy_bullet_1,
         R.string.more_about_dvs_privacy_bullet_2
     ).map { resourceId ->
@@ -83,7 +83,7 @@ internal object BodyHelper {
     }.map { bulletText ->
         ListItem(text = bulletText)
     }.let { bulletItems ->
-        LeftAlignedScreenBodyV2.BulletList(
+        LeftAlignedScreenBody.BulletList(
             items = bulletItems.toPersistentList(),
             title = ListTitle(
                 text = stringResource(R.string.more_about_dvs_privacy_body, this),
@@ -95,7 +95,7 @@ internal object BodyHelper {
     @Composable
     private fun String.privacyNoticeButton(
         onClick: () -> Unit
-    ): LeftAlignedScreenBodyV2.SecondaryButton = LeftAlignedScreenBodyV2.SecondaryButton(
+    ): LeftAlignedScreenBody.SecondaryButton = LeftAlignedScreenBody.SecondaryButton(
         text = stringResource(R.string.more_about_dvs_privacy_policy_link, this),
         onClick = onClick,
         showIcon = true,
