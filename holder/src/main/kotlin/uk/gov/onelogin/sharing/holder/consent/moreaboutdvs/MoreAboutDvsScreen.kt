@@ -1,19 +1,16 @@
 package uk.gov.onelogin.sharing.holder.consent.moreaboutdvs
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
@@ -41,7 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.topappbar.GdsTopAppBarDefaults.scrollBehaviour
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreen
 import uk.gov.android.ui.theme.m3.GdsLocalColorScheme
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.android.ui.theme.minimumTouchTarget
@@ -127,7 +124,7 @@ internal fun MoreAboutDvsContent(
             }
         }
 
-        LeftAlignedScreenV2(
+        LeftAlignedScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .testTag("MoreAboutDvsContent"),
@@ -139,8 +136,7 @@ internal fun MoreAboutDvsContent(
                 onPrivacyPolicyLinkClick = {
                     latestOnPrivacyPolicyLinkClick(state.privacyPolicyUrl)
                 }
-            ),
-            forceScroll = true
+            )
         )
     }
 }

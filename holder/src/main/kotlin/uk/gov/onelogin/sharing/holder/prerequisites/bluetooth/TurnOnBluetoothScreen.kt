@@ -22,9 +22,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.persistentListOf
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreen
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreenBody
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreenButton
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
@@ -84,22 +84,21 @@ internal fun TurnOnBluetoothScreen(
 
 @Composable
 internal fun TurnOnBluetoothContent(onTurnOnBluetooth: () -> Unit, modifier: Modifier = Modifier) {
-    LeftAlignedScreenV2(
+    LeftAlignedScreen(
         modifier = modifier,
         title = stringResource(R.string.holder_turn_on_bluetooth_title),
         body = persistentListOf(
-            LeftAlignedScreenBodyV2.Text(
+            LeftAlignedScreenBody.Text(
                 stringResource(R.string.holder_turn_on_bluetooth_body_1)
             ),
-            LeftAlignedScreenBodyV2.Text(
+            LeftAlignedScreenBody.Text(
                 stringResource(R.string.holder_turn_on_bluetooth_body_2)
             )
         ),
         primaryButton = LeftAlignedScreenButton(
             text = stringResource(R.string.holder_turn_on_bluetooth_button),
             onClick = onTurnOnBluetooth
-        ),
-        forceScroll = true
+        )
     )
 }
 
