@@ -18,6 +18,7 @@ import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolut
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
+import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.navigateToTurnOnBluetooth
@@ -208,7 +209,7 @@ private fun convertSuccessStateToNavigation(
     // DCMAW-24155: Update to use specific route
     SuccessReason.UnfulfillableRequest -> {
         {
-            navController.navigateToHolderSuccessScreen {
+            navController.navigateToUnfulfillableError {
                 exitJourneyOptions()
             }
         }
