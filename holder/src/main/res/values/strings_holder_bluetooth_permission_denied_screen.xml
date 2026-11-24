@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="holder_bluetooth_permission_denied_title" translatable="false">@string/you_need_to_allow_connection_to_nearby_devices</string>
+    <string name="holder_bluetooth_permission_denied_body_1" translatable="false">@string/allow_app_to_connect_to_nearby_devices_to_share</string>
+    <string name="holder_bluetooth_permission_denied_body_2" translatable="false">@string/you_will_connect_via_qr_later</string>
+    <string name="holder_bluetooth_permission_denied_allow_button" translatable="false">@string/allow</string>
+    <string name="holder_bluetooth_permission_denied_cancel_button" translatable="false" tools:ignore="DuplicateStrings">@string/cancel_and_go_back_to_documents</string>
+</resources>

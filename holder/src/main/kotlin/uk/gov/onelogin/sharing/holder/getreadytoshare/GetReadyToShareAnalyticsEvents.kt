@@ -1,12 +1,8 @@
 package uk.gov.onelogin.sharing.holder.getreadytoshare
 
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.logging.api.v3.v3dot1.logger.logEventV3Dot1
-import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
-import uk.gov.logging.api.v3dot1.model.ViewEvent.Screen
 import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
 import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.screenEvent
-import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 
 internal object GetReadyToShareAnalyticsEvents {
     internal fun AnalyticsLogger.getReadyToShareScreen() = screenEvent(
