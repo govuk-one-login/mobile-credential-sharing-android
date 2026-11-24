@@ -17,8 +17,8 @@ import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigatio
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.configureTurnOnBluetooth
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.configureBleRestricted
-import uk.gov.onelogin.sharing.holder.qrcode.QrCodeNavigationExt.configureQrCodeScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission.BluetoothPermissionDeniedNavigationExt.configureBluetoothPermissionDenied
+import uk.gov.onelogin.sharing.holder.qrcode.QrCodeNavigationExt.configureQrCodeScreen
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.configureHolderSuccessScreen
 
 @Keep
