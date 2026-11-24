@@ -5,13 +5,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.height
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import androidx.navigation.testing.TestNavHostController
@@ -35,7 +38,6 @@ import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
-import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.NonStartedHolderSessionStates
@@ -237,6 +239,59 @@ class ShareCredentialTest {
             waitForIdle()
             onNodeWithContentDescription("Close").assertDoesNotExist()
         }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Close button slides the journey down`() = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(
+                    HolderSessionStateStubs.presentingEngagementStub
+                )
+            )
+        )
+
+        composeTestRule.run {
+            setContent { SetupExtendedShareCredential(presenter) }
+            waitForIdle()
+            val rootHeight = onRoot().getUnclippedBoundsInRoot().height
+            val closeButon = onNodeWithContentDescription("Close")
+            val startTop = closeButon.getUnclippedBoundsInRoot().top
+
+            closeButon.performClick()
+
+            waitUntil {
+                closeButon.getUnclippedBoundsInRoot().top == startTop + rootHeight
+            }
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Repeat close taps only cancel once`() = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(
+                HolderSessionStateStubs.presentingEngagementStub
+            )
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.run {
+            setContent { SetupExtendedShareCredential(presenter) }
+            waitForIdle()
+            val closeButon = onNodeWithContentDescription("Close")
+            closeButon.performClick()
+            closeButon.performClick()
+            waitUntil { orchestrator.cancelCount >= 1 }
+            waitForIdle()
+        }
+
+        assertEquals(1, orchestrator.cancelCount)
     }
 
     @Test
