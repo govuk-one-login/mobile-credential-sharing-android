@@ -1,17 +1,19 @@
 package uk.gov.onelogin.sharing.holder.error.unfulfillable
 
-import androidx.activity.compose.BackHandler
+import android.content.Context
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.m3.GdsTheme
@@ -21,6 +23,7 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplate
+import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateViewModel
 import uk.gov.onelogin.sharing.holder.error.NavigationEvent
 import uk.gov.onelogin.sharing.holder.error.createErrorBodyText
 
@@ -28,26 +31,32 @@ import uk.gov.onelogin.sharing.holder.error.createErrorBodyText
 internal fun UnfulfillableErrorScreen(
     modifier: Modifier = Modifier,
     viewModel: UnfulfillableErrorViewModel = metroViewModel(),
+    errorTemplateViewModel: ErrorScreenTemplateViewModel = metroViewModel()
 ) {
-    val context = LocalContext.current
-    val mainScope = rememberCoroutineScope { Dispatchers.Main }
-    val onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
-    val scope = rememberCoroutineScope()
-    val navigationEvent by viewModel.navigationEvent.collectAsStateWithLifecycle(
+    val navigationEvent by errorTemplateViewModel.navigationEvent.collectAsStateWithLifecycle(
         initialValue = null
     )
 
-    val onExitJourney: () -> Unit = {
-        mainScope.launch {
-            onBackPressedDispatcherOwner?.onBackPressedDispatcher?.onBackPressed()
-        }
-    }
-    val buttonBehaviour: () -> Unit = {
-        scope.launch {
-            viewModel.reset()
-        }
-    }
+    UnfulfillableErrorScreenContent(
+        modifier = modifier,
+        navigationEvent = navigationEvent,
+        onLaunch = viewModel::sendScreenEvent,
+        onGoBackToDocumentsClick = errorTemplateViewModel::reset,
+        onUpdateNavigationEvent = errorTemplateViewModel::sendButtonEvent
+    )
+}
 
+@Composable
+private fun UnfulfillableErrorScreenContent(
+    modifier: Modifier = Modifier,
+    navigationEvent: NavigationEvent? = null,
+    onLaunch: (String) -> Unit = {},
+    onGoBackToDocumentsClick: () -> Unit = {},
+    onUpdateNavigationEvent: (String) -> Unit = {}
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val latestOnLaunch by rememberUpdatedState(onLaunch)
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("UnfulfillableErrorScreen")
@@ -58,32 +67,13 @@ internal fun UnfulfillableErrorScreen(
         scope.launch {
             titleRes
                 .let(context::getEnglishString)
-                .let(viewModel::sendScreenEvent)
-        }
-    }
-
-    BackHandler(
-        navigationEvent == null,
-        buttonBehaviour
-    )
-
-    LaunchedEffect(navigationEvent) {
-        when (navigationEvent) {
-            is NavigationEvent.ExitJourney -> {
-                R.string.holder_generic_error_button
-                    .let(context::getEnglishString)
-                    .let(viewModel::sendButtonEvent)
-                onExitJourney()
-            }
-
-            else -> {
-                // do nothing with null events
-            }
+                .let(latestOnLaunch)
         }
     }
 
     ErrorScreenTemplate(
         modifier = modifier,
+        navigationEvent = navigationEvent,
         titleText = stringResource(titleRes),
         body = { padding ->
             listOf(
@@ -93,7 +83,8 @@ internal fun UnfulfillableErrorScreen(
                 createErrorBodyText(resourceId, padding)
             }
         },
-        onGoBackToDocumentsClick = buttonBehaviour
+        onGoBackToDocumentsClick = onGoBackToDocumentsClick,
+        onUpdateNavigationEvent = onUpdateNavigationEvent
     )
 }
 
@@ -101,8 +92,9 @@ internal fun UnfulfillableErrorScreen(
 @Composable
 internal fun GenericHolderErrorScreenPreview() {
     GdsTheme {
-        UnfulfillableErrorScreen(
-            modifier = Modifier.fillMaxSize()
+        UnfulfillableErrorScreenContent(
+            modifier = Modifier.fillMaxSize(),
+            navigationEvent = null,
         )
     }
 }

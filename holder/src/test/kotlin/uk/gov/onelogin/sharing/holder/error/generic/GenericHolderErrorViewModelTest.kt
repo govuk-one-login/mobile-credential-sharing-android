@@ -50,27 +50,6 @@ class GenericHolderErrorViewModelTest {
     }
 
     @Test
-    fun `Exiting the journey resets the orchestrator`() = runTest {
-        viewModel.navigationEvent.test {
-            viewModel.reset().join()
-
-            assertThat(
-                orchestrator,
-                allOf(
-                    hasCancelCount(0),
-                    hasResetCount(1),
-                    hasStartCount(0)
-                )
-            )
-
-            assertThat(
-                expectMostRecentItem(),
-                equalTo(NavigationEvent.ExitJourney)
-            )
-        }
-    }
-
-    @Test
     fun `Sends a screen-level event to the analytics logger`() = runTest {
         viewModel.sendScreenEvent(SCREEN_NAME).join()
 
@@ -102,13 +81,4 @@ class GenericHolderErrorViewModelTest {
             )
         }
 
-    @Test
-    fun `Sends an analytics event for button presses`() = runTest {
-        viewModel.sendButtonEvent(BUTTON_TEXT).join()
-
-        assertThat(
-            analyticsLogger,
-            contains(expectedGoBackToDocumentsButtonEvent)
-        )
-    }
 }

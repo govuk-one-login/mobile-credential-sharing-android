@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.holder.error.generic
 
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.api.analytics.extensions.getEnglishString
@@ -21,36 +18,25 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsS
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
 import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplate
-import uk.gov.onelogin.sharing.holder.error.createErrorBodyText
+import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateViewModel
 import uk.gov.onelogin.sharing.holder.error.NavigationEvent
+import uk.gov.onelogin.sharing.holder.error.createErrorBodyText
 
 @Composable
 internal fun GenericHolderErrorScreen(
     modifier: Modifier = Modifier,
-    viewModel: GenericHolderErrorViewModel = metroViewModel()
+    viewModel: GenericHolderErrorViewModel = metroViewModel(),
+    errorTemplateViewModel: ErrorScreenTemplateViewModel = metroViewModel(),
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
-    val mainScope = rememberCoroutineScope { Dispatchers.Main }
-    val navigationEvent by viewModel.navigationEvent.collectAsStateWithLifecycle(
+    val navigationEvent by errorTemplateViewModel.navigationEvent.collectAsStateWithLifecycle(
         initialValue = null
     )
-    val onExitJourney: () -> Unit = {
-        mainScope.launch {
-            onBackPressedDispatcherOwner?.onBackPressedDispatcher?.onBackPressed()
-        }
-    }
 
     val metrics = rememberMetricsStateHolder()
     LaunchedEffect(Unit) {
         metrics.putScreenState("GenericHolderErrorScreen")
-    }
-
-    val buttonBehaviour: () -> Unit = {
-        scope.launch {
-            viewModel.reset()
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -61,39 +47,24 @@ internal fun GenericHolderErrorScreen(
         }
     }
 
-    BackHandler(
-        navigationEvent == null,
-        buttonBehaviour
+    GenericErrorScreenContent(
+        modifier = modifier,
+        navigationEvent = navigationEvent,
+        onGoBackToDocumentsClick = errorTemplateViewModel::reset,
+        onUpdateNavigationEvent = errorTemplateViewModel::sendButtonEvent
     )
-
-    LaunchedEffect(navigationEvent) {
-        when (navigationEvent) {
-            is NavigationEvent.ExitJourney -> {
-                R.string.holder_generic_error_button
-                    .let(context::getEnglishString)
-                    .let(viewModel::sendButtonEvent)
-                onExitJourney()
-            }
-
-            else -> {
-                // do nothing with null events
-            }
-        }
-    }
-
-    GenericErrorScreenContent(modifier) {
-        buttonBehaviour()
-    }
 }
 
 @Composable
 internal fun GenericErrorScreenContent(
+    navigationEvent: NavigationEvent?,
     modifier: Modifier = Modifier,
-    onGoBackToDocumentsClick: () -> Unit = {}
+    onGoBackToDocumentsClick: () -> Unit = {},
+    onUpdateNavigationEvent: (String) -> Unit = {}
 ) {
-
     ErrorScreenTemplate(
         modifier = modifier,
+        navigationEvent = navigationEvent,
         titleText = stringResource(R.string.holder_generic_error_title),
         body = { padding ->
             listOf(
@@ -103,7 +74,8 @@ internal fun GenericErrorScreenContent(
                 createErrorBodyText(resourceId, padding)
             }
         },
-        onGoBackToDocumentsClick = onGoBackToDocumentsClick
+        onGoBackToDocumentsClick = onGoBackToDocumentsClick,
+        onUpdateNavigationEvent = onUpdateNavigationEvent,
     )
 }
 
@@ -112,7 +84,8 @@ internal fun GenericErrorScreenContent(
 internal fun GenericHolderErrorScreenPreview() {
     GdsTheme {
         GenericErrorScreenContent(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            navigationEvent = null
         )
     }
 }

@@ -29,6 +29,7 @@ import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onN
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.holder.HolderRoutes
 import uk.gov.onelogin.sharing.holder.TestViewModelFactory
+import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateViewModel
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.configureUnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
 import uk.gov.onelogin.sharing.holder.navigation.TestNavHostControllerHelper.prepareController
@@ -55,8 +56,15 @@ class UnfulfillableErrorNavigationExtTest {
         )
     }
 
-    private val viewModel by lazy {
+    private val unfulfillableViewModel by lazy {
         UnfulfillableErrorViewModel(
+            analyticsLogger = mockk(relaxed = true),
+            orchestrator = orchestrator
+        )
+    }
+
+    private val errorTemplateViewModel by lazy {
+        ErrorScreenTemplateViewModel(
             analyticsLogger = mockk(relaxed = true),
             orchestrator = orchestrator
         )
@@ -65,7 +73,8 @@ class UnfulfillableErrorNavigationExtTest {
     private val viewModelFactory: MetroViewModelFactory by lazy {
         TestViewModelFactory(
             viewModelProviders = mapOf(
-                UnfulfillableErrorViewModel::class to { viewModel }
+                UnfulfillableErrorViewModel::class to { unfulfillableViewModel },
+                ErrorScreenTemplateViewModel::class to { errorTemplateViewModel }
             )
         )
     }

@@ -26,11 +26,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 class UnfulfillableErrorViewModel(
     private val analyticsLogger: AnalyticsLogger,
-    private val orchestrator: Orchestrator.Holder,
+    orchestrator: Orchestrator.Holder,
 ) : ViewModel() {
-
-    private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()
-    val navigationEvent: SharedFlow<NavigationEvent?> = _navigationEvent
 
     private val successReason = orchestrator.holderSessionState
         .filterIsInstance<HolderSessionState.Complete.Success>()
@@ -40,15 +37,6 @@ class UnfulfillableErrorViewModel(
             SharingStarted.Eagerly,
             HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
         )
-
-    fun reset() = viewModelScope.launch {
-        orchestrator.reset()
-        _navigationEvent.emit(NavigationEvent.ExitJourney)
-    }
-
-    fun sendButtonEvent(name: String) = viewModelScope.launch {
-        analyticsLogger.buttonEvent(name)
-    }
 
     fun sendScreenEvent(name: String) = viewModelScope.launch {
         analyticsLogger.errorScreenEvent(

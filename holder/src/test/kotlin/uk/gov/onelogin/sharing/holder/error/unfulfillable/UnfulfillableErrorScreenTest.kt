@@ -4,15 +4,21 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.onelogin.sharing.holder.TestViewModelFactory
+import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateViewModel
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
+import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorViewModel
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorAnalyticsTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -42,6 +48,20 @@ class UnfulfillableErrorScreenTest {
             orchestrator = orchestrator,
         )
     }
+
+    private val errorTemplateViewModel by lazy {
+        ErrorScreenTemplateViewModel(
+            analyticsLogger = analyticsLogger,
+            orchestrator = orchestrator
+        )
+    }
+
+    private val viewModelFactory: MetroViewModelFactory = TestViewModelFactory(
+        viewModelProviders = mapOf(
+            UnfulfillableErrorViewModel::class to { viewModel },
+            ErrorScreenTemplateViewModel::class to { errorTemplateViewModel }
+        )
+    )
 
     @Test
     fun `Has valid UI elements`() = runTest {
@@ -144,11 +164,14 @@ class UnfulfillableErrorScreenTest {
 
     @Composable
     private fun Render() {
-        GdsTheme {
-            UnfulfillableErrorScreen(
-                modifier = Modifier.fillMaxSize(),
-                viewModel = viewModel,
-            )
+        CompositionLocalProvider(
+            LocalMetroViewModelFactory provides viewModelFactory
+        ) {
+            GdsTheme {
+                UnfulfillableErrorScreen(
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
     }
 }
