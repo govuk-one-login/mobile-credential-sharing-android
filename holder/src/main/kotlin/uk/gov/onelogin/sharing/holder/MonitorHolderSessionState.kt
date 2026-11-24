@@ -21,6 +21,8 @@ import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigation
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.navigateToTurnOnBluetooth
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.navigateToBleRestricted
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission.BluetoothPermissionDeniedNavigationExt.navigateToBluetoothPermissionDenied
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
@@ -105,6 +107,12 @@ internal suspend fun convertSessionStateToNavigation(
                         exitJourneyOptions()
                     }
                 }
+            } else if (state.requiresBluetoothPermission()) {
+                {
+                    navController.navigateToBluetoothPermissionDenied {
+                        exitJourneyOptions()
+                    }
+                }
             } else {
                 {
                     navController.navigateToGetReadyToShare {
@@ -177,6 +185,12 @@ private fun handleHolderSessionFailure(
                 BluetoothSessionError.BluetoothConnectionError
             )
         )
+    } else if (state.isUnrecoverableBluetoothPrerequisite()) {
+        navController.navigateToBleRestricted {
+            popUpTo<HolderRoutes> {
+                inclusive = true
+            }
+        }
     } else {
         navController.navigateToGenericHolderError {
             popUpTo<HolderRoutes> {

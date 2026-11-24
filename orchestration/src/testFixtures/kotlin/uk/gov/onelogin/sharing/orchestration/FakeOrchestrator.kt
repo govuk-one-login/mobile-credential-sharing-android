@@ -17,6 +17,7 @@ class FakeOrchestrator(
         VerifierSessionState.NotStarted
     ),
     val parser: FakeQrParser = FakeQrParser(),
+    var confirmConsentCount: Int = 0,
     var startCount: Int = 0,
     var cancelCount: Int = 0,
     var resetCount: Int = 0,
@@ -59,7 +60,10 @@ class FakeOrchestrator(
         cancelCount++
     }
 
-    override suspend fun confirmConsent() = onConfirmConsent()
+    override suspend fun confirmConsent() {
+        confirmConsentCount++
+        onConfirmConsent()
+    }
 
     override suspend fun denyConsent() {
         cancelCount++

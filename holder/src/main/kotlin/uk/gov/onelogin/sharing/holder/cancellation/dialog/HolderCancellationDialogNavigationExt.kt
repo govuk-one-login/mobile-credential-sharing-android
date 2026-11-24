@@ -1,16 +1,12 @@
 package uk.gov.onelogin.sharing.holder.cancellation.dialog
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.dialog
 import kotlinx.coroutines.launch
-import uk.gov.android.ui.theme.spacingDouble
 
 data object HolderCancellationDialogNavigationExt {
     fun NavController.navigateToHolderUserCancellationDialog(
@@ -23,8 +19,6 @@ data object HolderCancellationDialogNavigationExt {
             val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
 
             HolderCancellationDialogContents(
-                modifier = Modifier
-                    .padding(spacingDouble),
                 onDismiss = {
                     scope.launch {
                         backPressedDispatcher?.onBackPressedDispatcher?.onBackPressed()

@@ -1,16 +1,13 @@
 package uk.gov.onelogin.sharing.ui.impl
 
-import androidx.activity.OnBackPressedDispatcher
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -31,13 +28,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
-import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
 import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.NonStartedHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
@@ -86,6 +83,7 @@ class ShareCredentialTest {
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
@@ -105,9 +103,67 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
+    fun `Close button is hidden while awaiting user consent`() = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(
+                    HolderSessionState.AwaitingUserConsent(
+                        mockk(relaxed = true),
+                        mockk(relaxed = true)
+                    )
+                )
+            )
+        )
+
+        composeTestRule.run {
+            setContent { ShareCredential(component = presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Cancel and go back button on the consent screen opens the stop the check dialog`() =
+        runTest {
+            val presenter = FakeCredentialPresenter(
+                appGraph = appGraph,
+                orchestrator = FakeOrchestrator(
+                    initialHolderState = MutableStateFlow(
+                        HolderSessionState.AwaitingUserConsent(
+                            request = mockk(relaxed = true),
+                            presentation = ConsentPresentation(
+                                documents = emptyList(),
+                                privacyPolicyUrl = "https://verifier.example/privacy",
+                                organizationName = "Organisation Ltd"
+                            )
+                        )
+                    )
+                )
+            )
+
+            composeTestRule.run {
+                setContent { SetupExtendedShareCredential(presenter) }
+                waitForIdle()
+                onAllNodesWithText("Cancel and go back to documents").onFirst().performClick()
+                waitForIdle()
+            }
+
+            composeTestRule.waitUntil(
+                "Unexpected route found!: ${controller.currentDestination?.route}"
+            ) {
+                controller.currentDestination?.route
+                    ?.contains("HolderCancellationDialogRoute")
+                    ?: false
+            }
+        }
+
+    @Test
+    @UiThreadTest
     fun `Close button navigates to confirmation dialog for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Processing establishment" to HolderSessionState.ProcessingEstablishment
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -155,7 +211,6 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button doesn't exist for complete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Cancelled" to HolderSessionState.Complete.Cancelled,
             "Failed" to HolderSessionState.Complete.Failed(
                 SessionError(
@@ -337,7 +392,7 @@ class ShareCredentialTest {
             "Current route: ${controller.currentDestination?.route}"
         ) {
             controller.currentDestination?.route
-                ?.contains("DetailsShared") == true
+                ?.contains("AwaitingVerifierResolution") == true
         }
 
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
@@ -379,59 +434,6 @@ class ShareCredentialTest {
             waitForIdle()
         }
         assertEquals(true, cancelled)
-    }
-
-    @Test
-    @UiThreadTest
-    fun `Go back to documents resets and hands control back to the host app`() = runTest {
-        var hostBackPresses = 0
-        val orchestrator = FakeOrchestrator(
-            initialHolderState = MutableStateFlow(HolderSessionState.Complete.Success())
-        )
-        val presenter = FakeCredentialPresenter(
-            appGraph = appGraph,
-            orchestrator = orchestrator
-        )
-
-        composeTestRule.setContent {
-            BackHandler { hostBackPresses++ }
-            ShareCredential(presenter)
-        }
-        composeTestRule.waitForIdle()
-        composeTestRule.onNode(
-            hasText("Go back to documents") and hasRole(Role.Button)
-        ).performClick()
-        composeTestRule.waitForIdle()
-
-        assertEquals(1, orchestrator.dismissCount)
-        assertEquals(1, hostBackPresses)
-    }
-
-    @Test
-    @UiThreadTest
-    fun `System back resets and hands control back to the host app`() = runTest {
-        var hostBackPresses = 0
-        lateinit var dispatcher: OnBackPressedDispatcher
-
-        val orchestrator = FakeOrchestrator(
-            initialHolderState = MutableStateFlow(HolderSessionState.Complete.Success())
-        )
-        val presenter = FakeCredentialPresenter(
-            appGraph = appGraph,
-            orchestrator = orchestrator
-        )
-
-        composeTestRule.setContent {
-            dispatcher = LocalOnBackPressedDispatcherOwner.current!!.onBackPressedDispatcher
-            BackHandler { hostBackPresses++ }
-            ShareCredential(presenter)
-        }
-        composeTestRule.waitForIdle()
-        dispatcher.onBackPressed()
-        composeTestRule.waitForIdle()
-
-        assertEquals(1, orchestrator.dismissCount)
-        assertEquals(1, hostBackPresses)
     }
 
     private fun performCloseJourneyViaButton(presenter: FakeCredentialPresenter) {

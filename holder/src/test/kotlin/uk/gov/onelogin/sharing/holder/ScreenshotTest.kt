@@ -11,4 +11,14 @@ private object ModulePackagePreviewsProvider : PackagePreviewsProvider()
 class ScreenshotTest(
     @TestParameter(valuesProvider = ModulePackagePreviewsProvider::class)
     preview: ComposablePreview<AndroidPreviewInfo>
-) : BaseRoborazziScreenshotTest(preview)
+) : BaseRoborazziScreenshotTest(preview) {
+
+    /**
+     * Previews containing an indeterminate progress indicator never become idle, so they are
+     * captured with a paused Compose clock instead.
+     */
+    override val manualClockPreviewClassSimpleNames: Set<String> = setOf(
+        "HolderConsentScreenKt",
+        "HolderPrerequisitesScreenKt"
+    )
+}
