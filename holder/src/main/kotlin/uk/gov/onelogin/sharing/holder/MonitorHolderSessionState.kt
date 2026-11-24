@@ -121,31 +121,7 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Preflight -> {
-            if (state.requiresBluetoothEnabledAfterDenial()) {
-                {
-                    navController.navigateToDeviceBleDenied {
-                        exitJourneyOptions()
-                    }
-                }
-            } else if (state.requiresBluetoothEnabled()) {
-                {
-                    navController.navigateToTurnOnBluetooth {
-                        exitJourneyOptions()
-                    }
-                }
-            } else if (state.requiresBluetoothPermission()) {
-                {
-                    navController.navigateToBluetoothPermissionDenied {
-                        exitJourneyOptions()
-                    }
-                }
-            } else {
-                {
-                    navController.navigateToGetReadyToShare {
-                        exitJourneyOptions()
-                    }
-                }
-            }
+            convertPreflightStateToNavigation(state, navController, exitJourneyOptions)
         }
 
         is HolderSessionState.PresentingEngagement -> {
@@ -209,6 +185,44 @@ internal suspend fun convertSessionStateToNavigation(
         -> {
             // Do nothing with UI-less states
             {}
+        }
+    }
+}
+
+private fun convertPreflightStateToNavigation(
+    state: HolderSessionState.Preflight,
+    navController: NavHostController,
+    exitJourneyOptions: NavOptionsBuilder.() -> Unit
+): () -> Unit = when {
+    state.requiresBluetoothEnabledAfterDenial() -> {
+        {
+            navController.navigateToDeviceBleDenied {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    state.requiresBluetoothEnabled() -> {
+        {
+            navController.navigateToTurnOnBluetooth {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    state.requiresBluetoothPermission() -> {
+        {
+            navController.navigateToBluetoothPermissionDenied {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    else -> {
+        {
+            navController.navigateToGetReadyToShare {
+                exitJourneyOptions()
+            }
         }
     }
 }
