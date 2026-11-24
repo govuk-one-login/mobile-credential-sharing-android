@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 class ErrorScreenTemplateViewModel(
     private val analyticsLogger: AnalyticsLogger,
-    private val orchestrator: Orchestrator.Holder,
+    private val orchestrator: Orchestrator.Holder
 ) : ViewModel() {
 
     private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()

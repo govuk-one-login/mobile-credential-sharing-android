@@ -36,9 +36,9 @@ import uk.gov.onelogin.sharing.holder.R
 
 @Composable
 fun ErrorScreenTemplate(
+    titleText: String,
     navigationEvent: NavigationEvent?,
     modifier: Modifier = Modifier,
-    titleText: String,
     body: (LazyListScope.(Dp) -> Unit) = { _ -> },
     onGoBackToDocumentsClick: () -> Unit = {},
     onUpdateNavigationEvent: (String) -> Unit = {}
@@ -115,10 +115,7 @@ fun ErrorScreenTemplate(
     )
 }
 
-internal fun LazyListScope.createErrorBodyText(
-    @StringRes resourceId: Int,
-    padding: Dp
-) {
+internal fun LazyListScope.createErrorBodyText(@StringRes resourceId: Int, padding: Dp) {
     item {
         Text(
             stringResource(resourceId),

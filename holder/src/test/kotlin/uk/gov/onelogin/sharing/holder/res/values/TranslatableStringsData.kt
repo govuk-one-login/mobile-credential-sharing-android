@@ -166,9 +166,9 @@ enum class TranslatableStringsData(
         resourceId = R.string.the_person_doing_the_check_asked_for_details_not_on_your_documents,
         translations = mapOf(
             "en" to "The person doing the check asked for details that are not on " +
-                    "your documents.",
+                "your documents.",
             "cy" to "Gofynnodd y person sy’n gwneud y gwiriad am fanylion nad ydynt ar " +
-                    "eich dogfennau."
+                "eich dogfennau."
         )
     ),
     TURN_ON_BLUETOOTH_BEFORE_SHARING(

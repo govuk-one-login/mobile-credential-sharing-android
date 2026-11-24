@@ -38,11 +38,10 @@ class UnfulfillableErrorScreenRule(
         useUnmergedTree = useUnmergedTree
     )
 
-    override fun onTitle(useUnmergedTree: Boolean): SemanticsNodeInteraction =
-        onNodeWithText(
-            resources.getString(
-                R.string.holder_unfulfillable_error_title
-            ),
-            useUnmergedTree
-        )
+    override fun onTitle(useUnmergedTree: Boolean): SemanticsNodeInteraction = onNodeWithText(
+        resources.getString(
+            R.string.holder_unfulfillable_error_title
+        ),
+        useUnmergedTree
+    )
 }

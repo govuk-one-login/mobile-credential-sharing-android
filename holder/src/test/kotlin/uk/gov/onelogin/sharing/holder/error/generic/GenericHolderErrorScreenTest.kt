@@ -189,7 +189,7 @@ class GenericHolderErrorScreenTest {
         ) {
             GdsTheme {
                 GenericHolderErrorScreen(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

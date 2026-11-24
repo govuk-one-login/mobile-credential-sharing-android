@@ -90,7 +90,7 @@ internal fun UnfulfillableErrorScreenPreview() {
     GdsTheme {
         UnfulfillableErrorScreenContent(
             modifier = Modifier.fillMaxSize(),
-            navigationEvent = null,
+            navigationEvent = null
         )
     }
 }

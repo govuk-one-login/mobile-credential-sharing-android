@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.error.unfulfillable
 
+import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.MatcherAssert.assertThat
@@ -9,7 +10,6 @@ import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorAnal
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorAnalyticsTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import kotlin.test.Test
 
 class UnfulfillableErrorViewModelTest {
 
@@ -28,7 +28,7 @@ class UnfulfillableErrorViewModelTest {
     private val viewModel by lazy {
         UnfulfillableErrorViewModel(
             analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
 

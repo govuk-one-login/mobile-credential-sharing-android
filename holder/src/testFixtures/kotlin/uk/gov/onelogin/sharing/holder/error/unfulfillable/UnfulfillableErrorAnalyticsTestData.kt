@@ -7,14 +7,13 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.C
 
 object UnfulfillableErrorAnalyticsTestData {
     const val SCREEN_NAME = "Details requested not available"
-    fun expectedScreenEvent(
-        reason: SuccessReason = SuccessReason.UnfulfillableRequest
-    ) = ViewEvent.Error(
-        name = SCREEN_NAME,
-        id = "1c5c61b3-b8d4-4355-9be3-b26440a43b3f",
-        endpoint = "",
-        status = "",
-        reason = reason.toString(),
-        params = walletSharingRequiredParameters,
-    ).asLegacyEvent()
+    fun expectedScreenEvent(reason: SuccessReason = SuccessReason.UnfulfillableRequest) =
+        ViewEvent.Error(
+            name = SCREEN_NAME,
+            id = "1c5c61b3-b8d4-4355-9be3-b26440a43b3f",
+            endpoint = "",
+            status = "",
+            reason = reason.toString(),
+            params = walletSharingRequiredParameters
+        ).asLegacyEvent()
 }

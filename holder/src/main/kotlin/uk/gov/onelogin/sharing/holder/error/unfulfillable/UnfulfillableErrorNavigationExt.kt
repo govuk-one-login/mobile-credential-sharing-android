@@ -16,7 +16,6 @@ object UnfulfillableErrorNavigationExt {
     ) = navigate(UnfulfillableErrorRoute, options)
 
     fun NavGraphBuilder.configureUnfulfillableErrorRoute() {
-
         composable<UnfulfillableErrorRoute> {
             UnfulfillableErrorScreen()
         }

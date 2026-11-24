@@ -26,7 +26,7 @@ import uk.gov.onelogin.sharing.holder.error.createErrorBodyText
 internal fun GenericHolderErrorScreen(
     modifier: Modifier = Modifier,
     viewModel: GenericHolderErrorViewModel = metroViewModel(),
-    errorTemplateViewModel: ErrorScreenTemplateViewModel = metroViewModel(),
+    errorTemplateViewModel: ErrorScreenTemplateViewModel = metroViewModel()
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -75,7 +75,7 @@ internal fun GenericErrorScreenContent(
             }
         },
         onGoBackToDocumentsClick = onGoBackToDocumentsClick,
-        onUpdateNavigationEvent = onUpdateNavigationEvent,
+        onUpdateNavigationEvent = onUpdateNavigationEvent
     )
 }
 

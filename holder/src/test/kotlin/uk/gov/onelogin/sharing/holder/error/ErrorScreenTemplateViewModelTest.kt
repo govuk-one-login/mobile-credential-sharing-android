@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.error
 
 import app.cash.turbine.test
+import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
@@ -15,7 +16,6 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasCancelC
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasResetCount
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasStartCount
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import kotlin.test.Test
 
 class ErrorScreenTemplateViewModelTest {
 
@@ -34,10 +34,9 @@ class ErrorScreenTemplateViewModelTest {
     private val viewModel by lazy {
         ErrorScreenTemplateViewModel(
             analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
-
 
     @Test
     fun `Exiting the journey resets the orchestrator`() = runTest {

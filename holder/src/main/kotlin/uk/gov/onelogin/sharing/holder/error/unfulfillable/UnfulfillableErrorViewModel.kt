@@ -22,7 +22,7 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
 class UnfulfillableErrorViewModel(
     private val analyticsLogger: AnalyticsLogger,
-    orchestrator: Orchestrator.Holder,
+    orchestrator: Orchestrator.Holder
 ) : ViewModel() {
 
     private val successReason = orchestrator.holderSessionState
@@ -37,7 +37,7 @@ class UnfulfillableErrorViewModel(
     fun sendScreenEvent(name: String) = viewModelScope.launch {
         analyticsLogger.unfulfillableErrorScreen(
             name = name,
-            reason = successReason.value,
+            reason = successReason.value
         )
     }
 }

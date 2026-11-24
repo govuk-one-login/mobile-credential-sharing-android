@@ -18,6 +18,8 @@ import com.google.testing.junit.testparameterinjector.KotlinTestParameters.named
 import com.google.testing.junit.testparameterinjector.TestParameter
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import kotlin.test.Test
+import kotlin.test.fail
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -31,8 +33,6 @@ import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTest
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorAnalyticsTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import kotlin.test.Test
-import kotlin.test.fail
 
 @RunWith(RobolectricTestParameterInjector::class)
 class UnfulfillableErrorScreenTest {
@@ -60,7 +60,7 @@ class UnfulfillableErrorScreenTest {
     private val viewModel by lazy {
         UnfulfillableErrorViewModel(
             analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator,
+            orchestrator = orchestrator
         )
     }
 
@@ -127,7 +127,6 @@ class UnfulfillableErrorScreenTest {
             }
         }
     }
-
 
     @Test
     fun `Navigating back to documents also sends an analytics event`() = runTest {
@@ -212,7 +211,7 @@ class UnfulfillableErrorScreenTest {
         ) {
             GdsTheme {
                 UnfulfillableErrorScreen(
-                    modifier = Modifier.fillMaxSize().testTag(contentTag),
+                    modifier = Modifier.fillMaxSize().testTag(contentTag)
                 )
             }
         }

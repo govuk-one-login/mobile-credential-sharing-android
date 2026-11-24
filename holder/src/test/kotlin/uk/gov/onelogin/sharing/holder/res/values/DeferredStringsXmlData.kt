@@ -179,5 +179,5 @@ enum class DeferredStringsXmlData(
     HOLDER_UNFULFILLABLE_ERROR_TITLE(
         defersTo = R.string.details_requested_not_available,
         resourceId = R.string.holder_unfulfillable_error_title
-    ),
+    )
 }
