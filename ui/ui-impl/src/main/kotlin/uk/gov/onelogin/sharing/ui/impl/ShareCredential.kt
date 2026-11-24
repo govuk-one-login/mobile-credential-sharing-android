@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -116,7 +115,7 @@ internal fun ShareCredential(
 
     val onCancel: () -> Unit = {
         if (dismissJob == null && cancelJob?.isActive != true) {
-            scope.launch {
+            cancelJob = scope.launch {
                 if (state.shouldConfirmCancellation()) {
                     withContext(uiDispatcher) {
                         navController.navigateToHolderUserCancellationDialog()
