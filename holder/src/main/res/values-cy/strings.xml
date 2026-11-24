@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="allow">Caniatáu</string>
+    <string name="allow_app_to_connect_to_nearby_devices_to_share">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\’r ap hwn gysylltu â dyfeisiau cyfagos.</string>
     <string name="allow_bluetooth">Caniatáu Bluetooth</string>
     <string name="allow_bluetooth_before_sharing_details">Cyn y gallwch rannu manylion o’ch trwydded yrru’r DU, mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth.</string>
     <string name="ask_administrator_to_allow_bluetooth">Os yw sefydliad yn rheoli’r ffôn hwn, gofynnwch i weinyddwr ganiatáu Bluetooth.</string>
@@ -34,12 +36,10 @@
     <string name="use_qr_code_to_connect_next">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf.</string>
     <string name="you_cannot_share_your_details">Mae hyn yn golygu na allwch rannu eich manylion.</string>
     <string name="you_may_be_able_to_use_a_physical_document_instead">Efallai y gallwch ddefnyddio dogfen gorfforol yn lle hynny.</string>
+    <string name="you_need_to_allow_connection_to_nearby_devices">Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos</string>
     <string name="you_will_connect_via_qr_later">Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny yn nes ymlaen.</string>
     <string name="you_will_need_to_turn_on_bluetooth">Os yw Bluetooth wedi’i ddiffodd ar eich ffôn, bydd angen i chi ei droi ymlaen hefyd.</string>
     <string name="your_details_have_not_been_shared">Nid yw eich manylion wedi’u rhannu.</string>
-    <string name="you_need_to_allow_connection_to_nearby_devices">Mae angen i chi ganiatáu cysylltiad â dyfeisiau cyfagos</string>
-    <string name="allow_app_to_connect_to_nearby_devices_to_share">Er mwyn gallu rhannu, mae angen i chi ganiatáu i\’r ap hwn gysylltu â dyfeisiau cyfagos.</string>
-    <string name="allow">Caniatáu</string>
 
     <string name="cancel_and_go_back_to_documents">Canslo a mynd yn ôl i ddogfennau</string>
 
