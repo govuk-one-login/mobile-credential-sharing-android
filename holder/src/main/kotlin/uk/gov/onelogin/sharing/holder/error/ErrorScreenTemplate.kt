@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.error
 
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.annotation.StringRes
@@ -20,8 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.componentsv2.button.ButtonTypeV2
@@ -45,7 +44,6 @@ fun ErrorScreenTemplate(
 ) {
     val context = LocalContext.current
     val latestOnGoBackToDocumentsClick by rememberUpdatedState(onGoBackToDocumentsClick)
-    val latestOnUpdateNavigationEvent by rememberUpdatedState(onUpdateNavigationEvent)
     val mainScope = rememberCoroutineScope { Dispatchers.Main }
     val onBackPressedDispatcherOwner = LocalOnBackPressedDispatcherOwner.current
     val scope = rememberCoroutineScope()
@@ -66,13 +64,70 @@ fun ErrorScreenTemplate(
         buttonBehaviour
     )
 
+    HandleNavigationEvent(
+        navigationEvent = navigationEvent,
+        context = context,
+        onUpdateNavigationEvent = onUpdateNavigationEvent,
+        onExitJourney = onExitJourney
+    )
+
+    ErrorScreen(
+        modifier = modifier,
+        icon = errorIconContent,
+        title = errorTemplateTitle(titleText),
+        body = body,
+        supportingText = null,
+        primaryButton = errorTemplateButton(buttonBehaviour)
+    )
+}
+
+private fun errorTemplateButton(buttonBehaviour: () -> Unit): @Composable () -> Unit = {
+    GdsButton(
+        text = stringResource(R.string.holder_generic_error_button),
+        buttonType = ButtonTypeV2.Primary(),
+        onClick = buttonBehaviour,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+private fun errorTemplateTitle(titleText: String): @Composable (Dp) -> Unit = { horizontalPadding ->
+    GdsHeading(
+        text = titleText,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = horizontalPadding),
+        textAlign = GdsHeadingAlignment.CenterAligned
+    )
+}
+
+private val errorIconContent: @Composable (Dp) -> Unit = { horizontalPadding ->
+    GdsIcon(
+        image = ImageVector.vectorResource(ErrorScreenIcon.ErrorIcon.icon),
+        contentDescription = stringResource(ErrorScreenIcon.ErrorIcon.description),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = horizontalPadding),
+        color = MaterialTheme.colorScheme.onBackground
+    )
+}
+
+@Composable
+private fun HandleNavigationEvent(
+    navigationEvent: NavigationEvent?,
+    context: Context,
+    onUpdateNavigationEvent: (String) -> Unit,
+    onExitJourney: () -> Unit
+) {
+    val latestOnExitJourney by rememberUpdatedState(onExitJourney)
+    val latestOnUpdateNavigationEvent by rememberUpdatedState(onUpdateNavigationEvent)
+
     LaunchedEffect(navigationEvent) {
         when (navigationEvent) {
             is NavigationEvent.ExitJourney -> {
                 R.string.holder_generic_error_button
                     .let(context::getEnglishString)
                     .let(latestOnUpdateNavigationEvent)
-                onExitJourney()
+                latestOnExitJourney()
             }
 
             else -> {
@@ -80,39 +135,6 @@ fun ErrorScreenTemplate(
             }
         }
     }
-
-    ErrorScreen(
-        modifier = modifier,
-        icon = { horizontalPadding ->
-            GdsIcon(
-                image = ImageVector.vectorResource(ErrorScreenIcon.ErrorIcon.icon),
-                contentDescription = stringResource(ErrorScreenIcon.ErrorIcon.description),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding),
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        },
-        title = { horizontalPadding ->
-            GdsHeading(
-                text = titleText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding),
-                textAlign = GdsHeadingAlignment.CenterAligned
-            )
-        },
-        body = body,
-        supportingText = null,
-        primaryButton = {
-            GdsButton(
-                text = stringResource(R.string.holder_generic_error_button),
-                buttonType = ButtonTypeV2.Primary(),
-                onClick = buttonBehaviour,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    )
 }
 
 internal fun LazyListScope.createErrorBodyText(@StringRes resourceId: Int, padding: Dp) {
