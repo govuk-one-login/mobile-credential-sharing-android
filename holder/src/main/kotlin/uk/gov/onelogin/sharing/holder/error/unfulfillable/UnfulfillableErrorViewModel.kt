@@ -6,18 +6,14 @@ import dev.zacsweers.metro.ContributesIntoMap
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 import dev.zacsweers.metrox.viewmodel.ViewModelKey
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
-import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
-import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.errorScreenEvent
 import uk.gov.onelogin.sharing.core.HolderUiScope
-import uk.gov.onelogin.sharing.holder.error.NavigationEvent
+import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorAnalyticsEvents.unfulfillableErrorScreen
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 
@@ -39,10 +35,9 @@ class UnfulfillableErrorViewModel(
         )
 
     fun sendScreenEvent(name: String) = viewModelScope.launch {
-        analyticsLogger.errorScreenEvent(
+        analyticsLogger.unfulfillableErrorScreen(
             name = name,
-            id = "1c5c61b3-b8d4-4355-9be3-b26440a43b3f",
-            reason = successReason.value.toString(),
+            reason = successReason.value,
         )
     }
 }

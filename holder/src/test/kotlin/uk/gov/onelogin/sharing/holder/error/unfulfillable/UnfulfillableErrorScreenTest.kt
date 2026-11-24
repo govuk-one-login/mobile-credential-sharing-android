@@ -1,35 +1,50 @@
 package uk.gov.onelogin.sharing.holder.error.unfulfillable
 
+import android.content.Context
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
+import androidx.test.core.app.ApplicationProvider
+import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
+import com.google.testing.junit.testparameterinjector.TestParameter
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.TestViewModelFactory
 import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateViewModel
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
-import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorViewModel
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorAnalyticsTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import kotlin.test.Test
 import kotlin.test.fail
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class UnfulfillableErrorScreenTest {
-    @get:Rule
-    val composeTestRule = UnfulfillableErrorScreenRule()
 
+    private val resources = ApplicationProvider.getApplicationContext<Context>().resources
+
+    @get:Rule
+    val composeTestRule = UnfulfillableErrorScreenRule(
+        resources = resources
+    )
+
+    private val contentTag = "content"
     private val analyticsLogger = FakeAnalyticsLogger()
 
     private val initialHolderSessionState: HolderSessionState = HolderSessionState.Complete.Success(
@@ -64,9 +79,22 @@ class UnfulfillableErrorScreenTest {
     )
 
     @Test
-    fun `Has valid UI elements`() = runTest {
+    fun `Has valid UI elements`(
+        @TestParameter content: @Composable () -> Unit = namedTestValues(
+            "Screen-level composable" to {
+                Render()
+            },
+            "Preview composable" to {
+                CompositionLocalProvider(
+                    LocalMetroViewModelFactory provides viewModelFactory
+                ) {
+                    GdsTheme { UnfulfillableErrorScreenPreview() }
+                }
+            }
+        )
+    ) = runTest {
         composeTestRule.run {
-            setContent { Render() }
+            setContent(content)
 
             assertValidUi()
         }
@@ -162,6 +190,21 @@ class UnfulfillableErrorScreenTest {
         }
     }
 
+    @Test
+    fun `Keyboard navigation accesses the bottom CTA`() = runTest {
+        composeTestRule.run {
+            setContent { Render() }
+
+            onNodeWithTag(contentTag).performKeyInput {
+                pressKey(Key.DirectionDown)
+                pressKey(Key.DirectionDown)
+            }
+            waitForIdle()
+
+            assertButtonIsFocused()
+        }
+    }
+
     @Composable
     private fun Render() {
         CompositionLocalProvider(
@@ -169,7 +212,7 @@ class UnfulfillableErrorScreenTest {
         ) {
             GdsTheme {
                 UnfulfillableErrorScreen(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().testTag(contentTag),
                 )
             }
         }

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -24,7 +25,10 @@ abstract class ErrorScreenTemplateRule(
         .resources
 ) : ComposeContentTestRule by composeTestRule {
 
-    fun assertValidButton(useUnmergedTree: Boolean = true) = onButton(useUnmergedTree)
+    fun assertButtonIsFocused(useUnmergedTree: Boolean = false) = onButton(useUnmergedTree)
+        .assertIsFocused()
+
+    fun assertValidButton(useUnmergedTree: Boolean = false) = onButton(useUnmergedTree)
         .assertExists()
         .assertHasClickAction()
         .assertIsEnabled()
@@ -38,13 +42,13 @@ abstract class ErrorScreenTemplateRule(
 
     abstract fun assertValidUi(useUnmergedTree: Boolean = false)
 
-    fun onButton(useUnmergedTree: Boolean = true) = onNodeWithText(
+    fun onButton(useUnmergedTree: Boolean = false) = onNodeWithText(
         resources.getString(R.string.holder_generic_error_button),
         useUnmergedTree = useUnmergedTree
     )
 
     abstract fun onTitle(useUnmergedTree: Boolean = false): SemanticsNodeInteraction
 
-    fun performGoBackToDocumentsClick(useUnmergedTree: Boolean = true) = onButton(useUnmergedTree)
+    fun performGoBackToDocumentsClick(useUnmergedTree: Boolean = false) = onButton(useUnmergedTree)
         .performClick()
 }

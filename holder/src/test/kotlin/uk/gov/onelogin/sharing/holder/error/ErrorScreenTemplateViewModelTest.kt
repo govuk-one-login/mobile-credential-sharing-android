@@ -8,12 +8,8 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
 import uk.gov.logging.analytics.FakeAnalyticsLogger
-import uk.gov.onelogin.sharing.holder.error.NavigationEvent
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.BUTTON_TEXT
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
-import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorAnalyticsTestData.SCREEN_NAME
-import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorAnalyticsTestData.expectedScreenEvent
-import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorViewModel
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasCancelCount
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasResetCount
@@ -21,7 +17,7 @@ import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasStartCo
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import kotlin.test.Test
 
-class ErrorScreenTemplateViewModelText {
+class ErrorScreenTemplateViewModelTest {
 
     private val analyticsLogger = FakeAnalyticsLogger()
 

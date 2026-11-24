@@ -57,8 +57,8 @@ internal fun GenericHolderErrorScreen(
 
 @Composable
 internal fun GenericErrorScreenContent(
-    navigationEvent: NavigationEvent?,
     modifier: Modifier = Modifier,
+    navigationEvent: NavigationEvent? = null,
     onGoBackToDocumentsClick: () -> Unit = {},
     onUpdateNavigationEvent: (String) -> Unit = {}
 ) {

@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.holder.error.unfulfillable
 
-import android.content.Context
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,8 +11,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.api.analytics.extensions.getEnglishString
@@ -47,7 +43,7 @@ internal fun UnfulfillableErrorScreen(
 }
 
 @Composable
-private fun UnfulfillableErrorScreenContent(
+internal fun UnfulfillableErrorScreenContent(
     modifier: Modifier = Modifier,
     navigationEvent: NavigationEvent? = null,
     onLaunch: (String) -> Unit = {},
@@ -90,7 +86,7 @@ private fun UnfulfillableErrorScreenContent(
 
 @PreviewContent
 @Composable
-internal fun GenericHolderErrorScreenPreview() {
+internal fun UnfulfillableErrorScreenPreview() {
     GdsTheme {
         UnfulfillableErrorScreenContent(
             modifier = Modifier.fillMaxSize(),
