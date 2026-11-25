@@ -1,11 +1,9 @@
-package uk.gov.onelogin.sharing.testapp.credential.select
+package uk.gov.onelogin.sharing.testapp.credential.attribute.select
 
 import kotlin.test.assertEquals
 import org.junit.Test
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.DocumentType
 import uk.gov.onelogin.sharing.orchestration.verificationrequest.toItemsRequest
-import uk.gov.onelogin.sharing.testapp.credential.attribute.select.DocRequestMode
-import uk.gov.onelogin.sharing.testapp.credential.attribute.select.VerifierAttributeOption
 
 class VerifierAttributeOptionTest {
     private val option = VerifierAttributeOption.PORTRAIT_AND_DRIVING_PRIVILEGES_RETAIN
