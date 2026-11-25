@@ -42,6 +42,15 @@ enum class VerifierAttributeOption(
             )
         )
     ),
+    PORTRAIT_AND_DRIVING_PRIVILEGES_RETAIN(
+        displayName = "Portrait and Driving Privileges (Retain)",
+        attributeGroup = AttributeGroup(
+            mapOf(
+                MdlAttribute.Portrait to true,
+                MdlAttribute.DrivingPrivileges to true
+            )
+        )
+    ),
     MULTI_DOC_REQUEST(
         displayName = "Multi Doc Request: Unsupported + Valid (eVRC + mDL)",
         attributeGroup = AttributeGroup(

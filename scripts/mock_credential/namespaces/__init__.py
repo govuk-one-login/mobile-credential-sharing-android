@@ -41,6 +41,17 @@ SAMPLE_ITEMS = {
         {"digestID": 9, "elementIdentifier": "age_over_18", "elementValue": True},
         {"digestID": 10, "elementIdentifier": "age_over_21", "elementValue": False},
         {"digestID": 11, "elementIdentifier": "age_over_25", "elementValue": False},
+        {
+            "digestID": 13,
+            "elementIdentifier": "driving_privileges",
+            "elementValue": [
+                {
+                    "vehicle_category_code": "B",
+                    "issue_date": CBORTag(1004, "2024-01-01"),
+                    "expiry_date": CBORTag(1004, "2034-01-01")
+                }
+            ]
+        }
     ],
     "org.iso.18013.5.1.GB": [
         {"digestID": 12, "elementIdentifier": "welsh_licence", "elementValue": False},
