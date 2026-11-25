@@ -24,7 +24,7 @@ internal object CrlHttpClientFactory {
         return clients.getOrPut(directory.absolutePath) {
             KtorHttpClient(
                 userAgentGenerator = SdkUserAgent,
-                rawCache = RawCacheConfig(directory)
+                rawCache = RawCacheConfig.Builder(directory).build()
             )
         }
     }
