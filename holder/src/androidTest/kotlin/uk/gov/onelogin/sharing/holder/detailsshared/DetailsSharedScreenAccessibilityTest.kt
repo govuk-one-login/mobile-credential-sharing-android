@@ -24,7 +24,7 @@ class DetailsSharedScreenAccessibilityTest {
     private val orchestrator by lazy {
         FakeOrchestrator(
             initialHolderState = MutableStateFlow(
-                HolderSessionState.AwaitingVerifierResolution
+                HolderSessionState.AwaitingVerifierResolution()
             )
         )
     }

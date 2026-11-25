@@ -1701,7 +1701,7 @@ class HolderOrchestratorTest {
 
     @Test
     fun `GATT End in awaitingVerifierResolution supplies DetailsShared`() = runTest {
-        initialStates[0] = HolderSessionState.AwaitingVerifierResolution
+        initialStates[0] = HolderSessionState.AwaitingVerifierResolution()
         val transport = FakePeripheralBluetoothTransport()
         val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
         backgroundScope.launch { orchestrator.holderSessionState.collect { } }
