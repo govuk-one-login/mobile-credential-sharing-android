@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,9 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenBodyV2
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenButton
-import uk.gov.android.ui.patterns.leftalignedscreen.LeftAlignedScreenV2
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreen
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreenBody
+import uk.gov.android.ui.patterns.leftalignedscreen.v3.LeftAlignedScreenButton
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
@@ -89,7 +88,7 @@ internal fun GetReadyToShareContent(
     onAllowBluetoothClick: () -> Unit = {},
     onFindOutMoreButtonClick: () -> Unit = {}
 ) {
-    LeftAlignedScreenV2(
+    LeftAlignedScreen(
         modifier = modifier,
         title = stringResource(R.string.get_ready_to_share_header),
         body = listOf(
@@ -99,7 +98,7 @@ internal fun GetReadyToShareContent(
         ).map {
             stringResource(it)
         }.map {
-            LeftAlignedScreenBodyV2.Text(text = it)
+            LeftAlignedScreenBody.Text(text = it)
         }.toPersistentList(),
         primaryButton = LeftAlignedScreenButton(
             text = stringResource(R.string.get_ready_to_share_allow_bluetooth),
@@ -110,8 +109,7 @@ internal fun GetReadyToShareContent(
             text = stringResource(R.string.get_ready_to_share_find_out_more),
             onClick = onFindOutMoreButtonClick,
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(15.dp))
-        ),
-        forceScroll = true
+        )
     )
 }
 

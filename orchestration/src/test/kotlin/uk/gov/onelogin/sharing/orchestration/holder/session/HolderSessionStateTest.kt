@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.AwaitingUserConsent
@@ -19,7 +20,11 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.P
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingEstablishment
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ProcessingResponse
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.ReadyToPresent
+import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.api.state.CameraState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 
 @RunWith(TestParameterInjector::class)
 class HolderSessionStateTest {
@@ -186,6 +191,101 @@ class HolderSessionStateTest {
                 BluetoothState.PermissionDeniedPermanently
             )
                 .requiresBluetoothEnabled()
+        }
+    }
+
+    @Test
+    fun `Failed is an unrecoverable Bluetooth prerequisite when Bluetooth is restricted`() {
+        val failed = Failed(
+            SessionError(
+                "Device cannot perform journey",
+                SessionErrorReason.UnrecoverablePrerequisite(
+                    MissingPrerequisites.Bluetooth(BluetoothState.Restricted)
+                )
+            )
+        )
+        assertTrue { failed.isUnrecoverableBluetoothPrerequisite() }
+    }
+
+    @Test
+    fun `Failed is an unrecoverable Bluetooth prerequisite when Bluetooth is unsupported`() {
+        val failed = Failed(
+            SessionError(
+                "Device cannot perform journey",
+                SessionErrorReason.UnrecoverablePrerequisite(
+                    MissingPrerequisites.Bluetooth(BluetoothState.Unsupported)
+                )
+            )
+        )
+        assertTrue { failed.isUnrecoverableBluetoothPrerequisite() }
+    }
+
+    @Test
+    fun `Failed is not an unrecoverable Bluetooth prerequisite when Bluetooth is recoverable`() {
+        val failed = Failed(
+            SessionError(
+                "Device cannot perform journey",
+                SessionErrorReason.UnrecoverablePrerequisite(
+                    MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+                )
+            )
+        )
+        assertIs<SessionErrorReason.UnrecoverablePrerequisite>(failed.sessionReason)
+        assertFalse { failed.isUnrecoverableBluetoothPrerequisite() }
+    }
+
+    @Test
+    fun `A Camera prerequisite failure emits Failed`() {
+        val failed = Failed(
+            SessionError(
+                "Device cannot perform journey",
+                SessionErrorReason.UnrecoverablePrerequisite(
+                    MissingPrerequisites.Camera(CameraState.Restricted)
+                )
+            )
+        )
+        assertIs<SessionErrorReason.UnrecoverablePrerequisite>(failed.sessionReason)
+        assertFalse { failed.isUnrecoverableBluetoothPrerequisite() }
+    }
+
+    @Test
+    fun `A generic throwable failure emits Failed`() {
+        val failed = Failed(
+            SessionError(
+                "Something went wrong",
+                SessionErrorReason.UnrecoverableThrowable(Exception())
+            )
+        )
+        assertIs<SessionErrorReason.UnrecoverableThrowable>(failed.sessionReason)
+        assertFalse { failed.isUnrecoverableBluetoothPrerequisite() }
+    }
+
+    @Test
+    fun `Preflight requires Bluetooth permission when permission not granted`() {
+        assertTrue {
+            HolderSessionStateStubs.preflightBluetoothPermissionDenied.requiresBluetoothPermission()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth permission for missing prerequisites`() {
+        assertFalse { Preflight(listOf()).requiresBluetoothPermission() }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth permission when Bluetooth is powered off`() {
+        assertFalse {
+            HolderSessionStateStubs.preflightWithoutBluetooth.requiresBluetoothPermission()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth permission when permission denied permanently`() {
+        assertFalse {
+            HolderSessionStateStubs.preflightWithBluetooth(
+                BluetoothState.PermissionDeniedPermanently
+            )
+                .requiresBluetoothPermission()
         }
     }
 }

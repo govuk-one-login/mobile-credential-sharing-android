@@ -16,6 +16,8 @@ import uk.gov.onelogin.sharing.holder.loading.LoadingRoute
 import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedRoute
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission.BluetoothPermissionDeniedRoute
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
@@ -70,6 +72,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     TurnOnBluetoothRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<TurnOnBluetoothRoute>()
+                )
+            },
+            Triple(
+                "'Preflight (Bluetooth permission denied)' -> BluetoothPermissionDeniedRoute",
+                HolderSessionStateStubs.preflightBluetoothPermissionDenied
+            ) {
+                instanceOf<BluetoothPermissionDeniedRoute>(
+                    BluetoothPermissionDeniedRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<BluetoothPermissionDeniedRoute>()
                 )
             },
             Triple(
@@ -138,6 +150,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     BtConnectionErrorRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<BtConnectionErrorRoute>()
+                )
+            },
+            Triple(
+                "Failure: Unrecoverable Bluetooth prerequisite",
+                HolderSessionStateStubs.restrictedBluetoothFailure
+            ) {
+                instanceOf<BleRestrictedRoute>(
+                    BleRestrictedRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<BleRestrictedRoute>()
                 )
             },
             Triple(
