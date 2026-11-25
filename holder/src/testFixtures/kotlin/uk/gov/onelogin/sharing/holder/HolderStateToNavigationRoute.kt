@@ -7,11 +7,13 @@ import com.google.testing.junit.testparameterinjector.TestParametersValuesProvid
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
+import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionRoute
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
-import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
+import uk.gov.onelogin.sharing.holder.loading.LoadingRoute
+import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedRoute
@@ -21,8 +23,6 @@ import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
-import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionPresentation
-import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 
 private typealias InputParameters = Triple<
@@ -105,6 +105,36 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
+                "'AwaitingVerifierResolution' -> LoadingRoute(SharingDetails)",
+                HolderSessionState.AwaitingVerifierResolution()
+            ) {
+                equalTo(
+                    LoadingRoute(LoadingScreenType.SharingDetails)
+                ).matches(
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
+                )
+            },
+            Triple(
+                "'ProcessingResponse' -> LoadingRoute(SharingDetails)",
+                HolderSessionState.ProcessingResponse()
+            ) {
+                equalTo(
+                    LoadingRoute(LoadingScreenType.SharingDetails)
+                ).matches(
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
+                )
+            },
+            Triple(
+                "'ProcessingEstablishment' -> LoadingRoute(GettingDetails)",
+                HolderSessionState.ProcessingEstablishment()
+            ) {
+                equalTo(
+                    LoadingRoute(LoadingScreenType.GettingDetails)
+                ).matches(
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
+                )
+            },
+            Triple(
                 "Failure: Bluetooth connection error -> BtConnectionErrorRoute",
                 HolderSessionState.Complete.Failed(
                     SessionError(
@@ -180,16 +210,15 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'Complete.Success(Approved)' -> DetailsSharedRoute",
+                "'Complete.Success(Approved)' -> AwaitingVerifierResolutionRoute",
                 HolderSessionState.Complete.Success(
-                    HolderSessionState.Complete.SuccessReason.Approved,
-                    ResolutionPresentation(ResolutionResult.DetailsShared)
+                    HolderSessionState.Complete.SuccessReason.Approved
                 )
             ) {
-                instanceOf<DetailsSharedRoute>(
-                    DetailsSharedRoute::class.java
+                instanceOf<AwaitingVerifierResolutionRoute>(
+                    AwaitingVerifierResolutionRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<DetailsSharedRoute>()
+                    currentBackStackEntry?.toRoute<AwaitingVerifierResolutionRoute>()
                 )
             }
         )

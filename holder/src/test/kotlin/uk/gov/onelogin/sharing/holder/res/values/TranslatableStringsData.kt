@@ -198,6 +198,20 @@ enum class TranslatableStringsData(
             "cy" to "Efallai y gallwch ddefnyddio dogfen gorfforol yn lle hynny."
         )
     ),
+    HOLDER_GETTING_DETAILS_LABEL(
+        resourceId = R.string.holder_getting_details_label,
+        translations = mapOf(
+            "en" to "Getting list of details",
+            "cy" to "Casglu rhestr o fanylion"
+        )
+    ),
+    HOLDER_SHARING_DETAILS_LABEL(
+        resourceId = R.string.holder_sharing_details_label,
+        translations = mapOf(
+            "en" to "Sharing your details",
+            "cy" to "Rhannu eich manylion"
+        )
+    ),
     YOU_WILL_CONNECT_VIA_QR_LATER(
         resourceId = R.string.you_will_connect_via_qr_later,
         translations = mapOf(

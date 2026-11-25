@@ -24,13 +24,13 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val notStartedTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.ProcessingEstablishment(),
             HolderSessionState.AwaitingUserConsent(
                 deviceRequestStub,
                 HolderSessionStateStubs.consentPresentationStub
             ),
-            HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution,
+            HolderSessionState.ProcessingResponse(),
+            HolderSessionState.AwaitingVerifierResolution(),
             HolderSessionState.SendingTermination,
             HolderSessionStateStubs.successStub,
             HolderSessionStateStubs.userCancellation
@@ -41,13 +41,13 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
         private val preflightTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.ProcessingEstablishment(),
             HolderSessionState.AwaitingUserConsent(
                 deviceRequestStub,
                 HolderSessionStateStubs.consentPresentationStub
             ),
-            HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution,
+            HolderSessionState.ProcessingResponse(),
+            HolderSessionState.AwaitingVerifierResolution(),
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionStateStubs.preflightEmptyPermissions to it
@@ -56,13 +56,13 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
-            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.ProcessingEstablishment(),
             HolderSessionState.AwaitingUserConsent(
                 deviceRequestStub,
                 HolderSessionStateStubs.consentPresentationStub
             ),
-            HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution,
+            HolderSessionState.ProcessingResponse(),
+            HolderSessionState.AwaitingVerifierResolution(),
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.ReadyToPresent to it
@@ -76,8 +76,8 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
                 deviceRequestStub,
                 HolderSessionStateStubs.consentPresentationStub
             ),
-            HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution,
+            HolderSessionState.ProcessingResponse(),
+            HolderSessionState.AwaitingVerifierResolution(),
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.PresentingEngagement("") to it
@@ -87,23 +87,23 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.ProcessingEstablishment,
-            HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution
+            HolderSessionState.ProcessingEstablishment(),
+            HolderSessionState.ProcessingResponse(),
+            HolderSessionState.AwaitingVerifierResolution()
         ).map {
-            HolderSessionState.ProcessingEstablishment to it
+            HolderSessionState.ProcessingEstablishment() to it
         }
         private val awaitingUserConsentTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.ProcessingEstablishment(),
             HolderSessionState.AwaitingUserConsent(
                 deviceRequestStub,
                 HolderSessionStateStubs.consentPresentationStub
             ),
-            HolderSessionState.AwaitingVerifierResolution,
+            HolderSessionState.AwaitingVerifierResolution(),
             HolderSessionStateStubs.successStub
         ).map {
             HolderSessionState.AwaitingUserConsent(
@@ -116,42 +116,42 @@ class InvalidHolderSessionStateTransitions : TestParametersValuesProvider() {
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.ProcessingEstablishment(),
             HolderSessionState.AwaitingUserConsent(
                 deviceRequestStub,
                 HolderSessionStateStubs.consentPresentationStub
             ),
-            HolderSessionState.ProcessingResponse
+            HolderSessionState.ProcessingResponse()
         ).map {
-            HolderSessionState.ProcessingResponse to it
+            HolderSessionState.ProcessingResponse() to it
         }
         private val awaitingVerifierResolutionTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.ProcessingEstablishment(),
             HolderSessionState.AwaitingUserConsent(
                 deviceRequestStub,
                 HolderSessionStateStubs.consentPresentationStub
             ),
-            HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution
+            HolderSessionState.ProcessingResponse(),
+            HolderSessionState.AwaitingVerifierResolution()
         ).map {
-            HolderSessionState.AwaitingVerifierResolution to it
+            HolderSessionState.AwaitingVerifierResolution() to it
         }
         private val terminatingSessionTransitions = listOf(
             HolderSessionState.NotStarted,
             HolderSessionStateStubs.preflightEmptyPermissions,
             HolderSessionState.ReadyToPresent,
             HolderSessionState.PresentingEngagement(""),
-            HolderSessionState.ProcessingEstablishment,
+            HolderSessionState.ProcessingEstablishment(),
             HolderSessionState.AwaitingUserConsent(
                 deviceRequestStub,
                 HolderSessionStateStubs.consentPresentationStub
             ),
-            HolderSessionState.ProcessingResponse,
-            HolderSessionState.AwaitingVerifierResolution,
+            HolderSessionState.ProcessingResponse(),
+            HolderSessionState.AwaitingVerifierResolution(),
             HolderSessionState.SendingTermination
         ).map {
             HolderSessionState.SendingTermination to it

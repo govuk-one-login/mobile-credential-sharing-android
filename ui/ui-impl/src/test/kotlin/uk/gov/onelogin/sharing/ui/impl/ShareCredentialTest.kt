@@ -1,5 +1,7 @@
 package uk.gov.onelogin.sharing.ui.impl
 
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -162,7 +164,7 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button navigates to confirmation dialog for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Processing establishment" to HolderSessionState.ProcessingEstablishment
+            "Processing establishment" to HolderSessionState.ProcessingEstablishment()
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(
@@ -208,9 +210,30 @@ class ShareCredentialTest {
 
     @Test
     @UiThreadTest
+    fun `Close button doesn't exist while sharing details`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Processing response" to HolderSessionState.ProcessingResponse(),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution()
+        )
+    ) = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(state)
+            )
+        )
+
+        composeTestRule.run {
+            setContent { ShareCredential(component = presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    @UiThreadTest
     fun `Close button doesn't exist for complete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution,
             "Cancelled" to HolderSessionState.Complete.Cancelled,
             "Failed" to HolderSessionState.Complete.Failed(
                 SessionError(
@@ -392,12 +415,58 @@ class ShareCredentialTest {
             "Current route: ${controller.currentDestination?.route}"
         ) {
             controller.currentDestination?.route
-                ?.contains("DetailsShared") == true
+                ?.contains("AwaitingVerifierResolution") == true
         }
 
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progressIndicator").assertDoesNotExist()
         assertEquals(0, orchestrator.startCount)
+    }
+
+    @Test
+    @UiThreadTest
+    fun `System back is swallowed while sharing details`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Processing response" to HolderSessionState.ProcessingResponse(),
+            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution()
+        )
+    ) = runTest {
+        val orchestrator = FakeOrchestrator(
+            initialHolderState = MutableStateFlow(state)
+        )
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+        var backDispatcher: OnBackPressedDispatcherOwner? = null
+
+        composeTestRule.setContent {
+            backDispatcher = LocalOnBackPressedDispatcherOwner.current
+            val uiGraph = remember(presenter.appGraph, presenter.orchestrator) {
+                createGraphFactory<HolderUiGraph.Factory>()
+                    .create(presenter.appGraph, presenter.orchestrator)
+            }
+            controller = TestNavHostController(LocalContext.current).apply {
+                navigatorProvider.addNavigator(ComposeNavigator())
+                navigatorProvider.addNavigator(DialogNavigator())
+            }
+
+            ShareCredential(
+                analyticsLogger = analyticsLogger,
+                orchestrator = orchestrator,
+                holderSessionState = orchestrator.holderSessionState,
+                viewModelFactory = uiGraph.metroViewModelFactory,
+                navController = controller
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        val routeBeforeBack = controller.currentDestination?.route
+        backDispatcher!!.onBackPressedDispatcher.onBackPressed()
+        composeTestRule.waitForIdle()
+
+        assertEquals(routeBeforeBack, controller.currentDestination?.route)
+        assertEquals(0, orchestrator.cancelCount)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

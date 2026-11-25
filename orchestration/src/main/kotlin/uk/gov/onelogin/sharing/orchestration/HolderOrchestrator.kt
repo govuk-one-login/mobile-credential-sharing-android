@@ -300,7 +300,7 @@ class HolderOrchestrator(
                 return
             }
 
-            safeTransitionTo(HolderSessionState.ProcessingResponse)
+            safeTransitionTo(HolderSessionState.ProcessingResponse())
             sendDeviceResponse(document = document, skDevice = submission.skDevice)
         } catch (e: CredentialSigningException.Recoverable) {
             // Neutral outcome: keep the session active on the consent screen.
@@ -350,7 +350,7 @@ class HolderOrchestrator(
         }
 
         if (sent) {
-            safeTransitionTo(HolderSessionState.AwaitingVerifierResolution)
+            safeTransitionTo(HolderSessionState.AwaitingVerifierResolution())
         } else {
             failWith(
                 message = "Failed to send DeviceResponse",
@@ -402,8 +402,6 @@ class HolderOrchestrator(
 
             signingJob?.cancel()
             consentInFlight.set(false)
-
-            safeTransitionTo(HolderSessionState.ProcessingResponse)
 
             val skDevice = checkNotNull(context.skDevice) {
                 "Missing skDevice"
@@ -507,7 +505,7 @@ class HolderOrchestrator(
     }
 
     @Suppress("LongMethod")
-    private fun handleMdocState(state: PeripheralBluetoothState) {
+    private suspend fun handleMdocState(state: PeripheralBluetoothState) {
         logger.debug(logTag, "state = $state")
 
         val currentState = sessionFlow.value.currentState.value
@@ -530,7 +528,7 @@ class HolderOrchestrator(
             is PeripheralBluetoothState.Connected -> {
                 sessionTimer.start(INACTIVITY_TIMEOUT) { cancel() }
 
-                safeTransitionTo(HolderSessionState.ProcessingEstablishment)
+                safeTransitionTo(HolderSessionState.ProcessingEstablishment())
                 appCoroutineScope.launch {
                     peripheralBluetoothTransport.stopAdvertising()
                 }
@@ -1191,8 +1189,10 @@ class HolderOrchestrator(
 
         if (sent && sessionDataToSend != null) {
             holderSessionTerminator.terminate()
+        } else if (sendEndCommand) {
+            holderSessionTerminator.terminate()
         } else {
-            stopAdvertising(sendEndCommand = sendEndCommand)
+            stopAdvertising(sendEndCommand = false)
         }
 
         safeTransitionTo(finalState)
