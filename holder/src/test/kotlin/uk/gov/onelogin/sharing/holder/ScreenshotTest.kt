@@ -19,6 +19,7 @@ class ScreenshotTest(
      */
     override val manualClockPreviewClassSimpleNames: Set<String> = setOf(
         "HolderConsentScreenKt",
-        "HolderPrerequisitesScreenKt"
+        "HolderPrerequisitesScreenKt",
+        "LoadingScreenKt"
     )
 }

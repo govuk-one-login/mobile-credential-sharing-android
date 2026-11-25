@@ -22,7 +22,7 @@ class HolderCancellationDialogViewModelTest {
     val dispatcherRule = MainDispatcherRule()
 
     private val holderState = MutableStateFlow<HolderSessionState>(
-        HolderSessionState.ProcessingEstablishment
+        HolderSessionState.ProcessingEstablishment()
     )
     private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
     private val analyticsLogger = FakeAnalyticsLogger()

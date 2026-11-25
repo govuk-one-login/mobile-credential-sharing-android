@@ -13,6 +13,7 @@ import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDial
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configureHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.configureGenericHolderError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.configureGetReadyToShare
+import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.configureLoadingScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.configureTurnOnBluetooth
@@ -37,6 +38,7 @@ data object HolderRoutes {
             configureBluetoothPermissionDenied()
             configureHolderPresentQrScreen()
             configureHolderConsentScreen()
+            configureLoadingScreen()
             configureBluetoothConnectionErrorRoute()
             configureAwaitingVerifierResolutionScreen()
             configureHolderSuccessScreen()

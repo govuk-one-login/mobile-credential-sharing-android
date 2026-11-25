@@ -17,8 +17,11 @@ import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluet
 import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
+import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
+import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoadingScreen
+import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.navigateToTurnOnBluetooth
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.navigateToBleRestricted
@@ -29,6 +32,7 @@ import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigat
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
+import uk.gov.onelogin.sharing.orchestration.holder.session.ProgressPresentation
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 /**
@@ -89,6 +93,20 @@ internal suspend fun convertSessionStateToNavigation(
         navController.currentDestination?.route == HolderPresentQrRoute::class.qualifiedName
     }
 
+    val loadingNavigation: (
+        ProgressPresentation,
+        NavOptionsBuilder.() -> Unit
+    ) -> () -> Unit = { presentation, popUpToOptions ->
+        {
+            navController.navigateToLoadingScreen(
+                type = LoadingScreenType.from(presentation.phase)
+            ) {
+                popUpToOptions()
+                launchSingleTop = true
+            }
+        }
+    }
+
     when (state) {
         HolderSessionState.NotStarted -> {
             {
@@ -140,11 +158,9 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
-        HolderSessionState.AwaitingVerifierResolution -> {
-            {
-                navController.navigateToAwaitingVerifierResolutionScreen {
-                    exitJourneyOptions()
-                }
+        is HolderSessionState.AwaitingVerifierResolution -> {
+            loadingNavigation(state.presentation) {
+                popUpTo<HolderConsentRoute> { inclusive = true }
             }
         }
 
@@ -166,10 +182,21 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
+        is HolderSessionState.ProcessingEstablishment -> {
+            loadingNavigation(state.presentation) {
+                popUpTo<HolderPresentQrRoute> { inclusive = true }
+            }
+        }
+
+        is HolderSessionState.ProcessingResponse -> {
+            loadingNavigation(state.presentation) {
+                launchSingleTop = true
+                popUpTo<HolderConsentRoute> { inclusive = true }
+            }
+        }
+
         HolderSessionState.Complete.Expired,
         HolderSessionState.ReadyToPresent,
-        HolderSessionState.ProcessingEstablishment,
-        HolderSessionState.ProcessingResponse,
         HolderSessionState.SendingTermination
         -> {
             // Do nothing with UI-less states

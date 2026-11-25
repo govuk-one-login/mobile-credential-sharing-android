@@ -37,7 +37,7 @@ class HolderCancellationDialogContentsTest {
     val composeTestRule = HolderCancellationDialogContentsRule()
 
     private val holderState = MutableStateFlow<HolderSessionState>(
-        HolderSessionState.ProcessingEstablishment
+        HolderSessionState.ProcessingEstablishment()
     )
     private val orchestrator by lazy {
         FakeOrchestrator(initialHolderState = holderState)

@@ -12,6 +12,8 @@ import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
+import uk.gov.onelogin.sharing.holder.loading.LoadingRoute
+import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedRoute
@@ -103,13 +105,33 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'AwaitingVerifierResolution' -> AwaitingVerifierResolutionRoute",
-                HolderSessionState.AwaitingVerifierResolution
+                "'AwaitingVerifierResolution' -> LoadingRoute(SharingDetails)",
+                HolderSessionState.AwaitingVerifierResolution()
             ) {
-                instanceOf<AwaitingVerifierResolutionRoute>(
-                    AwaitingVerifierResolutionRoute::class.java
+                equalTo(
+                    LoadingRoute(LoadingScreenType.SharingDetails)
                 ).matches(
-                    currentBackStackEntry?.toRoute<AwaitingVerifierResolutionRoute>()
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
+                )
+            },
+            Triple(
+                "'ProcessingResponse' -> LoadingRoute(SharingDetails)",
+                HolderSessionState.ProcessingResponse()
+            ) {
+                equalTo(
+                    LoadingRoute(LoadingScreenType.SharingDetails)
+                ).matches(
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
+                )
+            },
+            Triple(
+                "'ProcessingEstablishment' -> LoadingRoute(GettingDetails)",
+                HolderSessionState.ProcessingEstablishment()
+            ) {
+                equalTo(
+                    LoadingRoute(LoadingScreenType.GettingDetails)
+                ).matches(
+                    currentBackStackEntry?.toRoute<LoadingRoute>()
                 )
             },
             Triple(
