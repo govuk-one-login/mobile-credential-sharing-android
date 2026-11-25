@@ -20,10 +20,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import uk.gov.logging.api.analytics.logging.v3.AnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.buttonEvent
 import uk.gov.onelogin.sharing.core.HolderUiScope
-import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedAnalytics.deviceBleDeniedCancelButton
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedAnalytics.deviceBleDeniedScreen
-import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedAnalytics.deviceBleDeniedTurnOnButton
 import uk.gov.onelogin.sharing.orchestration.Orchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
@@ -90,10 +89,10 @@ class DeviceBleDeniedViewModel(
     }
 
     fun sendTurnOnBluetoothEvent(buttonText: String) = viewModelScope.launch(dispatcher) {
-        analyticsLogger.deviceBleDeniedTurnOnButton(buttonText = buttonText)
+        analyticsLogger.buttonEvent(text = buttonText)
     }
 
     fun sendCancelEvent(buttonText: String) = viewModelScope.launch(dispatcher) {
-        analyticsLogger.deviceBleDeniedCancelButton(buttonText = buttonText)
+        analyticsLogger.buttonEvent(text = buttonText)
     }
 }

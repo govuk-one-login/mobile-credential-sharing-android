@@ -7,12 +7,6 @@ import uk.gov.onelogin.sharing.analytics.AnalyticsLoggerHelper.screenEvent
 internal object DeviceBleDeniedAnalytics {
     internal const val SCREEN_ID = "64d8556e-c6ec-4d90-812d-2ddfc834d677"
 
-    internal fun AnalyticsLogger.deviceBleDeniedScreen(screenName: String) =
+   internal fun AnalyticsLogger.deviceBleDeniedScreen(screenName: String) =
         screenEvent(title = screenName, id = SCREEN_ID)
-
-    internal fun AnalyticsLogger.deviceBleDeniedTurnOnButton(buttonText: String) =
-        buttonEvent(text = buttonText)
-
-    internal fun AnalyticsLogger.deviceBleDeniedCancelButton(buttonText: String) =
-        buttonEvent(text = buttonText)
 }
