@@ -3,9 +3,12 @@ package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -13,9 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +42,7 @@ import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.putScreenState
 import uk.gov.onelogin.sharing.core.performance.JankStatsHelper.rememberMetricsStateHolder
 import uk.gov.onelogin.sharing.core.presentation.preview.PreviewContent
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.LOADING_SPINNER_TEST_TAG
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
 
@@ -85,7 +91,9 @@ internal fun DeviceBleDeniedScreen(
     // Disabled once leaving, so a second back press can't cancel the journey twice.
     BackHandler(enabled = !isLeaving, onBack = onCancel)
 
-    if (!isLeaving) {
+    if (isLeaving) {
+        DeviceBleDeniedLoadingContent(modifier = modifier)
+    } else {
         DeviceBleDeniedContent(
             modifier = modifier,
             onTurnOnBluetooth = {
@@ -163,6 +171,19 @@ internal fun DeviceBleDeniedContent(
     )
 }
 
+@Composable
+internal fun DeviceBleDeniedLoadingContent(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG)
+        )
+    }
+}
+
 @PreviewContent
 @Composable
 internal fun DeviceBleDeniedContentPreview() {
@@ -173,6 +194,16 @@ internal fun DeviceBleDeniedContentPreview() {
                 onCancel = {},
                 modifier = Modifier.fillMaxSize()
             )
+        }
+    }
+}
+
+@PreviewContent
+@Composable
+internal fun DeviceBleDeniedLoadingContentPreview() {
+    GdsTheme {
+        Surface {
+            DeviceBleDeniedLoadingContent(modifier = Modifier.fillMaxSize())
         }
     }
 }

@@ -270,13 +270,15 @@ class DeviceBleDeniedScreenTest {
     }
 
     @Test
-    fun `Leaving Preflight hides the screen content`() = runTest {
+    fun `Leaving Preflight replaces the screen content with a loading spinner`() = runTest {
         composeTestRule.run {
             setContent { Render() }
             assertTitleIsDisplayed()
 
             holderState.update { HolderSessionState.ReadyToPresent }
 
+            waitUntilLoadingSpinnerExists()
+            assertLoadingSpinnerIsDisplayed()
             assertTitleDoesNotExist()
         }
     }
@@ -301,6 +303,14 @@ class DeviceBleDeniedScreenTest {
         composeTestRule.run {
             setContent { DeviceBleDeniedContentPreview() }
             assertValidUi()
+        }
+    }
+
+    @Test
+    fun `Loading preview renders the loading content`() = runTest {
+        composeTestRule.run {
+            setContent { DeviceBleDeniedLoadingContentPreview() }
+            assertLoadingSpinnerIsDisplayed()
         }
     }
 

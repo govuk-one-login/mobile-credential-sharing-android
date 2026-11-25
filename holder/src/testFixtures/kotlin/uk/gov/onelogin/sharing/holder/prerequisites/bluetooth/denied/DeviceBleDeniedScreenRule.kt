@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertWidthIsAtLeast
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -18,6 +19,7 @@ import androidx.test.core.app.ApplicationProvider
 import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.android.ui.theme.minimumTouchTarget
 import uk.gov.onelogin.sharing.holder.R
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.LOADING_SPINNER_TEST_TAG
 
 class DeviceBleDeniedScreenRule(
     private val composeTestRule: ComposeContentTestRule = createComposeRule(),
@@ -44,6 +46,16 @@ class DeviceBleDeniedScreenRule(
         hasText(resources.getString(R.string.holder_device_ble_denied_cancel_button))
             and hasRole(Role.Button)
     ).onFirst()
+
+    private val loadingSpinner = hasTestTag(LOADING_SPINNER_TEST_TAG)
+
+    fun onLoadingSpinner() = onNode(loadingSpinner)
+
+    fun assertLoadingSpinnerIsDisplayed() = onLoadingSpinner().assertIsDisplayed()
+
+    fun waitUntilLoadingSpinnerExists() = waitUntil {
+        onAllNodes(loadingSpinner).fetchSemanticsNodes().isNotEmpty()
+    }
 
     fun assertTitleIsDisplayed() = onTitle().assertIsDisplayed()
 
