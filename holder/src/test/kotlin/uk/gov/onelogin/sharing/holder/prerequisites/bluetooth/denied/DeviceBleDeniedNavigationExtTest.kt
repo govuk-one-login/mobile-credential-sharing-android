@@ -126,40 +126,25 @@ class DeviceBleDeniedNavigationExtTest {
     }
 
     @Test
-    fun `Popping the back stack leaves the screen`() = runTest {
-        composeTestRule.run {
-            setNavContent()
-            navigateToDeviceBleDenied()
-            assertValidUi()
-
-            runOnUiThread { controller.popBackStack() }
-
-            waitUntil("Did not leave the device Bluetooth denied screen") {
-                controller.currentBackStackEntry?.destination?.route == START_DESTINATION
-            }
-            assertTitleDoesNotExist()
-        }
-    }
-
-    @Test
-    fun `Every way of cancelling the journey cancels it via the orchestrator`(
-        @TestParameter(valuesProvider = CancelActionProvider::class) action: CancelAction
+    fun `Every way of leaving the screen pops it off the back stack`(
+        @TestParameter(valuesProvider = LeaveActionProvider::class) action: LeaveAction
     ) = runTest {
         composeTestRule.run {
             val backPressedDispatcherOwner = setNavContent()
             navigateToDeviceBleDenied()
             assertValidUi()
 
-            action.perform(this, backPressedDispatcherOwner)
+            action.perform(this, controller, backPressedDispatcherOwner)
 
-            waitUntil("Did not cancel the journey via $action") {
-                hasCancelCount(1).matches(orchestrator)
+            waitUntil("Did not leave the device Bluetooth denied screen via $action") {
+                controller.currentBackStackEntry?.destination?.route == START_DESTINATION
             }
+            assertTitleDoesNotExist()
 
             assertThat(
                 orchestrator,
                 allOf(
-                    hasCancelCount(1),
+                    hasCancelCount(0),
                     hasResetCount(0)
                 )
             )
@@ -205,19 +190,23 @@ class DeviceBleDeniedNavigationExtTest {
         }
     }
 
-    data class CancelAction(
+    data class LeaveAction(
         val description: String,
         val perform: DeviceBleDeniedScreenRule.(
+            controller: TestNavHostController,
             backPressedDispatcherOwner: () -> OnBackPressedDispatcherOwner?
         ) -> Unit
     ) {
         override fun toString(): String = description
     }
 
-    class CancelActionProvider : TestParameterValuesProvider() {
-        override fun provideValues(context: Context?): List<CancelAction> = listOf(
-            CancelAction(description = "Cancel button") { performCancelClick() },
-            CancelAction(description = "Back pressed dispatcher") { owner ->
+    class LeaveActionProvider : TestParameterValuesProvider() {
+        override fun provideValues(context: Context?): List<LeaveAction> = listOf(
+            LeaveAction(description = "Cancel button") { _, _ -> performCancelClick() },
+            LeaveAction(description = "Pop back stack") { controller, _ ->
+                runOnUiThread { controller.popBackStack() }
+            },
+            LeaveAction(description = "Back pressed dispatcher") { _, owner ->
                 runOnUiThread { owner()?.onBackPressedDispatcher?.onBackPressed() }
             }
         )

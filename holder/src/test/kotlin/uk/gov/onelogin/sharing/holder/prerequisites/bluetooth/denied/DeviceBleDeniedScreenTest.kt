@@ -1,7 +1,5 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied
 
-import androidx.activity.OnBackPressedDispatcher
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.Composable
@@ -14,7 +12,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlin.test.assertEquals
-import kotlin.test.fail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -189,16 +186,19 @@ class DeviceBleDeniedScreenTest {
     }
 
     @Test
-    fun `Tapping cancel cancels the journey without asking for confirmation`() = runTest {
-        composeTestRule.run {
-            setContent { Render() }
+    fun `Tapping cancel invokes the cancel callback without cancelling the journey itself`() =
+        runTest {
+            var cancelled = false
+            composeTestRule.run {
+                setContent { Render(onCancel = { cancelled = true }) }
 
-            performCancelClick()
+                performCancelClick()
 
-            waitUntil("Journey should have been cancelled!") { orchestrator.cancelCount == 1 }
+                waitUntil("Cancel callback was not invoked!") { cancelled }
+            }
+            assertEquals(0, orchestrator.cancelCount)
+            assertEquals(0, orchestrator.resetCount)
         }
-        assertEquals(0, orchestrator.resetCount)
-    }
 
     @Test
     fun `Tapping cancel sends the cancel button event`() = runTest {
@@ -211,30 +211,6 @@ class DeviceBleDeniedScreenTest {
                 analyticsLogger.contains(DeviceBleDeniedTestData.expectedCancelEvent)
             }
         }
-    }
-
-    @Test
-    fun `Pressing back behaves the same as tapping cancel`() = runTest {
-        var onBackPressedDispatcher: OnBackPressedDispatcher? = null
-        composeTestRule.run {
-            setContent {
-                onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
-                    ?.onBackPressedDispatcher
-                Render()
-            }
-            waitForIdle()
-
-            runOnUiThread {
-                onBackPressedDispatcher?.onBackPressed()
-                    ?: fail("Cannot find back press dispatcher!")
-            }
-
-            waitUntil("Journey should have been cancelled!") { orchestrator.cancelCount == 1 }
-            waitUntil("Cannot find expected event!: $analyticsLogger") {
-                analyticsLogger.contains(DeviceBleDeniedTestData.expectedCancelEvent)
-            }
-        }
-        assertEquals(0, orchestrator.resetCount)
     }
 
     @Test
@@ -313,9 +289,9 @@ class DeviceBleDeniedScreenTest {
     }
 
     @Composable
-    private fun Render() {
+    private fun Render(onCancel: () -> Unit = {}) {
         ProvideActivityResultRegistry(testRegistry) {
-            DeviceBleDeniedScreen(viewModel = viewModel)
+            DeviceBleDeniedScreen(viewModel = viewModel, onCancel = onCancel)
         }
     }
 }

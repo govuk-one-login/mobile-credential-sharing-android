@@ -3,7 +3,7 @@
     tools:ignore="MissingTranslation">
     <string name="holder_device_ble_denied_title">@string/bluetooth_is_turned_off</string>
     <string name="holder_device_ble_denied_body_1">@string/to_be_able_to_share_turn_on_bluetooth</string>
-    <string name="holder_device_ble_denied_body_2">@string/use_qr_code_to_connect_next</string>
-    <string name="holder_device_ble_denied_turn_on_button">@string/holder_turn_on_bluetooth_button</string>
+    <string name="holder_device_ble_denied_body_2" tools:ignore="DuplicateStrings">@string/use_qr_code_to_connect_next</string>
+    <string name="holder_device_ble_denied_turn_on_button" tools:ignore="DuplicateStrings">@string/turn_on_bluetooth</string>
     <string name="holder_device_ble_denied_cancel_button" tools:ignore="DuplicateStrings">@string/cancel_and_go_back_to_documents</string>
 </resources>

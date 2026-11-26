@@ -1,5 +1,6 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
@@ -13,7 +14,15 @@ object DeviceBleDeniedNavigationExt {
 
     internal fun NavGraphBuilder.configureDeviceBleDenied() {
         composable<DeviceBleDeniedRoute> {
-            DeviceBleDeniedScreen(modifier = Modifier.fillMaxSize())
+            val backPressDispatcher = LocalOnBackPressedDispatcherOwner.current
+            DeviceBleDeniedScreen(
+                modifier = Modifier.fillMaxSize(),
+                onCancel = {
+                    backPressDispatcher
+                        ?.onBackPressedDispatcher
+                        ?.onBackPressed()
+                }
+            )
         }
     }
 }

@@ -1,6 +1,5 @@
 package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +50,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionCon
 internal fun DeviceBleDeniedScreen(
     modifier: Modifier = Modifier,
     viewModel: DeviceBleDeniedViewModel = metroViewModel(),
+    onCancel: () -> Unit = {},
     launcher: ActivityResultLauncher<PrerequisiteAction> = rememberLauncherForActivityResult(
         PrerequisiteActionContract
     ) {}
@@ -81,16 +81,6 @@ internal fun DeviceBleDeniedScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    val onCancel: () -> Unit = {
-        viewModel.sendCancelEvent(
-            context.getEnglishString(R.string.holder_device_ble_denied_cancel_button)
-        )
-        viewModel.exitJourney()
-    }
-
-    // Disabled once leaving, so a second back press can't cancel the journey twice.
-    BackHandler(enabled = !isLeaving, onBack = onCancel)
-
     if (isLeaving) {
         DeviceBleDeniedLoadingContent(modifier = modifier)
     } else {
@@ -102,7 +92,12 @@ internal fun DeviceBleDeniedScreen(
                 )
                 viewModel.turnOnBluetooth(launcher)
             },
-            onCancel = onCancel
+            onCancel = {
+                viewModel.sendCancelEvent(
+                    context.getEnglishString(R.string.holder_device_ble_denied_cancel_button)
+                )
+                onCancel()
+            }
         )
     }
 }

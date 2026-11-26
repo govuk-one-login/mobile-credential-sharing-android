@@ -154,14 +154,6 @@ class DeviceBleDeniedViewModelTest {
     }
 
     @Test
-    fun `Exiting the journey cancels it without resetting the orchestrator`() = runTest {
-        viewModel.exitJourney().join()
-
-        assertEquals(1, orchestrator.cancelCount)
-        assertEquals(0, orchestrator.resetCount)
-    }
-
-    @Test
     fun `isClosing is true once session leaves Preflight`() {
         assertFalse(viewModel.isClosing.value)
         holderState.update { HolderSessionState.NotStarted }

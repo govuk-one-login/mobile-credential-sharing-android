@@ -80,10 +80,6 @@ class DeviceBleDeniedViewModel(
         resolve(launcher)
     }
 
-    fun exitJourney(): Job = viewModelScope.launch(dispatcher) {
-        orchestrator.cancel()
-    }
-
     fun sendScreenEvent(screenName: String) = viewModelScope.launch(dispatcher) {
         analyticsLogger.deviceBleDeniedScreen(screenName = screenName)
     }
