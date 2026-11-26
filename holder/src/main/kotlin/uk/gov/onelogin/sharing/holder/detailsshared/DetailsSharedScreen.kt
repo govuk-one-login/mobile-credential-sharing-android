@@ -65,7 +65,7 @@ internal fun DetailsSharedScreen(
 
     /**
      * Self-disabling callback handles both system/hardware back and "Go back to documents" so the
-     * journey is reset exactly once before control is handed back to the host app.
+     * journey is dismissed exactly once before control is handed back to the host app.
      *
      * Replaces [androidx.activity.compose.BackHandler]: `onExitJourney` re-dispatches the back
      * press to the host app, which a BackHandler catches and causes recursion until a

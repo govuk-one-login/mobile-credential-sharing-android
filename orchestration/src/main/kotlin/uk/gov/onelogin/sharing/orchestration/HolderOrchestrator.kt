@@ -1163,7 +1163,8 @@ class HolderOrchestrator(
     }
 
     /**
-     * Completes an approved journey once the Verifier has resolved it.
+     * Completes an approved journey once the Verifier has resolved it, or the user dismisses
+     * Details shared.
      *
      * Cleanup happens before the terminal state is published so "Details shared" (and its
      * dismissal) are only offered once nothing is left hanging.

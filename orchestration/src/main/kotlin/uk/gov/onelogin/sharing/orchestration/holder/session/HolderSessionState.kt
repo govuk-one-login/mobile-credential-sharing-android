@@ -152,12 +152,10 @@ sealed class HolderSessionState :
      * State for when the Holder has sent the DeviceResponse to the Verifier and is
      * awaiting the Verifier to close the session.
      *
-     * Carries the same [ProgressPresentation.SharingDetails] as [ProcessingResponse] so the User
-     * continues to see "Sharing your details" with cancellation unavailable; the screen does not
-     * change when the response is sent.
+     * The user already sees the "Details shared" confirmation. Dismissing it tears the session
+     * down (see [uk.gov.onelogin.sharing.orchestration.Orchestrator.Holder.dismissJourney])
      *
-     * @param presentation The loading screen presentation. Defaults to
-     * [ProgressPresentation.SharingDetails] ("Sharing your details", cancellation unavailable).
+     * @param presentation What the UI shows. Defaults to [ResolutionResult.DetailsShared].
      */
     data class AwaitingVerifierResolution(
         val presentation: ResolutionPresentation = ResolutionPresentation(
