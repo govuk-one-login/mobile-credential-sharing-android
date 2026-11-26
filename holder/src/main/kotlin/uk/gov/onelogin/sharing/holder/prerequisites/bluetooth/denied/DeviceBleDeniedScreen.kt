@@ -172,15 +172,23 @@ internal fun DeviceBleDeniedContent(
 }
 
 @Composable
-internal fun DeviceBleDeniedLoadingContent(modifier: Modifier = Modifier) {
+internal fun DeviceBleDeniedLoadingContent(
+    modifier: Modifier = Modifier,
+    progress: (() -> Float)? = null
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        CircularProgressIndicator(
-            modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG)
-        )
+        if (progress != null) {
+            CircularProgressIndicator(
+                progress = progress,
+                modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG)
+            )
+        } else {
+            CircularProgressIndicator(modifier = Modifier.testTag(LOADING_SPINNER_TEST_TAG))
+        }
     }
 }
 
@@ -203,7 +211,10 @@ internal fun DeviceBleDeniedContentPreview() {
 internal fun DeviceBleDeniedLoadingContentPreview() {
     GdsTheme {
         Surface {
-            DeviceBleDeniedLoadingContent(modifier = Modifier.fillMaxSize())
+            DeviceBleDeniedLoadingContent(
+                modifier = Modifier.fillMaxSize(),
+                progress = { 0.7f }
+            )
         }
     }
 }

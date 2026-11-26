@@ -9,15 +9,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
-import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
-import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
-import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
-import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 import kotlin.test.fail
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +29,7 @@ import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.core.activity.registry.ActivityResultLauncherExt.ProvideActivityResultRegistry
+import uk.gov.onelogin.sharing.holder.TestViewModelFactory
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -79,18 +75,11 @@ class DeviceBleDeniedScreenTest {
         )
     }
 
-    private val viewModelFactory = object : MetroViewModelFactory() {
-        override val viewModelProviders: Map<KClass<out ViewModel>, () -> ViewModel>
-            get() = mapOf(DeviceBleDeniedViewModel::class to { viewModel })
-
-        override val assistedFactoryProviders:
-            Map<KClass<out ViewModel>, () -> ViewModelAssistedFactory>
-            get() = emptyMap()
-
-        override val manualAssistedFactoryProviders:
-            Map<KClass<out ManualViewModelAssistedFactory>, () -> ManualViewModelAssistedFactory>
-            get() = emptyMap()
-    }
+    private val viewModelFactory = TestViewModelFactory(
+        viewModelProviders = mapOf(
+            DeviceBleDeniedViewModel::class to { viewModel }
+        )
+    )
 
     private var launchedAction: Any? = null
     private val testRegistry = object : ActivityResultRegistry() {
@@ -249,24 +238,14 @@ class DeviceBleDeniedScreenTest {
     }
 
     @Test
+    fun `Displaying the screen in English sends analytics events in English`() = runTest {
+        assertAnalyticsEventsAreSentInEnglish()
+    }
+
+    @Test
     @Config(qualifiers = "cy")
     fun `Displaying the screen in Welsh sends analytics events in English`() = runTest {
-        composeTestRule.run {
-            setContent { Render() }
-
-            performTurnOnBluetoothClick()
-            waitUntil { analyticsLogger.size >= 2 }
-            performCancelClick()
-            waitUntil { analyticsLogger.size >= 3 }
-        }
-        assertThat(
-            analyticsLogger,
-            contains(
-                DeviceBleDeniedTestData.expectedScreenEvent,
-                DeviceBleDeniedTestData.expectedTurnOnBluetoothEvent,
-                DeviceBleDeniedTestData.expectedCancelEvent
-            )
-        )
+        assertAnalyticsEventsAreSentInEnglish()
     }
 
     @Test
@@ -312,6 +291,25 @@ class DeviceBleDeniedScreenTest {
             setContent { DeviceBleDeniedLoadingContentPreview() }
             assertLoadingSpinnerIsDisplayed()
         }
+    }
+
+    private fun assertAnalyticsEventsAreSentInEnglish() {
+        composeTestRule.run {
+            setContent { Render() }
+
+            performTurnOnBluetoothClick()
+            waitUntil { analyticsLogger.size >= 2 }
+            performCancelClick()
+            waitUntil { analyticsLogger.size >= 3 }
+        }
+        assertThat(
+            analyticsLogger,
+            contains(
+                DeviceBleDeniedTestData.expectedScreenEvent,
+                DeviceBleDeniedTestData.expectedTurnOnBluetoothEvent,
+                DeviceBleDeniedTestData.expectedCancelEvent
+            )
+        )
     }
 
     @Composable

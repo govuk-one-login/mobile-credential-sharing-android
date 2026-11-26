@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
@@ -19,24 +18,24 @@ import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.navigation.toRoute
 import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
-import dev.zacsweers.metrox.viewmodel.ManualViewModelAssistedFactory
-import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
-import dev.zacsweers.metrox.viewmodel.ViewModelAssistedFactory
-import kotlin.reflect.KClass
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.Matchers.allOf
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.holder.TestViewModelFactory
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedNavigationExt.configureDeviceBleDenied
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedNavigationExt.navigateToDeviceBleDenied
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasCancelCount
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestratorMatchers.hasResetCount
 import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
@@ -94,18 +93,11 @@ class DeviceBleDeniedNavigationExtTest {
         )
     }
 
-    private val viewModelFactory = object : MetroViewModelFactory() {
-        override val viewModelProviders: Map<KClass<out ViewModel>, () -> ViewModel>
-            get() = mapOf(DeviceBleDeniedViewModel::class to { viewModel })
-
-        override val assistedFactoryProviders:
-            Map<KClass<out ViewModel>, () -> ViewModelAssistedFactory>
-            get() = emptyMap()
-
-        override val manualAssistedFactoryProviders:
-            Map<KClass<out ManualViewModelAssistedFactory>, () -> ManualViewModelAssistedFactory>
-            get() = emptyMap()
-    }
+    private val viewModelFactory = TestViewModelFactory(
+        viewModelProviders = mapOf(
+            DeviceBleDeniedViewModel::class to { viewModel }
+        )
+    )
 
     private val onDestinationChangedListener = NavController.OnDestinationChangedListener {
             controller,
@@ -147,31 +139,24 @@ class DeviceBleDeniedNavigationExtTest {
 
     @Test
     fun `Every way of cancelling the journey cancels it via the orchestrator`(
-        @TestParameter action: CancelAction
+        @TestParameter(valuesProvider = CancelActionProvider::class) action: CancelAction
     ) = runTest {
         composeTestRule.run {
             val backPressedDispatcherOwner = setNavContent()
             navigateToDeviceBleDenied()
             assertValidUi()
 
-            when (action) {
-                CancelAction.CancelButton -> performCancelClick()
-
-                CancelAction.BackPressedDispatcher -> runOnUiThread {
-                    backPressedDispatcherOwner()?.onBackPressedDispatcher?.onBackPressed()
-                }
-            }
+            action.perform(this, backPressedDispatcherOwner)
 
             waitUntil("Did not cancel the journey via $action") {
-                orchestrator.cancelCount == 1
+                hasCancelCount(1).matches(orchestrator)
             }
-            assertEquals(0, orchestrator.resetCount)
-        }
-    }
 
-    enum class CancelAction {
-        CancelButton,
-        BackPressedDispatcher
+            allOf(
+                hasCancelCount(1),
+                hasResetCount(0)
+            ).matches(orchestrator)
+        }
     }
 
     private fun DeviceBleDeniedScreenRule.setNavContent(): () -> OnBackPressedDispatcherOwner? {
@@ -215,6 +200,24 @@ class DeviceBleDeniedNavigationExtTest {
 
             configureDeviceBleDenied()
         }
+    }
+
+    data class CancelAction(
+        val description: String,
+        val perform: DeviceBleDeniedScreenRule.(
+            backPressedDispatcherOwner: () -> OnBackPressedDispatcherOwner?
+        ) -> Unit
+    ) {
+        override fun toString(): String = description
+    }
+
+    class CancelActionProvider : TestParameterValuesProvider() {
+        override fun provideValues(context: Context?): List<CancelAction> = listOf(
+            CancelAction(description = "Cancel button") { performCancelClick() },
+            CancelAction(description = "Back pressed dispatcher") { owner ->
+                runOnUiThread { owner()?.onBackPressedDispatcher?.onBackPressed() }
+            }
+        )
     }
 
     private companion object {
