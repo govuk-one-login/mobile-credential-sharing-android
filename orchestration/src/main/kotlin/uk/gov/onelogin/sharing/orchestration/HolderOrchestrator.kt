@@ -461,7 +461,8 @@ class HolderOrchestrator(
         val session = sessionFlow.value
         when (session.currentState.value) {
             // leaving before the verifier resolves: tear down immediately (no GATT End)
-            is HolderSessionState.AwaitingVerifierResolution -> resolveDetailsShared()
+            is HolderSessionState.AwaitingVerifierResolution ->
+                resolveDetailsShared(notifyVerifier = true)
 
             // already tearing down, wait
             HolderSessionState.SendingTermination -> Unit
@@ -1170,13 +1171,22 @@ class HolderOrchestrator(
      * dismissal) are only offered once nothing is left hanging.
      * [HolderSessionState.SendingTermination] is entered synchronously so other signals are
      * ignored while stopping.
+     *
+     * @param notifyVerifier `true` when the Holder ends the session itself (the user dismisses
+     * Details shared before the Verifier resolves it): GATT End is sent before the transport stops.
+     * `false` when the verifier has already ended the session (status 20 or GATT End), so nothing
+     * to notify.
      */
-    private fun resolveDetailsShared() {
+    private fun resolveDetailsShared(notifyVerifier: Boolean = false) {
         safeTransitionTo(HolderSessionState.SendingTermination)
         sessionTimer.stop()
         appCoroutineScope.launch {
-            logger.debug(logTag, STOPPING_BLE_ADVERTISING)
-            peripheralBluetoothTransport.stop(sendEndCommand = false)
+            if (notifyVerifier) {
+                holderSessionTerminator.terminate()
+            } else {
+                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                peripheralBluetoothTransport.stop(sendEndCommand = false)
+            }
             safeTransitionTo(
                 HolderSessionState.Complete.Success(
                     successReason = HolderSessionState.Complete.SuccessReason.Approved,

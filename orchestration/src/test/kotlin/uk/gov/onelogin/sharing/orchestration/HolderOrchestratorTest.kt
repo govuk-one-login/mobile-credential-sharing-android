@@ -1669,7 +1669,7 @@ class HolderOrchestratorTest {
         }
 
     @Test
-    fun `dismissJourney in awaitingVerifierResolution tears down before resetting`() = runTest {
+    fun `dismissJourney in awaitingVerifierResolution sends GATT End before resetting`() = runTest {
         with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
             backgroundScope.launch { orchestrator.holderSessionState.collect { } }
             advanceUntilIdle()
@@ -1677,8 +1677,8 @@ class HolderOrchestratorTest {
             orchestrator.dismissJourney()
             advanceUntilIdle()
 
-            assertEquals(1, transport.stopCalls)
-            assertEquals(0, terminator.terminateCalls)
+            assertEquals(1, terminator.terminateCalls)
+            assertEquals(0, transport.sendMessageCalls)
             assert(resetOrchestratorSessionLog in logger)
             assertThat(orchestrator.holderSessionState.value, isNotStarted())
         }
