@@ -16,9 +16,7 @@ import uk.gov.onelogin.sharing.core.HolderUiScope
 @Inject
 @ViewModelKey
 @ContributesIntoMap(HolderUiScope::class, binding = binding<ViewModel>())
-class ErrorScreenTemplateViewModel(
-    private val analyticsLogger: AnalyticsLogger,
-) : ViewModel() {
+class ErrorScreenTemplateViewModel(private val analyticsLogger: AnalyticsLogger) : ViewModel() {
 
     private val _navigationEvent = MutableSharedFlow<NavigationEvent?>()
     val navigationEvent: SharedFlow<NavigationEvent?> = _navigationEvent

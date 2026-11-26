@@ -1,6 +1,7 @@
 package uk.gov.onelogin.sharing.holder.error
 
 import app.cash.turbine.test
+import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
@@ -8,7 +9,6 @@ import org.hamcrest.Matchers.contains
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.BUTTON_TEXT
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
-import kotlin.test.Test
 
 class ErrorScreenTemplateViewModelTest {
 
