@@ -50,7 +50,7 @@ internal fun GenericHolderErrorScreen(
     GenericErrorScreenContent(
         modifier = modifier,
         navigationEvent = navigationEvent,
-        onGoBackToDocumentsClick = errorTemplateViewModel::reset,
+        onGoBackToDocumentsClick = errorTemplateViewModel::exit,
         onUpdateNavigationEvent = errorTemplateViewModel::sendButtonEvent
     )
 }

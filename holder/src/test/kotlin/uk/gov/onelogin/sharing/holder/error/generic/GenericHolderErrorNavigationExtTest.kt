@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.holder.error.generic
 
 import android.content.Context
-import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.Button
@@ -30,7 +29,6 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
-import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.TestViewModelFactory
 import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateViewModel
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.configureGenericHolderError
@@ -71,8 +69,7 @@ class GenericHolderErrorNavigationExtTest {
 
     private val errorTemplateViewModel by lazy {
         ErrorScreenTemplateViewModel(
-            analyticsLogger = mockk(relaxed = true),
-            orchestrator = orchestrator
+            analyticsLogger = mockk(relaxed = true)
         )
     }
 

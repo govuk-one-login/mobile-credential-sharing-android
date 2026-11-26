@@ -9,7 +9,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
@@ -66,8 +65,7 @@ class UnfulfillableErrorScreenTest {
 
     private val errorTemplateViewModel by lazy {
         ErrorScreenTemplateViewModel(
-            analyticsLogger = analyticsLogger,
-            orchestrator = orchestrator
+            analyticsLogger = analyticsLogger
         )
     }
 
@@ -113,22 +111,6 @@ class UnfulfillableErrorScreenTest {
     }
 
     @Test
-    fun `Resets the orchestrator when going back to documents`() = runTest {
-        composeTestRule.run {
-            setContent { Render() }
-            waitUntil("Orchestrator shouldn't have reset yet!") {
-                orchestrator.resetCount == 0
-            }
-
-            performGoBackToDocumentsClick()
-
-            waitUntil("Orchestrator should have been reset!") {
-                orchestrator.resetCount == 1
-            }
-        }
-    }
-
-    @Test
     fun `Navigating back to documents also sends an analytics event`() = runTest {
         composeTestRule.run {
             setContent { Render() }
@@ -136,32 +118,6 @@ class UnfulfillableErrorScreenTest {
 
             waitUntil("Cannot find expected event!: $analyticsLogger") {
                 analyticsLogger.contains(expectedGoBackToDocumentsButtonEvent)
-            }
-        }
-    }
-
-    @Test
-    fun `Pressing back on the device resets the orchestrator`() = runTest {
-        composeTestRule.run {
-            var onBackPressedDispatcher: OnBackPressedDispatcher? = null
-
-            setContent {
-                onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
-                    ?.onBackPressedDispatcher
-                Render()
-            }
-            waitUntil("Orchestrator shouldn't have reset yet!") {
-                orchestrator.resetCount == 0
-            }
-
-            runOnUiThread {
-                onBackPressedDispatcher?.onBackPressed() ?: fail(
-                    "Cannot find back press dispatcher!"
-                )
-            }
-
-            waitUntil("Orchestrator should have been reset!") {
-                orchestrator.resetCount == 1
             }
         }
     }

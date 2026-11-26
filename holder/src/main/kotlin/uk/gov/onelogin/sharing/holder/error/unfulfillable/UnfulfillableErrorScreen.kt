@@ -37,7 +37,7 @@ internal fun UnfulfillableErrorScreen(
         modifier = modifier,
         navigationEvent = navigationEvent,
         onLaunch = viewModel::sendScreenEvent,
-        onGoBackToDocumentsClick = errorTemplateViewModel::reset,
+        onGoBackToDocumentsClick = errorTemplateViewModel::exit,
         onUpdateNavigationEvent = errorTemplateViewModel::sendButtonEvent
     )
 }

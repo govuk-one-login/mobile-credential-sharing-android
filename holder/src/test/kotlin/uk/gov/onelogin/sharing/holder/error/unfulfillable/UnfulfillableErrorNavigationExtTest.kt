@@ -65,8 +65,7 @@ class UnfulfillableErrorNavigationExtTest {
 
     private val errorTemplateViewModel by lazy {
         ErrorScreenTemplateViewModel(
-            analyticsLogger = mockk(relaxed = true),
-            orchestrator = orchestrator
+            analyticsLogger = mockk(relaxed = true)
         )
     }
 
