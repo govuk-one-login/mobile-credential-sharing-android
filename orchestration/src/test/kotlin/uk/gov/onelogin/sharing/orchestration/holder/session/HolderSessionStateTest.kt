@@ -91,6 +91,30 @@ class HolderSessionStateTest {
     }
 
     @Test
+    fun `Preflight after denying Bluetooth is cancellable but hides the close button`() {
+        val state = Preflight(
+            missingPrerequisites = listOf(
+                MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            ),
+            enableBluetoothDenied = true
+        )
+
+        assertTrue { state.userCanCancel() }
+        assertTrue { state.hideCloseButton() }
+    }
+
+    @Test
+    fun `Preflight shows the close button before Bluetooth has been denied`() {
+        val state = Preflight(
+            missingPrerequisites = listOf(
+                MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            )
+        )
+
+        assertFalse { state.hideCloseButton() }
+    }
+
+    @Test
     fun `Sharing details states have no cancel behaviour and hide the close button`(
         @TestParameter state: HolderSessionState = testValues(
             ProcessingResponse(),

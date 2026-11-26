@@ -32,6 +32,7 @@ sealed class HolderSessionState :
     override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
 
     override fun hideCloseButton(): Boolean = when (this) {
+        is Preflight -> requiresBluetoothEnabledAfterDenial()
         is ProcessingEstablishment -> !presentation.showCloseButton
         is ProcessingResponse -> !presentation.showCloseButton
         is AwaitingVerifierResolution -> !presentation.showCloseButton
