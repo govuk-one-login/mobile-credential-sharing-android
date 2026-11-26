@@ -105,13 +105,13 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'AwaitingVerifierResolution' -> LoadingRoute(SharingDetails)",
+                "'AwaitingVerifierResolution' -> DetailsSharedRoute",
                 HolderSessionState.AwaitingVerifierResolution()
             ) {
-                equalTo(
-                    LoadingRoute(LoadingScreenType.SharingDetails)
+                instanceOf<DetailsSharedRoute>(
+                    DetailsSharedRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<LoadingRoute>()
+                    currentBackStackEntry?.toRoute<DetailsSharedRoute>()
                 )
             },
             Triple(

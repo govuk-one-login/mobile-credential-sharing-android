@@ -4,9 +4,9 @@ package uk.gov.onelogin.sharing.orchestration.holder.session
  * The information shown to the User on a transitional loading screen.
  *
  * Carried on the transitional [HolderSessionState]s (for example
- * [HolderSessionState.ProcessingEstablishment], [HolderSessionState.ProcessingResponse] and
- * [HolderSessionState.AwaitingVerifierResolution]), following the same convention as
- * [ConsentPresentation]: the Orchestrator owns the presentation and the UI simply renders it.
+ * [HolderSessionState.ProcessingEstablishment] and [HolderSessionState.ProcessingResponse]),
+ * following the same convention as [ConsentPresentation]: the Orchestrator owns the presentation
+ * and the UI simply renders it.
  *
  * This is the single rule the loading-screen states follow for both Back and Close:
  * [isCancellable] drives whether the User can back out (system back / future secondary button) and

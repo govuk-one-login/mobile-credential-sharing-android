@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -457,14 +458,27 @@ class HolderOrchestrator(
     }
 
     override fun dismissJourney() {
-        if (!sessionFlow.value.isComplete()) {
-            logger.debug(
-                logTag,
-                "dismissJourney ignored: journey still active in state ${holderSessionState.value}"
-            )
-            return
+        val session = sessionFlow.value
+        when (session.currentState.value) {
+            // leaving before the verifier resolves: tear down immediately (no GATT End)
+            is HolderSessionState.AwaitingVerifierResolution -> resolveDetailsShared()
+
+            // already tearing down, wait
+            HolderSessionState.SendingTermination -> Unit
+
+            else -> if (!session.isComplete()) {
+                logger.debug(
+                    logTag,
+                    "dismissJourney ignored: journey still active in state ${holderSessionState.value}"
+                )
+                return
+            }
         }
-        reset()
+        // only renew session once teardown is complete
+        appCoroutineScope.launch {
+            session.currentState.first { it.isComplete() }
+            if (sessionFlow.value === session) reset()
+        }
     }
 
     private fun enterGraceWindow() {

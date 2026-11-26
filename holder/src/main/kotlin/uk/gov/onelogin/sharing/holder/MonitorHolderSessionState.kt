@@ -32,6 +32,7 @@ import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigat
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.ProgressPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
@@ -158,11 +159,8 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
-        is HolderSessionState.AwaitingVerifierResolution -> {
-            loadingNavigation(state.presentation) {
-                popUpTo<HolderConsentRoute> { inclusive = true }
-            }
-        }
+        is HolderSessionState.AwaitingVerifierResolution ->
+            convertResolutionToNavigation(state.presentation, navController, exitJourneyOptions)
 
         is HolderSessionState.Complete.Failed -> {
             {
@@ -171,7 +169,7 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Complete.Success -> {
-            convertSuccessStateToNavigation(state, navController, exitJourneyOptions)
+            convertResolutionToNavigation(state.presentation, navController, exitJourneyOptions)
         }
 
         HolderSessionState.Complete.Cancelled -> {
@@ -234,11 +232,11 @@ private fun handleHolderSessionFailure(
     }
 }
 
-private fun convertSuccessStateToNavigation(
-    state: HolderSessionState.Complete.Success,
+private fun convertResolutionToNavigation(
+    presentation: ResolutionPresentation,
     navController: NavHostController,
     exitJourneyOptions: NavOptionsBuilder.() -> Unit
-): () -> Unit = when (state.presentation.result) {
+): () -> Unit = when (presentation.result) {
     ResolutionResult.DetailsShared -> {
         {
             navController.navigateToDetailsSharedScreen {

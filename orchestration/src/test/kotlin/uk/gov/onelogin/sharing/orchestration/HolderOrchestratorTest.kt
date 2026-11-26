@@ -1669,33 +1669,33 @@ class HolderOrchestratorTest {
         }
 
     @Test
-    fun `dismissJourney is ignored until a delayed Verifier reply resolves the journey`() =
+    fun `dismissJourney in awaitingVerifierResolution tears down before resetting`() = runTest {
+        with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+            backgroundScope.launch { orchestrator.holderSessionState.collect { } }
+            advanceUntilIdle()
+
+            orchestrator.dismissJourney()
+            advanceUntilIdle()
+
+            assertEquals(1, transport.stopCalls)
+            assertEquals(0, terminator.terminateCalls)
+            assert(resetOrchestratorSessionLog in logger)
+            assertThat(orchestrator.holderSessionState.value, isNotStarted())
+        }
+    }
+
+    @Test
+    fun `a new journey can start straight after dismissing in awaitingVerifierResolution`() =
         runTest {
             with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
                 backgroundScope.launch { orchestrator.holderSessionState.collect { } }
-                advanceUntilIdle()
-
-                // verifier hasn't replied yet - transaction still active
                 orchestrator.dismissJourney()
                 advanceUntilIdle()
 
-                assertThat(orchestrator.holderSessionState.value, isAwaitingVerifierResolution())
-                assert(resetOrchestratorSessionLog !in logger)
-                assertEquals(0, transport.stopCalls)
-
-                // delayed verifier response
-                transport.emitState(PeripheralBluetoothState.MessageReceived(byteArrayOf(1, 2, 3)))
+                orchestrator.start()
                 advanceUntilIdle()
 
-                assertThat(orchestrator.holderSessionState.value, isSuccessful())
-                assertEquals(1, transport.stopCalls)
-
-                // terminal state - cleaned up - dismissal clears session
-                orchestrator.dismissJourney()
-                advanceUntilIdle()
-
-                assert(resetOrchestratorSessionLog in logger)
-                assertThat(orchestrator.holderSessionState.value, isNotStarted())
+                assert("Journey already in progress" !in logger)
             }
         }
 

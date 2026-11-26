@@ -26,7 +26,6 @@ sealed class HolderSessionState :
     override fun userCanCancel(): Boolean = when (this) {
         is ProcessingEstablishment -> presentation.isCancellable
         is ProcessingResponse -> presentation.isCancellable
-        is AwaitingVerifierResolution -> presentation.isCancellable
         else -> this::class in cancellableStates
     }
     override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
@@ -34,7 +33,6 @@ sealed class HolderSessionState :
     override fun hideCloseButton(): Boolean = when (this) {
         is ProcessingEstablishment -> !presentation.showCloseButton
         is ProcessingResponse -> !presentation.showCloseButton
-        is AwaitingVerifierResolution -> !presentation.showCloseButton
         else -> this::class in hiddenCloseButtonStates
     }
 
@@ -51,7 +49,6 @@ sealed class HolderSessionState :
     fun blocksSystemBack(): Boolean = when (this) {
         is ProcessingEstablishment -> !presentation.isCancellable
         is ProcessingResponse -> !presentation.isCancellable
-        is AwaitingVerifierResolution -> !presentation.isCancellable
         else -> false
     }
 
@@ -163,7 +160,9 @@ sealed class HolderSessionState :
      * [ProgressPresentation.SharingDetails] ("Sharing your details", cancellation unavailable).
      */
     data class AwaitingVerifierResolution(
-        val presentation: ProgressPresentation = ProgressPresentation.SharingDetails
+        val presentation: ResolutionPresentation = ResolutionPresentation(
+            ResolutionResult.DetailsShared
+        )
     ) : HolderSessionState()
 
     /**
@@ -243,8 +242,7 @@ sealed class HolderSessionState :
         private val cancelConfirmationRequired = listOf(
             AwaitingUserConsent::class,
             ProcessingEstablishment::class,
-            ProcessingResponse::class,
-            AwaitingVerifierResolution::class
+            ProcessingResponse::class
         )
 
         @JvmStatic

@@ -93,8 +93,7 @@ class HolderSessionStateTest {
     @Test
     fun `Sharing details states have no cancel behaviour and hide the close button`(
         @TestParameter state: HolderSessionState = testValues(
-            ProcessingResponse(),
-            AwaitingVerifierResolution()
+            ProcessingResponse()
         )
     ) {
         assertFalse { state.userCanCancel() }
@@ -139,9 +138,7 @@ class HolderSessionStateTest {
         val notCancellable = cancellable.copy(isCancellable = false)
 
         assertTrue { ProcessingResponse(cancellable).userCanCancel() }
-        assertTrue { AwaitingVerifierResolution(cancellable).userCanCancel() }
         assertFalse { ProcessingResponse(notCancellable).userCanCancel() }
-        assertFalse { AwaitingVerifierResolution(notCancellable).userCanCancel() }
     }
 
     @Test
