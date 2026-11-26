@@ -11,8 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
-import androidx.navigation.compose.ComposeNavigator
-import androidx.navigation.compose.DialogNavigator
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
@@ -23,14 +22,17 @@ import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.MemorisedLogger
 import uk.gov.onelogin.sharing.core.MainDispatcherRule
 import uk.gov.onelogin.sharing.holder.TestViewModelFactory
+import uk.gov.onelogin.sharing.holder.navigation.TestNavHostControllerHelper.prepareController
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedNavigationExt.configureDeviceBleDenied
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedNavigationExt.navigateToDeviceBleDenied
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -41,6 +43,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
+
+private const val START_DESTINATION = "Unit test"
 
 @RunWith(RobolectricTestParameterInjector::class)
 class DeviceBleDeniedNavigationExtTest {
@@ -152,10 +156,13 @@ class DeviceBleDeniedNavigationExtTest {
                 hasCancelCount(1).matches(orchestrator)
             }
 
-            allOf(
-                hasCancelCount(1),
-                hasResetCount(0)
-            ).matches(orchestrator)
+            assertThat(
+                orchestrator,
+                allOf(
+                    hasCancelCount(1),
+                    hasResetCount(0)
+                )
+            )
         }
     }
 
@@ -163,15 +170,11 @@ class DeviceBleDeniedNavigationExtTest {
         var owner: OnBackPressedDispatcherOwner? = null
         setContent {
             owner = LocalOnBackPressedDispatcherOwner.current
-            controller = TestNavHostController(LocalContext.current).apply {
-                navigatorProvider.addNavigator(ComposeNavigator())
-                navigatorProvider.addNavigator(DialogNavigator())
+            controller = prepareController(LocalContext.current).apply {
                 addOnDestinationChangedListener(onDestinationChangedListener)
             }
 
-            CompositionLocalProvider(LocalMetroViewModelFactory provides viewModelFactory) {
-                Render()
-            }
+            Render()
         }
         return { owner }
     }
@@ -184,21 +187,21 @@ class DeviceBleDeniedNavigationExtTest {
 
     @Composable
     private fun Render() {
-        NavHost(
-            navController = controller,
-            startDestination = START_DESTINATION
+        CompositionLocalProvider(
+            LocalMetroViewModelFactory provides viewModelFactory
         ) {
-            composable(START_DESTINATION) {
-                Button(
-                    onClick = {
+            GdsTheme {
+                NavHost(
+                    navController = controller,
+                    startDestination = START_DESTINATION
+                ) {
+                    startRouteButton {
                         controller.navigateToDeviceBleDenied()
                     }
-                ) {
-                    Text("Navigate")
+
+                    configureDeviceBleDenied()
                 }
             }
-
-            configureDeviceBleDenied()
         }
     }
 
@@ -219,8 +222,12 @@ class DeviceBleDeniedNavigationExtTest {
             }
         )
     }
+}
 
-    private companion object {
-        const val START_DESTINATION = "Unit test"
+private fun NavGraphBuilder.startRouteButton(onClick: () -> Unit) {
+    composable(route = START_DESTINATION) {
+        Button(onClick = onClick) {
+            Text("Navigate")
+        }
     }
 }
