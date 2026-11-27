@@ -4,9 +4,12 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import com.google.testing.junit.testparameterinjector.KotlinTestParameters.namedTestValues
 import com.google.testing.junit.testparameterinjector.TestParameter
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
 import kotlin.test.Test
 import kotlin.test.fail
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +19,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.theme.m3.GdsTheme
 import uk.gov.logging.analytics.FakeAnalyticsLogger
+import uk.gov.onelogin.sharing.holder.TestViewModelFactory
+import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateViewModel
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedScreenEvent
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -52,6 +57,19 @@ class GenericHolderErrorScreenTest {
         )
     }
 
+    private val errorTemplateViewModel by lazy {
+        ErrorScreenTemplateViewModel(
+            analyticsLogger = analyticsLogger
+        )
+    }
+
+    private val viewModelFactory: MetroViewModelFactory = TestViewModelFactory(
+        viewModelProviders = mapOf(
+            GenericHolderErrorViewModel::class to { viewModel },
+            ErrorScreenTemplateViewModel::class to { errorTemplateViewModel }
+        )
+    )
+
     @Test
     fun `Is valid UI`(
         @TestParameter content: @Composable () -> Unit = namedTestValues(
@@ -59,7 +77,11 @@ class GenericHolderErrorScreenTest {
                 Render()
             },
             "Preview composable" to {
-                GdsTheme { GenericHolderErrorScreenPreview() }
+                CompositionLocalProvider(
+                    LocalMetroViewModelFactory provides viewModelFactory
+                ) {
+                    GdsTheme { GenericHolderErrorScreenPreview() }
+                }
             }
         )
     ) = runTest {
@@ -82,22 +104,6 @@ class GenericHolderErrorScreenTest {
     }
 
     @Test
-    fun `Resets the orchestrator when going back to documents`() = runTest {
-        composeTestRule.run {
-            setContent { Render() }
-            waitUntil("Orchestrator shouldn't have reset yet!") {
-                orchestrator.resetCount == 0
-            }
-
-            performGoBackToDocumentsClick()
-
-            waitUntil("Orchestrator should have been reset!") {
-                orchestrator.resetCount == 1
-            }
-        }
-    }
-
-    @Test
     fun `Navigating back to documents also sends an analytics event`() = runTest {
         composeTestRule.run {
             setContent { Render() }
@@ -105,32 +111,6 @@ class GenericHolderErrorScreenTest {
 
             waitUntil("Cannot find expected event!: $analyticsLogger") {
                 analyticsLogger.contains(expectedGoBackToDocumentsButtonEvent)
-            }
-        }
-    }
-
-    @Test
-    fun `Pressing back on the device resets the orchestrator`() = runTest {
-        composeTestRule.run {
-            var onBackPressedDispatcher: OnBackPressedDispatcher? = null
-
-            setContent {
-                onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
-                    ?.onBackPressedDispatcher
-                Render()
-            }
-            waitUntil("Orchestrator shouldn't have reset yet!") {
-                orchestrator.resetCount == 0
-            }
-
-            runOnUiThread {
-                onBackPressedDispatcher?.onBackPressed() ?: fail(
-                    "Cannot find back press dispatcher!"
-                )
-            }
-
-            waitUntil("Orchestrator should have been reset!") {
-                orchestrator.resetCount == 1
             }
         }
     }
@@ -160,11 +140,14 @@ class GenericHolderErrorScreenTest {
 
     @Composable
     private fun Render() {
-        GdsTheme {
-            GenericHolderErrorScreen(
-                modifier = Modifier.fillMaxSize(),
-                viewModel = viewModel
-            )
+        CompositionLocalProvider(
+            LocalMetroViewModelFactory provides viewModelFactory
+        ) {
+            GdsTheme {
+                GenericHolderErrorScreen(
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }

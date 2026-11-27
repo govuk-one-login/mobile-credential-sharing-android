@@ -12,6 +12,7 @@ import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.ViewEvent
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
+import uk.gov.onelogin.sharing.holder.error.NavigationEvent
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.BUTTON_TEXT
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.SCREEN_NAME
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorScreenTestData.expectedGoBackToDocumentsButtonEvent
@@ -49,27 +50,6 @@ class GenericHolderErrorViewModelTest {
     }
 
     @Test
-    fun `Exiting the journey resets the orchestrator`() = runTest {
-        viewModel.navigationEvent.test {
-            viewModel.reset().join()
-
-            assertThat(
-                orchestrator,
-                allOf(
-                    hasCancelCount(0),
-                    hasResetCount(1),
-                    hasStartCount(0)
-                )
-            )
-
-            assertThat(
-                expectMostRecentItem(),
-                equalTo(GenericHolderErrorViewModel.NavigationEvent.ExitJourney)
-            )
-        }
-    }
-
-    @Test
     fun `Sends a screen-level event to the analytics logger`() = runTest {
         viewModel.sendScreenEvent(SCREEN_NAME).join()
 
@@ -100,14 +80,4 @@ class GenericHolderErrorViewModelTest {
                 )
             )
         }
-
-    @Test
-    fun `Sends an analytics event for button presses`() = runTest {
-        viewModel.sendButtonEvent(BUTTON_TEXT).join()
-
-        assertThat(
-            analyticsLogger,
-            contains(expectedGoBackToDocumentsButtonEvent)
-        )
-    }
 }

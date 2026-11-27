@@ -11,6 +11,7 @@ import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolut
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
+import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.loading.LoadingRoute
 import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
@@ -183,10 +184,10 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     HolderSessionState.Complete.SuccessReason.UnfulfillableRequest
                 )
             ) {
-                instanceOf<HolderSuccessRoute>(
-                    HolderSuccessRoute::class.java
+                instanceOf<UnfulfillableErrorRoute>(
+                    UnfulfillableErrorRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<HolderSuccessRoute>()
+                    currentBackStackEntry?.toRoute<UnfulfillableErrorRoute>()
                 )
             },
             Triple(
