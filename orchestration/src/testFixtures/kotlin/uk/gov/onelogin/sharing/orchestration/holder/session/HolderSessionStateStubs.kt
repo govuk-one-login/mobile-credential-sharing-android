@@ -6,6 +6,8 @@ import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorStubs
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationReason
 
 object HolderSessionStateStubs {
     val userCancellation: HolderSessionState = HolderSessionState.Complete.Cancelled
@@ -26,6 +28,13 @@ object HolderSessionStateStubs {
             )
         )
     )
+    val readerAuthenticationFailure: HolderSessionState.Complete.Failed =
+        HolderSessionState.Complete.Failed(
+            SessionError(
+                "Reader Authentication Failed: ${ReaderAuthenticationReason.INVALID_READER_SIGNATURE}",
+                ReaderAuthenticationFailure(ReaderAuthenticationReason.INVALID_READER_SIGNATURE)
+            )
+        )
     val preflightBluetoothPermissionDenied: HolderSessionState.Preflight = preflightWithBluetooth(
         BluetoothState.PermissionNotGranted
     )

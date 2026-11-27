@@ -282,6 +282,21 @@ class HolderSessionStateTest {
         )
         assertIs<SessionErrorReason.UnrecoverableThrowable>(failed.sessionReason)
         assertFalse { failed.isUnrecoverableBluetoothPrerequisite() }
+        assertFalse { failed.isReaderAuthenticationFailure() }
+    }
+
+    @Test
+    fun `Failed is a reader authentication failure when caused by ReaderAuthenticationFailure`() {
+        val failed = HolderSessionStateStubs.readerAuthenticationFailure
+        assertIs<SessionErrorReason.UnrecoverableThrowable>(failed.sessionReason)
+        assertTrue { failed.isReaderAuthenticationFailure() }
+        assertFalse { failed.isUnrecoverableBluetoothPrerequisite() }
+    }
+
+    @Test
+    fun `Failed is not a reader authentication failure for prerequisite failures`() {
+        val failed = HolderSessionStateStubs.restrictedBluetoothFailure as Failed
+        assertFalse { failed.isReaderAuthenticationFailure() }
     }
 
     @Test
