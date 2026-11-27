@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigat
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedNavigationExt.navigateToDetailsSharedScreen
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
+import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoadingScreen
 import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
@@ -248,7 +249,7 @@ private fun convertResolutionToNavigation(
 
     ResolutionResult.UnfulfillableRequest -> {
         {
-            navController.navigateToHolderSuccessScreen {
+            navController.navigateToUnfulfillableError {
                 exitJourneyOptions()
             }
         }
