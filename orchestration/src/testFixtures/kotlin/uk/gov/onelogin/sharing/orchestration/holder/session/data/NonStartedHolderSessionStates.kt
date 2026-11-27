@@ -18,7 +18,7 @@ class NonStartedHolderSessionStates : TestParameterValuesProvider() {
             deviceRequestStub,
             HolderSessionStateStubs.consentPresentationStub
         ),
-        HolderSessionState.AwaitingVerifierResolution,
+        HolderSessionState.AwaitingVerifierResolution(),
         HolderSessionStateStubs.userCancellation,
         HolderSessionStateStubs.userJourneyFailure,
         HolderSessionStateStubs.successStub

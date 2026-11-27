@@ -2,7 +2,6 @@ package uk.gov.onelogin.sharing.orchestration.holder.session.data
 
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import uk.gov.onelogin.sharing.cryptoService.DeviceRequestStub.deviceRequestStub
-import uk.gov.onelogin.sharing.orchestration.holder.session.EngagementPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
 
@@ -15,14 +14,14 @@ class CancellableHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*> = listOf(
         HolderSessionStateStubs.preflightEmptyPermissions,
         HolderSessionState.ReadyToPresent,
-        HolderSessionStateStubs.presentingEngagementStub,
-        HolderSessionState.ProcessingEstablishment,
+        HolderSessionState.PresentingEngagement(""),
+        HolderSessionState.ProcessingEstablishment(),
         HolderSessionState.AwaitingUserConsent(
             deviceRequestStub,
             HolderSessionStateStubs.consentPresentationStub
         ),
-        HolderSessionState.ProcessingResponse,
-        HolderSessionState.AwaitingVerifierResolution,
+        HolderSessionState.ProcessingResponse(),
+        HolderSessionState.AwaitingVerifierResolution(),
         HolderSessionState.SendingTermination
     )
 }
