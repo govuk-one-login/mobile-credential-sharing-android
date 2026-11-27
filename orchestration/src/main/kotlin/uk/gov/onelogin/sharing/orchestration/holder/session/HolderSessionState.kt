@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
 
 /**
  * Represents a digital credential verification journey's state for devices that contain digital
@@ -226,6 +227,16 @@ sealed class HolderSessionState :
                 (sessionReason as? SessionErrorReason.UnrecoverablePrerequisite)
                     ?.any { it.prerequisite == Prerequisite.BLUETOOTH && !it.isRecoverable() }
                     ?: false
+
+            /**
+             * `true` when this failure is an [SessionErrorReason.UnrecoverableThrowable] caused by
+             * the Verifier's Reader Authentication failing verification.
+             *
+             * @see ReaderAuthenticationFailure
+             */
+            fun isReaderAuthenticationFailure(): Boolean =
+                (sessionReason as? SessionErrorReason.UnrecoverableThrowable)
+                    ?.exception is ReaderAuthenticationFailure
         }
 
         /**

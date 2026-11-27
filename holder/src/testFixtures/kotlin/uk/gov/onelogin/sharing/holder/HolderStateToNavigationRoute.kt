@@ -11,6 +11,7 @@ import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolut
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
+import uk.gov.onelogin.sharing.holder.error.readerauth.ReaderAuthErrorRoute
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
 import uk.gov.onelogin.sharing.holder.loading.LoadingRoute
@@ -172,6 +173,16 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                     BleRestrictedRoute::class.java
                 ).matches(
                     currentBackStackEntry?.toRoute<BleRestrictedRoute>()
+                )
+            },
+            Triple(
+                "Failure: Reader authentication -> ReaderAuthErrorRoute",
+                HolderSessionStateStubs.readerAuthenticationFailure
+            ) {
+                instanceOf<ReaderAuthErrorRoute>(
+                    ReaderAuthErrorRoute::class.java
+                ).matches(
+                    currentBackStackEntry?.toRoute<ReaderAuthErrorRoute>()
                 )
             },
             Triple(

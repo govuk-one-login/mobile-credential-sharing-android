@@ -19,6 +19,7 @@ import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavig
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
+import uk.gov.onelogin.sharing.holder.error.readerauth.ReaderAuthErrorNavigationExt.navigateToReaderAuthError
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoadingScreen
@@ -243,6 +244,12 @@ private fun handleHolderSessionFailure(
         )
     } else if (state.isUnrecoverableBluetoothPrerequisite()) {
         navController.navigateToBleRestricted {
+            popUpTo<HolderRoutes> {
+                inclusive = true
+            }
+        }
+    } else if (state.isReaderAuthenticationFailure()) {
+        navController.navigateToReaderAuthError {
             popUpTo<HolderRoutes> {
                 inclusive = true
             }
