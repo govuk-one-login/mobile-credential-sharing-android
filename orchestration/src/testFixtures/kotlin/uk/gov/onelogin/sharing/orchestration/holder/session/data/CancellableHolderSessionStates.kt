@@ -14,7 +14,7 @@ class CancellableHolderSessionStates : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<*> = listOf(
         HolderSessionStateStubs.preflightEmptyPermissions,
         HolderSessionState.ReadyToPresent,
-        HolderSessionState.PresentingEngagement(""),
+        HolderSessionStateStubs.presentingEngagementStub,
         HolderSessionState.ProcessingEstablishment(),
         HolderSessionState.AwaitingUserConsent(
             deviceRequestStub,

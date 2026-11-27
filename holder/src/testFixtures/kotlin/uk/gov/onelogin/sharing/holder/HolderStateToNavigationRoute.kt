@@ -18,7 +18,7 @@ import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission.BluetoothPermissionDeniedRoute
-import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
+import uk.gov.onelogin.sharing.holder.qrcode.QrCodeRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessRoute
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
@@ -95,13 +95,13 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'PresentingEngagement' -> HolderPresentQrRoute",
-                HolderSessionState.PresentingEngagement("")
+                "'PresentingEngagement' -> QrCodeRoute",
+                HolderSessionStateStubs.presentingEngagementStub
             ) {
-                instanceOf<HolderPresentQrRoute>(
-                    HolderPresentQrRoute::class.java
+                instanceOf<QrCodeRoute>(
+                    QrCodeRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<HolderPresentQrRoute>()
+                    currentBackStackEntry?.toRoute<QrCodeRoute>()
                 )
             },
             Triple(

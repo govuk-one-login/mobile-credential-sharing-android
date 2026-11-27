@@ -14,10 +14,18 @@ interface HolderSession :
 
     fun updateSessionContext(update: (HolderSessionContext) -> HolderSessionContext)
 
-    fun updateEngagementDisplay(showQr: Boolean) {
-        val current = currentState.value
-        if (current is HolderSessionState.PresentingEngagement && current.showQr != showQr) {
-            update(current.copy(showQr = showQr))
+    /**
+     * Updates the [EngagementPresentation] of a [HolderSessionState.PresentingEngagement] state in
+     * place, without a validated state transition. No-op in any other state, or when [transform]
+     * returns an equal presentation.
+     */
+    fun updateEngagementPresentation(
+        transform: (EngagementPresentation) -> EngagementPresentation
+    ) {
+        val current = currentState.value as? HolderSessionState.PresentingEngagement ?: return
+        val updated = transform(current.presentation)
+        if (updated != current.presentation) {
+            update(current.copy(presentation = updated))
         }
     }
 }
