@@ -91,6 +91,30 @@ class HolderSessionStateTest {
     }
 
     @Test
+    fun `Preflight after denying Bluetooth is cancellable but hides the close button`() {
+        val state = Preflight(
+            missingPrerequisites = listOf(
+                MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            ),
+            enableBluetoothDenied = true
+        )
+
+        assertTrue { state.userCanCancel() }
+        assertTrue { state.hideCloseButton() }
+    }
+
+    @Test
+    fun `Preflight shows the close button before Bluetooth has been denied`() {
+        val state = Preflight(
+            missingPrerequisites = listOf(
+                MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            )
+        )
+
+        assertFalse { state.hideCloseButton() }
+    }
+
+    @Test
     fun `Sharing details states have no cancel behaviour and hide the close button`(
         @TestParameter state: HolderSessionState = testValues(
             ProcessingResponse(),
@@ -268,6 +292,14 @@ class HolderSessionStateTest {
     }
 
     @Test
+    fun `Preflight requires Bluetooth enabling after denial when Bluetooth is still powered off`() {
+        assertTrue {
+            HolderSessionStateStubs.preflightBluetoothEnableDenied
+                .requiresBluetoothEnabledAfterDenial()
+        }
+    }
+
+    @Test
     fun `Preflight does not require Bluetooth permission for missing prerequisites`() {
         assertFalse { Preflight(listOf()).requiresBluetoothPermission() }
     }
@@ -280,12 +312,34 @@ class HolderSessionStateTest {
     }
 
     @Test
+    fun `Preflight does not require Bluetooth enabling after denial by default`() {
+        assertFalse {
+            HolderSessionStateStubs.preflightWithoutBluetooth.requiresBluetoothEnabledAfterDenial()
+        }
+    }
+
+    @Test
     fun `Preflight does not require Bluetooth permission when permission denied permanently`() {
         assertFalse {
             HolderSessionStateStubs.preflightWithBluetooth(
                 BluetoothState.PermissionDeniedPermanently
             )
                 .requiresBluetoothPermission()
+        }
+    }
+
+    @Test
+    fun `Preflight does not require Bluetooth enabling after denial without powered off Bluetooth`(
+        @TestParameter state: BluetoothState = testValues(
+            BluetoothState.PermissionNotGranted,
+            BluetoothState.PermissionUndetermined,
+            BluetoothState.PermissionDeniedPermanently
+        )
+    ) {
+        assertFalse {
+            HolderSessionStateStubs.preflightWithBluetooth(state)
+                .copy(enableBluetoothDenied = true)
+                .requiresBluetoothEnabledAfterDenial()
         }
     }
 }

@@ -18,6 +18,7 @@ import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.configureLoad
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.configureTurnOnBluetooth
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedNavigationExt.configureDeviceBleDenied
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.configureBleRestricted
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission.BluetoothPermissionDeniedNavigationExt.configureBluetoothPermissionDenied
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
@@ -37,6 +38,7 @@ data object HolderRoutes {
             configureTurnOnBluetooth()
             configureBleRestricted()
             configureBluetoothPermissionDenied()
+            configureDeviceBleDenied()
             configureHolderPresentQrScreen()
             configureHolderConsentScreen()
             configureLoadingScreen()

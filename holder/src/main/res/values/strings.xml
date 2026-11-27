@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="allow">Allow</string>
+    <string name="allow_app_to_connect_to_nearby_devices_to_share">To be able to share, you need to allow this app to connect to nearby devices.</string>
     <string name="allow_bluetooth" translatable="true">Allow Bluetooth</string>
     <string name="allow_bluetooth_before_sharing_details" translatable="true">Before you can share details from your UK driving licence, you need to allow this app to use Bluetooth.</string>
     <string name="ask_administrator_to_allow_bluetooth">If an organisation manages this phone, ask an administrator to allow Bluetooth.</string>
     <string name="bluetooth_is_restricted">Bluetooth is restricted</string>
+    <string name="bluetooth_is_turned_off" translatable="true">Bluetooth is turned off</string>
     <string name="bluetooth_permission_denied">Bluetooth permissions were denied</string>
     <string name="bluetooth_permission_permanently_denied">Bluetooth permissions have been permanently denied</string>
     <string name="bluetooth_turned_off_holder">Bluetooth was turned off on holder device during session</string>
@@ -34,19 +37,18 @@
     <string name="stop_check_dialog_title" translatable="true">Are you sure you want to stop the check?</string>
     <string name="the_person_checking_is_using_an_app_powered_by_dvs">The person doing the check is using an app powered by %1$s.</string>
     <string name="the_person_doing_the_check_asked_for_details_not_on_your_documents">The person doing the check asked for details that are not on your documents.</string>
+    <string name="to_be_able_to_share_turn_on_bluetooth" translatable="true">To be able to share, you need to turn on Bluetooth.</string>
     <string name="turn_off_parental_controls_restricting_bluetooth">If this phone has parental controls restricting Bluetooth, turn them off in your phone settings.</string>
-    <string name="turn_on_bluetooth" translatable="true">Turn on Bluetooth</string>
-    <string name="turn_on_bluetooth_before_sharing" translatable="true">Before you can share, you need to turn on Bluetooth.</string>
+    <string name="turn_on_bluetooth">Turn on Bluetooth</string>
+    <string name="turn_on_bluetooth_before_sharing">Before you can share, you need to turn on Bluetooth.</string>
     <string name="use_encryption_when_storing_your_details" translatable="true">use encryption when storing your details</string>
-    <string name="use_qr_code_to_connect_next" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
+    <string name="use_qr_code_to_connect_next">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
     <string name="you_cannot_share_your_details">This means you cannot share your details.</string>
     <string name="you_may_be_able_to_use_a_physical_document_instead">You may be able to use a physical document instead.</string>
-    <string name="you_will_connect_via_qr_later" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that later.</string>
-    <string name="you_will_need_to_turn_on_bluetooth" translatable="true">If Bluetooth is turned off on your phone, you’ll need to turn it on too.</string>
-    <string name="your_details_have_not_been_shared">Your details have not been shared.</string>
     <string name="you_need_to_allow_connection_to_nearby_devices">You need to allow connection to nearby devices</string>
-    <string name="allow_app_to_connect_to_nearby_devices_to_share">To be able to share, you need to allow this app to connect to nearby devices.</string>
-    <string name="allow">Allow</string>
+    <string name="you_will_connect_via_qr_later">You will not connect with a device yet. You’ll use a QR code to do that later.</string>
+    <string name="you_will_need_to_turn_on_bluetooth">If Bluetooth is turned off on your phone, you’ll need to turn it on too.</string>
+    <string name="your_details_have_not_been_shared">Your details have not been shared.</string>
 
     <string name="cancel_and_go_back_to_documents">Cancel and go back to documents</string>
 
