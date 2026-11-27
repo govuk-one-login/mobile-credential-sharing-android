@@ -38,6 +38,7 @@ import uk.gov.onelogin.sharing.holder.HolderStateToNavigationRoute
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
 import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateStubs
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.NonStartedHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
@@ -84,7 +85,7 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button exists for incomplete journeys`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+            "Presenting QR code" to HolderSessionStateStubs.presentingEngagementStub,
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
@@ -189,7 +190,7 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `Close button cancels the journey for certain states`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Presenting QR code" to HolderSessionState.PresentingEngagement(""),
+            "Presenting QR code" to HolderSessionStateStubs.presentingEngagementStub,
             "Preflight (Bluetooth off)" to HolderSessionState.Preflight(emptyList())
         )
     ) = runTest {
@@ -265,7 +266,7 @@ class ShareCredentialTest {
     fun `Close button sends a button analytics event`(
         @TestParameter state: HolderSessionState = namedTestValues(
             "Preflight" to HolderSessionState.Preflight(emptyList()),
-            "Presenting QR code" to HolderSessionState.PresentingEngagement("")
+            "Presenting QR code" to HolderSessionStateStubs.presentingEngagementStub
         )
     ) = runTest {
         val presenter = FakeCredentialPresenter(

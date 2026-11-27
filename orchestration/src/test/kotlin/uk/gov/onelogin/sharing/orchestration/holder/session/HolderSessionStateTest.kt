@@ -35,7 +35,7 @@ class HolderSessionStateTest {
             AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true)),
             ProcessingEstablishment(),
             Preflight(listOf()),
-            PresentingEngagement("unit test")
+            HolderSessionStateStubs.presentingEngagementStub
         )
     ) {
         assertTrue {
@@ -74,7 +74,7 @@ class HolderSessionStateTest {
         @TestParameter state: HolderSessionState = testValues(
             ProcessingEstablishment(),
             Preflight(listOf()),
-            PresentingEngagement("unit test")
+            HolderSessionStateStubs.presentingEngagementStub
         )
     ) {
         assertFalse {
@@ -107,7 +107,7 @@ class HolderSessionStateTest {
         @TestParameter state: HolderSessionState = testValues(
             ProcessingEstablishment(),
             Preflight(listOf()),
-            PresentingEngagement("unit test"),
+            HolderSessionStateStubs.presentingEngagementStub,
             AwaitingUserConsent(mockk(relaxed = true), mockk(relaxed = true)),
             NotStarted,
             Success()

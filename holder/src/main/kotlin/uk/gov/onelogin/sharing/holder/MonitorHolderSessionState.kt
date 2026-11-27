@@ -184,7 +184,7 @@ internal suspend fun convertSessionStateToNavigation(
 
         is HolderSessionState.ProcessingEstablishment -> {
             loadingNavigation(state.presentation) {
-                popUpTo<HolderPresentQrRoute> { inclusive = true }
+                popUpTo<QrCodeRoute> { inclusive = true }
             }
         }
 
