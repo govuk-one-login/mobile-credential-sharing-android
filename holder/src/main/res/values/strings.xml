@@ -35,8 +35,10 @@
     <string name="stop_check_dialog_continue_button" translatable="true">Continue with the check</string>
     <string name="stop_check_dialog_stop_button" translatable="true">Stop the check</string>
     <string name="stop_check_dialog_title" translatable="true">Are you sure you want to stop the check?</string>
+    <string name="the_app_the_person_is_using_does_not_meet_security">The app that the person doing the check is using does not currently meet all of our security requirements.</string>
     <string name="the_person_checking_is_using_an_app_powered_by_dvs">The person doing the check is using an app powered by %1$s.</string>
     <string name="the_person_doing_the_check_asked_for_details_not_on_your_documents">The person doing the check asked for details that are not on your documents.</string>
+    <string name="there_is_a_problem">There is a problem</string>
     <string name="to_be_able_to_share_turn_on_bluetooth" translatable="true">To be able to share, you need to turn on Bluetooth.</string>
     <string name="turn_off_parental_controls_restricting_bluetooth">If this phone has parental controls restricting Bluetooth, turn them off in your phone settings.</string>
     <string name="turn_on_bluetooth">Turn on Bluetooth</string>

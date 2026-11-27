@@ -185,6 +185,22 @@ enum class TranslatableStringsData(
                 "eich dogfennau."
         )
     ),
+    THE_APP_THE_PERSON_DOING_THE_CHECK_IS_USING(
+        resourceId = R.string.the_app_the_person_is_using_does_not_meet_security,
+        translations = mapOf(
+            "en" to "The app that the person doing the check is using does not currently " +
+                "meet all of our security requirements.",
+            "cy" to "Nid yw’r ap y mae’r person sy’n gwneud y gwiriad yn ei ddefnyddio ar " +
+                "hyn o bryd yn bodloni ein holl ofynion diogelwch."
+        )
+    ),
+    THERE_IS_A_PROBLEM(
+        resourceId = R.string.there_is_a_problem,
+        translations = mapOf(
+            "en" to "There is a problem",
+            "cy" to "Mae problem"
+        )
+    ),
     TURN_ON_BLUETOOTH_BEFORE_SHARING(
         resourceId = R.string.turn_on_bluetooth_before_sharing,
         translations = mapOf(
