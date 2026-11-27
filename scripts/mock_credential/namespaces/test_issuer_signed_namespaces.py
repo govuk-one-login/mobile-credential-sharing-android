@@ -9,7 +9,7 @@ class TestIssuerSignedNamespaces:
 
     @pytest.mark.parametrize(
         "namespace, expected_length",
-        [("org.iso.18013.5.1", 11), ("org.iso.18013.5.1.GB", 1)],
+        [("org.iso.18013.5.1", 12), ("org.iso.18013.5.1.GB", 1)],
         ids=["Common ISO namespace", "British domestic ISO namespace"],
     )
     def test_sample_items_contains_entries(self, namespace, expected_length):
@@ -19,7 +19,7 @@ class TestIssuerSignedNamespaces:
 
     @pytest.mark.parametrize(
         "namespace, expected_length",
-        [("org.iso.18013.5.1", 11), ("org.iso.18013.5.1.GB", 1)],
+        [("org.iso.18013.5.1", 12), ("org.iso.18013.5.1.GB", 1)],
         ids=["Common ISO namespace", "British domestic ISO namespace"],
     )
     def test_build_issuer_signed_items(self, namespace, expected_length):
@@ -30,7 +30,7 @@ class TestIssuerSignedNamespaces:
 
     @pytest.mark.parametrize(
         "namespace, expected_length",
-        [("org.iso.18013.5.1", 11), ("org.iso.18013.5.1.GB", 1)],
+        [("org.iso.18013.5.1", 12), ("org.iso.18013.5.1.GB", 1)],
         ids=["Common ISO namespace", "British domestic ISO namespace"],
     )
     def test_value_digest_generation(self, namespace, expected_length):

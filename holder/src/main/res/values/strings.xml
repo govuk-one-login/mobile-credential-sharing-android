@@ -9,6 +9,7 @@
     <string name="bluetooth_turned_off_holder">Bluetooth was turned off on holder device during session</string>
     <string name="checking_journey_requirements">Checking journey requirements...</string>
     <string name="creating_qr_code">Creating QR code...</string>
+    <string name="details_requested_not_available">Details requested not available</string>
     <string name="dvs_is_certified_under_uk_digital_verification_services_meaning_that">%1$s is certified under the UK Digital Verification Services Trust Framework. This means they must:</string>
     <string name="dvs_is_trusted_to_receive_and_store_details">%1$s is trusted by the UK government to receive and store your details securely.</string>
     <string name="dvs_s_privacy_notice">%1$s’s privacy notice</string>
@@ -31,6 +32,7 @@
     <string name="stop_check_dialog_stop_button" translatable="true">Stop the check</string>
     <string name="stop_check_dialog_title" translatable="true">Are you sure you want to stop the check?</string>
     <string name="the_person_checking_is_using_an_app_powered_by_dvs">The person doing the check is using an app powered by %1$s.</string>
+    <string name="the_person_doing_the_check_asked_for_details_not_on_your_documents">The person doing the check asked for details that are not on your documents.</string>
     <string name="turn_off_parental_controls_restricting_bluetooth">If this phone has parental controls restricting Bluetooth, turn them off in your phone settings.</string>
     <string name="turn_on_bluetooth" translatable="true">Turn on Bluetooth</string>
     <string name="turn_on_bluetooth_before_sharing" translatable="true">Before you can share, you need to turn on Bluetooth.</string>

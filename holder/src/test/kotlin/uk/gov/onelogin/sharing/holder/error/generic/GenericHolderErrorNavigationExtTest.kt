@@ -1,7 +1,6 @@
 package uk.gov.onelogin.sharing.holder.error.generic
 
 import android.content.Context
-import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.Button
@@ -22,6 +21,7 @@ import com.google.testing.junit.testparameterinjector.KotlinTestParameters.named
 import com.google.testing.junit.testparameterinjector.TestParameter
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.MetroViewModelFactory
+import io.mockk.mockk
 import kotlin.test.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -29,8 +29,8 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
 import uk.gov.android.ui.componentsv2.rules.ComposeContentTestRuleExtensions.onNodeWithRole
-import uk.gov.logging.analytics.FakeAnalyticsLogger
 import uk.gov.onelogin.sharing.holder.TestViewModelFactory
+import uk.gov.onelogin.sharing.holder.error.ErrorScreenTemplateViewModel
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.configureGenericHolderError
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
 import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
@@ -47,7 +47,6 @@ class GenericHolderErrorNavigationExtTest {
     private lateinit var controller: TestNavHostController
     private var onBackPressedDispatcher: OnBackPressedDispatcherOwner? = null
 
-    private val analyticsLogger = FakeAnalyticsLogger()
     private var initialHolderState: HolderSessionState = HolderSessionState.Complete.Failed(
         SessionError(
             "This is a navigation test",
@@ -61,16 +60,23 @@ class GenericHolderErrorNavigationExtTest {
         )
     }
 
-    private val viewModel by lazy {
+    private val genericViewModel by lazy {
         GenericHolderErrorViewModel(
-            analyticsLogger = analyticsLogger,
+            analyticsLogger = mockk(relaxed = true),
             orchestrator = orchestrator
+        )
+    }
+
+    private val errorTemplateViewModel by lazy {
+        ErrorScreenTemplateViewModel(
+            analyticsLogger = mockk(relaxed = true)
         )
     }
 
     private val viewModelFactory: MetroViewModelFactory = TestViewModelFactory(
         viewModelProviders = mapOf(
-            GenericHolderErrorViewModel::class to { viewModel }
+            GenericHolderErrorViewModel::class to { genericViewModel },
+            ErrorScreenTemplateViewModel::class to { errorTemplateViewModel }
         )
     )
 

@@ -12,6 +12,7 @@ import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDial
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configureHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedNavigationExt.configureDetailsSharedScreen
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.configureGenericHolderError
+import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.configureUnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.configureGetReadyToShare
 import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.configureLoadingScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
@@ -44,6 +45,7 @@ data object HolderRoutes {
             configureHolderSuccessScreen()
             configureHolderUserCancellationDialog()
             configureHolderUserCancellationScreen()
+            configureUnfulfillableErrorRoute()
         }
     }
 }

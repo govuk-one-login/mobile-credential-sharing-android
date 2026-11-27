@@ -30,6 +30,13 @@ enum class TranslatableStringsData(
             "cy" to "Manylion wedi’u rhannu"
         )
     ),
+    DETAILS_REQUESTED_NOT_AVAILABLE(
+        resourceId = R.string.details_requested_not_available,
+        translations = mapOf(
+            "en" to "Details requested not available",
+            "cy" to "Nid yw’r manylion a ofynnwyd amdanynt ar gael"
+        )
+    ),
     FIND_OUT_HOW_SHARING_WORKS(
         resourceId = R.string.find_out_how_sharing_works,
         translations = mapOf(
@@ -153,6 +160,15 @@ enum class TranslatableStringsData(
         translations = mapOf(
             "en" to "Continue with the check",
             "cy" to "Parhau gyda’r gwiriad"
+        )
+    ),
+    THE_PERSON_DOING_THE_CHECK(
+        resourceId = R.string.the_person_doing_the_check_asked_for_details_not_on_your_documents,
+        translations = mapOf(
+            "en" to "The person doing the check asked for details that are not on " +
+                "your documents.",
+            "cy" to "Gofynnodd y person sy’n gwneud y gwiriad am fanylion nad ydynt ar " +
+                "eich dogfennau."
         )
     ),
     TURN_ON_BLUETOOTH_BEFORE_SHARING(
