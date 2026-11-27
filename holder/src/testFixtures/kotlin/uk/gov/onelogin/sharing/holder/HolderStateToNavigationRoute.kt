@@ -7,9 +7,9 @@ import com.google.testing.junit.testparameterinjector.TestParametersValuesProvid
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.instanceOf
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BtConnectionErrorRoute
-import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionRoute
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenRoute
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
+import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorRoute
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareRoute
@@ -106,13 +106,13 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'AwaitingVerifierResolution' -> LoadingRoute(SharingDetails)",
+                "'AwaitingVerifierResolution' -> DetailsSharedRoute",
                 HolderSessionState.AwaitingVerifierResolution()
             ) {
-                equalTo(
-                    LoadingRoute(LoadingScreenType.SharingDetails)
+                instanceOf<DetailsSharedRoute>(
+                    DetailsSharedRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<LoadingRoute>()
+                    currentBackStackEntry?.toRoute<DetailsSharedRoute>()
                 )
             },
             Triple(
@@ -211,15 +211,15 @@ class HolderStateToNavigationRoute : TestParametersValuesProvider() {
                 )
             },
             Triple(
-                "'Complete.Success(Approved)' -> AwaitingVerifierResolutionRoute",
+                "'Complete.Success(Approved)' -> DetailsSharedRoute",
                 HolderSessionState.Complete.Success(
                     HolderSessionState.Complete.SuccessReason.Approved
                 )
             ) {
-                instanceOf<AwaitingVerifierResolutionRoute>(
-                    AwaitingVerifierResolutionRoute::class.java
+                instanceOf<DetailsSharedRoute>(
+                    DetailsSharedRoute::class.java
                 ).matches(
-                    currentBackStackEntry?.toRoute<AwaitingVerifierResolutionRoute>()
+                    currentBackStackEntry?.toRoute<DetailsSharedRoute>()
                 )
             }
         )

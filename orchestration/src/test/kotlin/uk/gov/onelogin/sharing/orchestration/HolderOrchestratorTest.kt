@@ -75,6 +75,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionStateSt
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageClassifier
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CancellableHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.CompleteHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.HolderSessionContextStub.holderSessionContextStub
@@ -1651,6 +1653,68 @@ class HolderOrchestratorTest {
     }
 
     @Test
+    fun `status 20 in awaitingVerifierResolution stops transport and supplies DetailsShared`() =
+        runTest {
+            with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+                deliverMessage()
+
+                val state = orchestrator.holderSessionState.value as
+                    HolderSessionState.Complete.Success
+                assertEquals(
+                    ResolutionPresentation(ResolutionResult.DetailsShared),
+                    state.presentation
+                )
+                assertEquals(1, transport.stopCalls)
+            }
+        }
+
+    @Test
+    fun `dismissJourney in awaitingVerifierResolution sends GATT End before resetting`() = runTest {
+        with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+            backgroundScope.launch { orchestrator.holderSessionState.collect { } }
+            advanceUntilIdle()
+
+            orchestrator.dismissJourney()
+            advanceUntilIdle()
+
+            assertEquals(1, terminator.terminateCalls)
+            assertEquals(0, transport.sendMessageCalls)
+            assert(resetOrchestratorSessionLog in logger)
+            assertThat(orchestrator.holderSessionState.value, isNotStarted())
+        }
+    }
+
+    @Test
+    fun `a new journey can start straight after dismissing in awaitingVerifierResolution`() =
+        runTest {
+            with(PeerTerminationFixture(SessionDataStatus.SESSION_TERMINATION)) {
+                backgroundScope.launch { orchestrator.holderSessionState.collect { } }
+                orchestrator.dismissJourney()
+                advanceUntilIdle()
+
+                orchestrator.start()
+                advanceUntilIdle()
+
+                assert("Journey already in progress" !in logger)
+            }
+        }
+
+    @Test
+    fun `GATT End in awaitingVerifierResolution supplies DetailsShared`() = runTest {
+        initialStates[0] = HolderSessionState.AwaitingVerifierResolution()
+        val transport = FakePeripheralBluetoothTransport()
+        val orchestrator = createOrchestrator(peripheralBluetoothTransport = transport)
+        backgroundScope.launch { orchestrator.holderSessionState.collect { } }
+
+        transport.emitState(PeripheralBluetoothState.Ended(SessionEndStates.SUCCESS))
+        advanceUntilIdle()
+
+        val state = orchestrator.holderSessionState.value as HolderSessionState.Complete.Success
+        assertEquals(ResolutionPresentation(ResolutionResult.DetailsShared), state.presentation)
+        assertEquals(1, transport.stopCalls)
+    }
+
+    @Test
     fun `non-20 status SessionData in awaitingVerifierResolution transitions to failed`() =
         runTest {
             with(PeerTerminationFixture(SessionDataStatus.ERROR_SESSION_ENCRYPTION)) {
@@ -1684,6 +1748,7 @@ class HolderOrchestratorTest {
                 advanceUntilIdle()
 
                 assertThat(orchestrator.holderSessionState.value, isSuccessful())
+                assertEquals(1, transport.stopCalls)
             }
         }
 

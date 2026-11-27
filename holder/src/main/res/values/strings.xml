@@ -17,7 +17,6 @@
     <string name="find_out_how_sharing_works" translatable="true">Find out how sharing works</string>
     <string name="generating_qr_code_data">Generating QR code data...</string>
     <string name="get_ready_to_share" translatable="true">Get ready to share</string>
-    <string name="go_back_to_documents">Go back to documents</string>
     <string name="have_not_met_requirements">Haven’t met requirements...</string>
     <string name="holder_consent_organization_sentence">The person doing the check is using an approved app powered by %1$s</string>
     <string name="how_long_they_will_keep_your_details" translatable="true">how long they will keep your details</string>
@@ -40,6 +39,10 @@
     <string name="use_encryption_when_storing_your_details" translatable="true">use encryption when storing your details</string>
     <string name="use_qr_code_to_connect_next" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that next.</string>
     <string name="you_cannot_share_your_details">This means you cannot share your details.</string>
+    <string name="details_shared" translatable="true">Details shared</string>
+    <string name="go_back_to_documents" translatable="true">Go back to documents</string>
+    <string name="bluetooth_connection_will_now_end" translatable="true">Your bluetooth connection with them will now end.</string>
+    <string name="person_will_check_details_shared" translatable="true">The person will check the details you shared.</string>
     <string name="you_may_be_able_to_use_a_physical_document_instead">You may be able to use a physical document instead.</string>
     <string name="you_will_connect_via_qr_later" translatable="true">You will not connect with a device yet. You’ll use a QR code to do that later.</string>
     <string name="you_will_need_to_turn_on_bluetooth" translatable="true">If Bluetooth is turned off on your phone, you’ll need to turn it on too.</string>

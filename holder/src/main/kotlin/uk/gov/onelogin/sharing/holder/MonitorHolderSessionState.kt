@@ -14,10 +14,10 @@ import kotlinx.coroutines.withContext
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.BluetoothSessionError
 import uk.gov.onelogin.sharing.core.presentation.bluetooth.errorTitle
 import uk.gov.onelogin.sharing.holder.HolderNavigationExtensions.navigateToBluetoothConnectionErrorRoute
-import uk.gov.onelogin.sharing.holder.awaitingresolution.AwaitingVerifierResolutionNavigationExt.navigateToAwaitingVerifierResolutionScreen
 import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavigationExt.navigateToHolderUserCancellationScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
+import uk.gov.onelogin.sharing.holder.detailsshared.DetailsSharedNavigationExt.navigateToDetailsSharedScreen
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
@@ -32,8 +32,9 @@ import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrRoute
 import uk.gov.onelogin.sharing.holder.success.HolderSuccessNavigationExt.navigateToHolderSuccessScreen
 import uk.gov.onelogin.sharing.orchestration.exceptions.BluetoothDisconnectedException
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
-import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState.Complete.SuccessReason
 import uk.gov.onelogin.sharing.orchestration.holder.session.ProgressPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 
 /**
@@ -159,11 +160,8 @@ internal suspend fun convertSessionStateToNavigation(
             }
         }
 
-        is HolderSessionState.AwaitingVerifierResolution -> {
-            loadingNavigation(state.presentation) {
-                popUpTo<HolderConsentRoute> { inclusive = true }
-            }
-        }
+        is HolderSessionState.AwaitingVerifierResolution ->
+            convertResolutionToNavigation(state.presentation, navController, exitJourneyOptions)
 
         is HolderSessionState.Complete.Failed -> {
             {
@@ -172,7 +170,7 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Complete.Success -> {
-            convertSuccessStateToNavigation(state, navController, exitJourneyOptions)
+            convertResolutionToNavigation(state.presentation, navController, exitJourneyOptions)
         }
 
         HolderSessionState.Complete.Cancelled -> {
@@ -235,13 +233,21 @@ private fun handleHolderSessionFailure(
     }
 }
 
-private fun convertSuccessStateToNavigation(
-    state: HolderSessionState.Complete.Success,
+private fun convertResolutionToNavigation(
+    presentation: ResolutionPresentation,
     navController: NavHostController,
     exitJourneyOptions: NavOptionsBuilder.() -> Unit
-): () -> Unit = when (state.successReason) {
-    // DCMAW-24155: Update to use specific route
-    SuccessReason.UnfulfillableRequest -> {
+): () -> Unit = when (presentation.result) {
+    ResolutionResult.DetailsShared -> {
+        {
+            navController.navigateToDetailsSharedScreen {
+                exitJourneyOptions()
+                launchSingleTop = true
+            }
+        }
+    }
+
+    ResolutionResult.UnfulfillableRequest -> {
         {
             navController.navigateToUnfulfillableError {
                 exitJourneyOptions()
@@ -249,19 +255,20 @@ private fun convertSuccessStateToNavigation(
         }
     }
 
-    SuccessReason.Denied -> {
+    // failures categories are not surfaced on Success yet
+    // fallback to the generic error screen
+    is ResolutionResult.Failed -> {
         {
-            navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
+            navController.navigateToGenericHolderError {
                 exitJourneyOptions()
             }
         }
     }
 
-    SuccessReason.Approved -> {
+    null -> {
         {
-            navController.navigateToAwaitingVerifierResolutionScreen {
+            navController.navigateToHolderSuccessScreen(immediatelyReset = true) {
                 exitJourneyOptions()
-                launchSingleTop = true
             }
         }
     }

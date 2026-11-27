@@ -26,7 +26,6 @@ sealed class HolderSessionState :
     override fun userCanCancel(): Boolean = when (this) {
         is ProcessingEstablishment -> presentation.isCancellable
         is ProcessingResponse -> presentation.isCancellable
-        is AwaitingVerifierResolution -> presentation.isCancellable
         else -> this::class in cancellableStates
     }
     override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
@@ -34,7 +33,6 @@ sealed class HolderSessionState :
     override fun hideCloseButton(): Boolean = when (this) {
         is ProcessingEstablishment -> !presentation.showCloseButton
         is ProcessingResponse -> !presentation.showCloseButton
-        is AwaitingVerifierResolution -> !presentation.showCloseButton
         else -> this::class in hiddenCloseButtonStates
     }
 
@@ -51,7 +49,6 @@ sealed class HolderSessionState :
     fun blocksSystemBack(): Boolean = when (this) {
         is ProcessingEstablishment -> !presentation.isCancellable
         is ProcessingResponse -> !presentation.isCancellable
-        is AwaitingVerifierResolution -> !presentation.isCancellable
         else -> false
     }
 
@@ -155,15 +152,15 @@ sealed class HolderSessionState :
      * State for when the Holder has sent the DeviceResponse to the Verifier and is
      * awaiting the Verifier to close the session.
      *
-     * Carries the same [ProgressPresentation.SharingDetails] as [ProcessingResponse] so the User
-     * continues to see "Sharing your details" with cancellation unavailable; the screen does not
-     * change when the response is sent.
+     * The user already sees the "Details shared" confirmation. Dismissing it tears the session
+     * down (see [uk.gov.onelogin.sharing.orchestration.Orchestrator.Holder.dismissJourney])
      *
-     * @param presentation The loading screen presentation. Defaults to
-     * [ProgressPresentation.SharingDetails] ("Sharing your details", cancellation unavailable).
+     * @param presentation What the UI shows. Defaults to [ResolutionResult.DetailsShared].
      */
     data class AwaitingVerifierResolution(
-        val presentation: ProgressPresentation = ProgressPresentation.SharingDetails
+        val presentation: ResolutionPresentation = ResolutionPresentation(
+            ResolutionResult.DetailsShared
+        )
     ) : HolderSessionState()
 
     /**
@@ -181,9 +178,13 @@ sealed class HolderSessionState :
         /**
          * The User has completed a digital credential verification journey without un-resolvable
          * errors occurring.
+         *
+         * @param presentation What the UI should show for this outcome.
          */
-        data class Success(val successReason: SuccessReason = SuccessReason.Approved) :
-            Complete("Successful journey")
+        data class Success(
+            val successReason: SuccessReason = SuccessReason.Approved,
+            val presentation: ResolutionPresentation = ResolutionPresentation.from(successReason)
+        ) : Complete("Successful journey")
 
         /**
          * Describes why the journey completed successfully.
@@ -239,8 +240,7 @@ sealed class HolderSessionState :
         private val cancelConfirmationRequired = listOf(
             AwaitingUserConsent::class,
             ProcessingEstablishment::class,
-            ProcessingResponse::class,
-            AwaitingVerifierResolution::class
+            ProcessingResponse::class
         )
 
         @JvmStatic

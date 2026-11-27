@@ -23,6 +23,13 @@ enum class TranslatableStringsData(
                 "mae angen i chi ganiatáu i’r ap hwn ddefnyddio Bluetooth."
         )
     ),
+    DETAILS_SHARED(
+        resourceId = R.string.details_shared,
+        translations = mapOf(
+            "en" to "Details shared",
+            "cy" to "Manylion wedi’u rhannu"
+        )
+    ),
     DETAILS_REQUESTED_NOT_AVAILABLE(
         resourceId = R.string.details_requested_not_available,
         translations = mapOf(
@@ -74,13 +81,6 @@ enum class TranslatableStringsData(
         translations = mapOf(
             "en" to "Get ready to share",
             "cy" to "Paratoi i rannu"
-        )
-    ),
-    GO_BACK_TO_DOCUMENTS(
-        resourceId = R.string.go_back_to_documents,
-        translations = mapOf(
-            "en" to "Go back to documents",
-            "cy" to "Ewch yn ôl i dogfennau"
         )
     ),
     SHARING_IS_CURRENTLY_UNAVAILABLE(
@@ -184,6 +184,27 @@ enum class TranslatableStringsData(
             "en" to "You will not connect with a device yet. You’ll use a QR code to do that next.",
             "cy" to
                 "Ni fyddwch yn cysylltu â dyfais ar hyn o bryd. Byddwch yn defnyddio cod QR i wneud hynny nesaf."
+        )
+    ),
+    GO_BACK_TO_DOCUMENTS(
+        resourceId = R.string.go_back_to_documents,
+        translations = mapOf(
+            "en" to "Go back to documents",
+            "cy" to "Ewch yn ôl i dogfennau"
+        )
+    ),
+    BLUETOOTH_CONNECTION_WILL_NOW_END(
+        resourceId = R.string.bluetooth_connection_will_now_end,
+        translations = mapOf(
+            "en" to "Your bluetooth connection with them will now end.",
+            "cy" to "Bydd eich cysylltiad Bluetooth gyda hwy nawr yn dod i ben."
+        )
+    ),
+    PERSON_WILL_CHECK_DETAILS_SHARED(
+        resourceId = R.string.person_will_check_details_shared,
+        translations = mapOf(
+            "en" to "The person will check the details you shared.",
+            "cy" to "Bydd y person yn gwirio’r manylion rydych wedi’u rhannu."
         )
     ),
     YOU_MAY_BE_ABLE_TO_USE_A_PHYSICAL_DOCUMENT_INSTEAD(

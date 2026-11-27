@@ -1,12 +1,15 @@
 package uk.gov.onelogin.sharing.ui.impl
 
 import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -30,6 +33,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import uk.gov.android.ui.componentsv2.matchers.SemanticsMatchers.hasRole
 import uk.gov.logging.api.v3.v3dot1.logger.asLegacyEvent
 import uk.gov.logging.api.v3dot1.model.TrackEvent.Button
 import uk.gov.onelogin.sharing.analytics.RequiredParameterConstants.walletSharingRequiredParameters
@@ -415,7 +419,7 @@ class ShareCredentialTest {
             "Current route: ${controller.currentDestination?.route}"
         ) {
             controller.currentDestination?.route
-                ?.contains("AwaitingVerifierResolution") == true
+                ?.contains("DetailsShared") == true
         }
 
         composeTestRule.onNodeWithText("Details shared").assertIsDisplayed()
@@ -427,8 +431,7 @@ class ShareCredentialTest {
     @UiThreadTest
     fun `System back is swallowed while sharing details`(
         @TestParameter state: HolderSessionState = namedTestValues(
-            "Processing response" to HolderSessionState.ProcessingResponse(),
-            "Awaiting verifier resolution" to HolderSessionState.AwaitingVerifierResolution()
+            "Processing response" to HolderSessionState.ProcessingResponse()
         )
     ) = runTest {
         val orchestrator = FakeOrchestrator(
@@ -503,6 +506,35 @@ class ShareCredentialTest {
             waitForIdle()
         }
         assertEquals(true, cancelled)
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Go back to documents dismisses and hands control back to the host app`(
+        @TestParameter state: HolderSessionState = namedTestValues(
+            "Awaiting Verifier Resolution" to HolderSessionState.AwaitingVerifierResolution(),
+            "Success" to HolderSessionState.Complete.Success()
+        )
+    ) = runTest {
+        var hostBackPresses = 0
+        val orchestrator = FakeOrchestrator(initialHolderState = MutableStateFlow(state))
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = orchestrator
+        )
+
+        composeTestRule.setContent {
+            BackHandler { hostBackPresses++ }
+            ShareCredential(presenter)
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNode(
+            hasText("Go back to documents") and hasRole(Role.Button)
+        ).performClick()
+        composeTestRule.waitForIdle()
+
+        assertEquals(1, orchestrator.dismissCount)
+        assertEquals(1, hostBackPresses)
     }
 
     private fun performCloseJourneyViaButton(presenter: FakeCredentialPresenter) {

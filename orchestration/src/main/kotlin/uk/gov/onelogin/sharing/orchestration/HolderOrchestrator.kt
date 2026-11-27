@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -64,6 +65,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionTerminator
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageClassifier
 import uk.gov.onelogin.sharing.orchestration.holder.session.InboundMessageType
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionPresentation
+import uk.gov.onelogin.sharing.orchestration.holder.session.ResolutionResult
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
 import uk.gov.onelogin.sharing.orchestration.session.SessionErrorReason
 import uk.gov.onelogin.sharing.orchestration.session.SessionFactory
@@ -451,6 +454,31 @@ class HolderOrchestrator(
                     createSessionResetMessage(Orchestrator.Holder.JOURNEY_NAME)
                 )
             }
+        }
+    }
+
+    override fun dismissJourney() {
+        val session = sessionFlow.value
+        when (session.currentState.value) {
+            // leaving before the verifier resolves: tear down immediately (no GATT End)
+            is HolderSessionState.AwaitingVerifierResolution ->
+                resolveDetailsShared(notifyVerifier = true)
+
+            // already tearing down, wait
+            HolderSessionState.SendingTermination -> Unit
+
+            else -> if (!session.isComplete()) {
+                logger.debug(
+                    logTag,
+                    "dismissJourney ignored: journey still active in state ${holderSessionState.value}"
+                )
+                return
+            }
+        }
+        // only renew session once teardown is complete
+        appCoroutineScope.launch {
+            session.currentState.first { it.isComplete() }
+            if (sessionFlow.value === session) reset()
         }
     }
 
@@ -1035,7 +1063,7 @@ class HolderOrchestrator(
         when (currentState) {
             is HolderSessionState.AwaitingVerifierResolution -> {
                 if (status == SessionDataStatus.SESSION_TERMINATION) {
-                    safeTransitionTo(HolderSessionState.Complete.Success())
+                    resolveDetailsShared()
                 } else {
                     safeTransitionTo(
                         HolderSessionState.Complete.Failed(
@@ -1045,9 +1073,9 @@ class HolderOrchestrator(
                             )
                         )
                     )
+                    logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                    stopAdvertising(sendEndCommand = false)
                 }
-                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
-                stopAdvertising(sendEndCommand = false)
                 logger.debug(logTag, "Holder session terminated")
             }
 
@@ -1124,9 +1152,7 @@ class HolderOrchestrator(
             }
 
             is HolderSessionState.AwaitingVerifierResolution -> {
-                appCoroutineScope.launch {
-                    terminateSession(finalState = HolderSessionState.Complete.Success())
-                }
+                resolveDetailsShared()
             }
 
             else -> {
@@ -1134,6 +1160,39 @@ class HolderOrchestrator(
                     terminateSession(finalState = HolderSessionState.Complete.Cancelled)
                 }
             }
+        }
+    }
+
+    /**
+     * Completes an approved journey once the Verifier has resolved it, or the user dismisses
+     * Details shared.
+     *
+     * Cleanup happens before the terminal state is published so "Details shared" (and its
+     * dismissal) are only offered once nothing is left hanging.
+     * [HolderSessionState.SendingTermination] is entered synchronously so other signals are
+     * ignored while stopping.
+     *
+     * @param notifyVerifier `true` when the Holder ends the session itself (the user dismisses
+     * Details shared before the Verifier resolves it): GATT End is sent before the transport stops.
+     * `false` when the verifier has already ended the session (status 20 or GATT End), so nothing
+     * to notify.
+     */
+    private fun resolveDetailsShared(notifyVerifier: Boolean = false) {
+        safeTransitionTo(HolderSessionState.SendingTermination)
+        sessionTimer.stop()
+        appCoroutineScope.launch {
+            if (notifyVerifier) {
+                holderSessionTerminator.terminate()
+            } else {
+                logger.debug(logTag, STOPPING_BLE_ADVERTISING)
+                peripheralBluetoothTransport.stop(sendEndCommand = false)
+            }
+            safeTransitionTo(
+                HolderSessionState.Complete.Success(
+                    successReason = HolderSessionState.Complete.SuccessReason.Approved,
+                    presentation = ResolutionPresentation(ResolutionResult.DetailsShared)
+                )
+            )
         }
     }
 
