@@ -1,0 +1,162 @@
+package uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied
+
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.app.ActivityOptionsCompat
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.runTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
+import org.junit.Rule
+import uk.gov.logging.api.v3.MemorisedLogger
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLogger
+import uk.gov.onelogin.sharing.analytics.StoredAnalyticsLoggerMatchers.hasSentEvents
+import uk.gov.onelogin.sharing.core.MainDispatcherRule
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedTestData.CANCEL_BUTTON_TEXT
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedTestData.SCREEN_ID
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedTestData.SCREEN_NAME
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedTestData.TURN_ON_BUTTON_TEXT
+import uk.gov.onelogin.sharing.orchestration.FakeOrchestrator
+import uk.gov.onelogin.sharing.orchestration.holder.prerequisites.usecases.ResolveHolderPrerequisiteAction
+import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
+import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
+import uk.gov.onelogin.sharing.prerequisites.api.contracts.PrerequisiteActionContract
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.prerequisites.permissions.FakePermissionChecker
+
+class DeviceBleDeniedViewModelTest {
+
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
+
+    private val analyticsLogger = StoredAnalyticsLogger()
+    private var recheckCount = 0
+    private val holderState = MutableStateFlow<HolderSessionState>(
+        HolderSessionState.Preflight(
+            missingPrerequisites = listOf(
+                MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+            ),
+            enableBluetoothDenied = true
+        ) { recheckCount++ }
+    )
+    private val orchestrator = FakeOrchestrator(initialHolderState = holderState)
+
+    private val viewModel by lazy {
+        DeviceBleDeniedViewModel(
+            analyticsLogger = analyticsLogger,
+            orchestrator = orchestrator,
+            resolver = ResolveHolderPrerequisiteAction(
+                logger = MemorisedLogger(),
+                orchestrator = orchestrator,
+                permissionChecker = FakePermissionChecker()
+            ),
+            dispatcher = dispatcherRule.testDispatcher
+        )
+    }
+
+    @Test
+    fun `Screen view event sets screen name and id`() = runTest {
+        viewModel.sendScreenEvent(SCREEN_NAME).join()
+
+        assertThat(
+            analyticsLogger,
+            hasSentEvents(contains(DeviceBleDeniedTestData.expectedScreenEvent))
+        )
+        val event = analyticsLogger.sentAnalyticsEvents.single()
+        assertEquals("screen_view", event.eventType)
+        assertEquals(SCREEN_NAME.lowercase(), event.parameters["screen_name"])
+        assertEquals(SCREEN_ID, event.parameters["screen_id"])
+    }
+
+    @Test
+    fun `Logs Turn on Bluetooth button event`() = runTest {
+        viewModel.sendTurnOnBluetoothEvent(TURN_ON_BUTTON_TEXT).join()
+
+        assertThat(
+            analyticsLogger,
+            hasSentEvents(contains(DeviceBleDeniedTestData.expectedTurnOnBluetoothEvent))
+        )
+    }
+
+    @Test
+    fun `Logs Cancel button event`() = runTest {
+        viewModel.sendCancelEvent(CANCEL_BUTTON_TEXT).join()
+
+        assertThat(
+            analyticsLogger,
+            hasSentEvents(contains(DeviceBleDeniedTestData.expectedCancelEvent))
+        )
+    }
+
+    @Test
+    fun `Turning on Bluetooth requests Bluetooth is enabled`() {
+        var launchedAction: PrerequisiteAction? = null
+        val launcher = object : ActivityResultLauncher<PrerequisiteAction>() {
+            override val contract: ActivityResultContract<PrerequisiteAction, *>
+                get() = PrerequisiteActionContract
+
+            override fun launch(input: PrerequisiteAction, options: ActivityOptionsCompat?) {
+                launchedAction = input
+            }
+
+            override fun unregister() = Unit
+        }
+
+        viewModel.turnOnBluetooth(launcher)
+
+        assertEquals(PrerequisiteAction.EnableBluetooth, launchedAction)
+    }
+
+    @Test
+    fun `Rechecking prerequisites re-runs Preflight checks`() = runTest {
+        viewModel.recheckPrerequisites().join()
+        assertEquals(1, recheckCount)
+    }
+
+    @Test
+    fun `Resuming without having paused doesn't recheck prerequisites`() = runTest {
+        assertNull(viewModel.onScreenResumed())
+        assertEquals(0, recheckCount)
+    }
+
+    @Test
+    fun `Resuming after pausing rechecks prerequisites once`() = runTest {
+        viewModel.onScreenPaused()
+
+        viewModel.onScreenResumed()?.join()
+        assertNull(viewModel.onScreenResumed())
+
+        assertEquals(1, recheckCount)
+    }
+
+    @Test
+    fun `Each pause allows one recheck on the following resume`() = runTest {
+        repeat(2) {
+            viewModel.onScreenPaused()
+            viewModel.onScreenResumed()?.join()
+        }
+
+        assertEquals(2, recheckCount)
+    }
+
+    @Test
+    fun `Rechecking prerequisites outside Preflight does not re-run checks`() = runTest {
+        holderState.update { HolderSessionState.NotStarted }
+        viewModel.recheckPrerequisites().join()
+        assertEquals(0, recheckCount)
+    }
+
+    @Test
+    fun `isClosing is true once session leaves Preflight`() {
+        assertFalse(viewModel.isClosing.value)
+        holderState.update { HolderSessionState.NotStarted }
+        assertTrue(viewModel.isClosing.value)
+    }
+}

@@ -3,7 +3,7 @@ package uk.gov.onelogin.sharing.ui.impl
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -126,7 +126,7 @@ internal fun ShareCredential(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .systemBarsPadding()
+                    .safeDrawingPadding()
             ) {
                 if (state.userCanCancel()) {
                     CloseButtonAppBar(

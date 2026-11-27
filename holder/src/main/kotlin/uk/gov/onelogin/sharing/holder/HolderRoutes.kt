@@ -12,12 +12,14 @@ import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavig
 import uk.gov.onelogin.sharing.holder.cancellation.dialog.HolderCancellationDialogNavigationExt.configureHolderUserCancellationDialog
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.configureHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.configureGenericHolderError
+import uk.gov.onelogin.sharing.holder.error.readerauth.ReaderAuthErrorNavigationExt.configureReaderAuthError
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.configureUnfulfillableErrorRoute
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.configureGetReadyToShare
 import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.configureLoadingScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.configureHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesRoute
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.configureTurnOnBluetooth
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedNavigationExt.configureDeviceBleDenied
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.configureBleRestricted
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission.BluetoothPermissionDeniedNavigationExt.configureBluetoothPermissionDenied
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.configureHolderPresentQrScreen
@@ -37,6 +39,7 @@ data object HolderRoutes {
             configureTurnOnBluetooth()
             configureBleRestricted()
             configureBluetoothPermissionDenied()
+            configureDeviceBleDenied()
             configureHolderPresentQrScreen()
             configureHolderConsentScreen()
             configureLoadingScreen()
@@ -46,6 +49,7 @@ data object HolderRoutes {
             configureHolderUserCancellationDialog()
             configureHolderUserCancellationScreen()
             configureUnfulfillableErrorRoute()
+            configureReaderAuthError()
         }
     }
 }

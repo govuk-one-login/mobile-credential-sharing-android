@@ -40,6 +40,8 @@ import uk.gov.onelogin.sharing.orchestration.holder.session.ConsentPresentation
 import uk.gov.onelogin.sharing.orchestration.holder.session.HolderSessionState
 import uk.gov.onelogin.sharing.orchestration.holder.session.data.NonStartedHolderSessionStates
 import uk.gov.onelogin.sharing.orchestration.session.SessionError
+import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
+import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
 import uk.gov.onelogin.sharing.sdk.FakeCredentialPresenter
 import uk.gov.onelogin.sharing.ui.impl.di.HolderUiGraph
 
@@ -99,6 +101,30 @@ class ShareCredentialTest {
             setContent { ShareCredential(component = presenter) }
             waitForIdle()
             onNodeWithContentDescription("Close").assertExists()
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun `Close button is hidden on the device Bluetooth denied screen`() = runTest {
+        val presenter = FakeCredentialPresenter(
+            appGraph = appGraph,
+            orchestrator = FakeOrchestrator(
+                initialHolderState = MutableStateFlow(
+                    HolderSessionState.Preflight(
+                        missingPrerequisites = listOf(
+                            MissingPrerequisites.Bluetooth(BluetoothState.PoweredOff)
+                        ),
+                        enableBluetoothDenied = true
+                    )
+                )
+            )
+        )
+
+        composeTestRule.run {
+            setContent { ShareCredential(component = presenter) }
+            waitForIdle()
+            onNodeWithContentDescription("Close").assertDoesNotExist()
         }
     }
 

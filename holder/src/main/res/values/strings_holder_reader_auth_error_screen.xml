@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="holder_reader_auth_error_title" translatable="false">@string/there_is_a_problem</string>
+    <string name="holder_reader_auth_error_body_1" translatable="false">@string/the_app_the_person_is_using_does_not_meet_security</string>
+    <string name="holder_reader_auth_error_body_2" translatable="false">@string/your_details_have_not_been_shared</string>
+</resources>

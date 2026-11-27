@@ -30,6 +30,13 @@ enum class TranslatableStringsData(
             "cy" to "Nid yw’r manylion a ofynnwyd amdanynt ar gael"
         )
     ),
+    BLUETOOTH_IS_TURNED_OFF(
+        resourceId = R.string.bluetooth_is_turned_off,
+        translations = mapOf(
+            "en" to "Bluetooth is turned off",
+            "cy" to "Mae Bluetooth wedi’i droi i ffwrdd"
+        )
+    ),
     FIND_OUT_HOW_SHARING_WORKS(
         resourceId = R.string.find_out_how_sharing_works,
         translations = mapOf(
@@ -125,6 +132,13 @@ enum class TranslatableStringsData(
             "cy" to "ddefnyddio amgryptio wrth storio’ch manylion"
         )
     ),
+    TO_BE_ABLE_TO_SHARE_TURN_ON_BLUETOOTH(
+        resourceId = R.string.to_be_able_to_share_turn_on_bluetooth,
+        translations = mapOf(
+            "en" to "To be able to share, you need to turn on Bluetooth.",
+            "cy" to "I allu rhannu, mae angen i chi droi Bluetooth ymlaen."
+        )
+    ),
     TURN_ON_BLUETOOTH(
         resourceId = R.string.turn_on_bluetooth,
         translations = mapOf(
@@ -169,6 +183,22 @@ enum class TranslatableStringsData(
                 "your documents.",
             "cy" to "Gofynnodd y person sy’n gwneud y gwiriad am fanylion nad ydynt ar " +
                 "eich dogfennau."
+        )
+    ),
+    THE_APP_THE_PERSON_DOING_THE_CHECK_IS_USING(
+        resourceId = R.string.the_app_the_person_is_using_does_not_meet_security,
+        translations = mapOf(
+            "en" to "The app that the person doing the check is using does not currently " +
+                "meet all of our security requirements.",
+            "cy" to "Nid yw’r ap y mae’r person sy’n gwneud y gwiriad yn ei ddefnyddio ar " +
+                "hyn o bryd yn bodloni ein holl ofynion diogelwch."
+        )
+    ),
+    THERE_IS_A_PROBLEM(
+        resourceId = R.string.there_is_a_problem,
+        translations = mapOf(
+            "en" to "There is a problem",
+            "cy" to "Mae problem"
         )
     ),
     TURN_ON_BLUETOOTH_BEFORE_SHARING(

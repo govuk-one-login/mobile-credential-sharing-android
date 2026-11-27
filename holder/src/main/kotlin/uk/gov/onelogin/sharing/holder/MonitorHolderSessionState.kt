@@ -19,12 +19,14 @@ import uk.gov.onelogin.sharing.holder.cancellation.HolderCancellationScreenNavig
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentNavigationExt.navigateToHolderConsentScreen
 import uk.gov.onelogin.sharing.holder.consent.HolderConsentRoute
 import uk.gov.onelogin.sharing.holder.error.generic.GenericHolderErrorNavigationExt.navigateToGenericHolderError
+import uk.gov.onelogin.sharing.holder.error.readerauth.ReaderAuthErrorNavigationExt.navigateToReaderAuthError
 import uk.gov.onelogin.sharing.holder.error.unfulfillable.UnfulfillableErrorNavigationExt.navigateToUnfulfillableError
 import uk.gov.onelogin.sharing.holder.getreadytoshare.GetReadyToShareNavigationExt.navigateToGetReadyToShare
 import uk.gov.onelogin.sharing.holder.loading.LoadingNavigationExt.navigateToLoadingScreen
 import uk.gov.onelogin.sharing.holder.loading.LoadingScreenType
 import uk.gov.onelogin.sharing.holder.prerequisites.HolderPrerequisitesNavigationExt.navigateToHolderPrerequisitesScreen
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.TurnOnBluetoothNavigationExt.navigateToTurnOnBluetooth
+import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.denied.DeviceBleDeniedNavigationExt.navigateToDeviceBleDenied
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.errors.BleRestrictedNavigationExt.navigateToBleRestricted
 import uk.gov.onelogin.sharing.holder.prerequisites.bluetooth.permission.BluetoothPermissionDeniedNavigationExt.navigateToBluetoothPermissionDenied
 import uk.gov.onelogin.sharing.holder.presentation.HolderPresentQrNavigationExt.navigateToHolderPresentQrScreen
@@ -120,25 +122,7 @@ internal suspend fun convertSessionStateToNavigation(
         }
 
         is HolderSessionState.Preflight -> {
-            if (state.requiresBluetoothEnabled()) {
-                {
-                    navController.navigateToTurnOnBluetooth {
-                        exitJourneyOptions()
-                    }
-                }
-            } else if (state.requiresBluetoothPermission()) {
-                {
-                    navController.navigateToBluetoothPermissionDenied {
-                        exitJourneyOptions()
-                    }
-                }
-            } else {
-                {
-                    navController.navigateToGetReadyToShare {
-                        exitJourneyOptions()
-                    }
-                }
-            }
+            convertPreflightStateToNavigation(state, navController, exitJourneyOptions)
         }
 
         is HolderSessionState.PresentingEngagement -> {
@@ -206,6 +190,44 @@ internal suspend fun convertSessionStateToNavigation(
     }
 }
 
+private fun convertPreflightStateToNavigation(
+    state: HolderSessionState.Preflight,
+    navController: NavHostController,
+    exitJourneyOptions: NavOptionsBuilder.() -> Unit
+): () -> Unit = when {
+    state.requiresBluetoothEnabledAfterDenial() -> {
+        {
+            navController.navigateToDeviceBleDenied {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    state.requiresBluetoothEnabled() -> {
+        {
+            navController.navigateToTurnOnBluetooth {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    state.requiresBluetoothPermission() -> {
+        {
+            navController.navigateToBluetoothPermissionDenied {
+                exitJourneyOptions()
+            }
+        }
+    }
+
+    else -> {
+        {
+            navController.navigateToGetReadyToShare {
+                exitJourneyOptions()
+            }
+        }
+    }
+}
+
 private fun handleHolderSessionFailure(
     state: HolderSessionState.Complete.Failed,
     navController: NavHostController,
@@ -222,6 +244,12 @@ private fun handleHolderSessionFailure(
         )
     } else if (state.isUnrecoverableBluetoothPrerequisite()) {
         navController.navigateToBleRestricted {
+            popUpTo<HolderRoutes> {
+                inclusive = true
+            }
+        }
+    } else if (state.isReaderAuthenticationFailure()) {
+        navController.navigateToReaderAuthError {
             popUpTo<HolderRoutes> {
                 inclusive = true
             }

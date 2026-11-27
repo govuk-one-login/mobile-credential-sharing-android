@@ -72,6 +72,26 @@ enum class DeferredStringsXmlData(
         defersTo = R.string.sharing_is_currently_unavailable,
         resourceId = R.string.holder_generic_error_title
     ),
+    HOLDER_DEVICE_BLE_DENIED_TITLE(
+        defersTo = R.string.bluetooth_is_turned_off,
+        resourceId = R.string.holder_device_ble_denied_title
+    ),
+    HOLDER_DEVICE_BLE_DENIED_BODY_1(
+        defersTo = R.string.to_be_able_to_share_turn_on_bluetooth,
+        resourceId = R.string.holder_device_ble_denied_body_1
+    ),
+    HOLDER_DEVICE_BLE_DENIED_BODY_2(
+        defersTo = R.string.use_qr_code_to_connect_next,
+        resourceId = R.string.holder_device_ble_denied_body_2
+    ),
+    HOLDER_DEVICE_BLE_DENIED_TURN_ON_BUTTON(
+        defersTo = R.string.turn_on_bluetooth,
+        resourceId = R.string.holder_device_ble_denied_turn_on_button
+    ),
+    HOLDER_DEVICE_BLE_DENIED_CANCEL_BUTTON(
+        defersTo = R.string.cancel_and_go_back_to_documents,
+        resourceId = R.string.holder_device_ble_denied_cancel_button
+    ),
     HOLDER_PREREQUISITES_NOT_STARTED(
         defersTo = R.string.checking_journey_requirements,
         resourceId = R.string.holder_prerequisites_not_started
@@ -199,5 +219,17 @@ enum class DeferredStringsXmlData(
     HOLDER_UNFULFILLABLE_ERROR_TITLE(
         defersTo = R.string.details_requested_not_available,
         resourceId = R.string.holder_unfulfillable_error_title
+    ),
+    HOLDER_READER_AUTH_ERROR_BODY_1(
+        defersTo = R.string.the_app_the_person_is_using_does_not_meet_security,
+        resourceId = R.string.holder_reader_auth_error_body_1
+    ),
+    HOLDER_READER_AUTH_ERROR_BODY_2(
+        defersTo = R.string.your_details_have_not_been_shared,
+        resourceId = R.string.holder_reader_auth_error_body_2
+    ),
+    HOLDER_READER_AUTH_ERROR_TITLE(
+        defersTo = R.string.there_is_a_problem,
+        resourceId = R.string.holder_reader_auth_error_title
     )
 }

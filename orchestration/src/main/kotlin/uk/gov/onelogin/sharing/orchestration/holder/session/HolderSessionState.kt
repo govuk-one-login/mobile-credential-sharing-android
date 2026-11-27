@@ -10,6 +10,7 @@ import uk.gov.onelogin.sharing.prerequisites.api.Prerequisite
 import uk.gov.onelogin.sharing.prerequisites.api.PrerequisiteAction
 import uk.gov.onelogin.sharing.prerequisites.api.state.BluetoothState
 import uk.gov.onelogin.sharing.prerequisites.impl.MissingPrerequisites
+import uk.gov.onelogin.sharing.verification.reader.ReaderAuthenticationFailure
 
 /**
  * Represents a digital credential verification journey's state for devices that contain digital
@@ -32,6 +33,7 @@ sealed class HolderSessionState :
     override fun shouldConfirmCancellation(): Boolean = this::class in cancelConfirmationRequired
 
     override fun hideCloseButton(): Boolean = when (this) {
+        is Preflight -> requiresBluetoothEnabledAfterDenial()
         is ProcessingEstablishment -> !presentation.showCloseButton
         is ProcessingResponse -> !presentation.showCloseButton
         is AwaitingVerifierResolution -> !presentation.showCloseButton
@@ -67,11 +69,14 @@ sealed class HolderSessionState :
      *
      * @param missingPrerequisites The list of [MissingPrerequisite]s required to perform the
      * journey in it's entirety.
+     * @param enableBluetoothDenied `true` when the User declined to turn on the device's Bluetooth
+     * when prompted.
      * @param onComplete The behaviour to call after a User action. Usually, this means performing
      * preflight checks again. Defaults to `{}`, meaning no additional behaviour occurs.
      */
     data class Preflight(
         val missingPrerequisites: List<MissingPrerequisite>,
+        val enableBluetoothDenied: Boolean = false,
         val onComplete: () -> Unit = {}
     ) : HolderSessionState(),
         Iterable<MissingPrerequisite> by missingPrerequisites {
@@ -90,6 +95,12 @@ sealed class HolderSessionState :
             (it as? MissingPrerequisites.Bluetooth)?.state ==
                 BluetoothState.PermissionNotGranted
         }
+
+        /**
+         * Check if device's Bluetooth is still turned off after the user declined to enable it
+         */
+        fun requiresBluetoothEnabledAfterDenial(): Boolean =
+            enableBluetoothDenied && requiresBluetoothEnabled()
     }
 
     /**
@@ -216,6 +227,16 @@ sealed class HolderSessionState :
                 (sessionReason as? SessionErrorReason.UnrecoverablePrerequisite)
                     ?.any { it.prerequisite == Prerequisite.BLUETOOTH && !it.isRecoverable() }
                     ?: false
+
+            /**
+             * `true` when this failure is an [SessionErrorReason.UnrecoverableThrowable] caused by
+             * the Verifier's Reader Authentication failing verification.
+             *
+             * @see ReaderAuthenticationFailure
+             */
+            fun isReaderAuthenticationFailure(): Boolean =
+                (sessionReason as? SessionErrorReason.UnrecoverableThrowable)
+                    ?.exception is ReaderAuthenticationFailure
         }
 
         /**

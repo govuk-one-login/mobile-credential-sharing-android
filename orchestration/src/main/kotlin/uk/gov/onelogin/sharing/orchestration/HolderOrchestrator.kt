@@ -207,11 +207,17 @@ class HolderOrchestrator(
                     )
                 }
 
-                else ->
+                else -> {
+                    val wasAwaitingBluetoothEnabled =
+                        (sessionFlow.value.currentState.value as? HolderSessionState.Preflight)
+                            ?.requiresBluetoothEnabled() == true
+
                     HolderSessionState.Preflight(
                         missingPrerequisites = prerequisiteCheck,
+                        enableBluetoothDenied = wasAwaitingBluetoothEnabled,
                         onComplete = ::performPreflightChecks
                     )
+                }
             }.let(::safeTransitionTo)
         }
     }
